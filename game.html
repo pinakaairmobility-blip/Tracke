@@ -1,0 +1,1158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>2048 — Levels Edition</title>
+  <style>
+    /* ── Reset & base ── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #0d0d1a;
+      --surface: #16172b;
+      --card: #1e2040;
+      --accent: #7c6aff;
+      --accent2: #ff6a9e;
+      --accent3: #00d4ff;
+      --gold: #ffd700;
+      --text: #e8eaf6;
+      --muted: #6b7094;
+      --radius: 16px;
+      --gap: 12px;
+      --transition: 0.12s ease;
+    }
+
+    body {
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 20px 16px 40px;
+      overflow-x: hidden;
+    }
+
+    /* ── Animated background ── */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background:
+        radial-gradient(ellipse 60% 40% at 20% 20%, rgba(124,106,255,.12) 0%, transparent 60%),
+        radial-gradient(ellipse 50% 60% at 80% 80%, rgba(0,212,255,.08) 0%, transparent 60%),
+        radial-gradient(ellipse 40% 50% at 60% 30%, rgba(255,106,158,.07) 0%, transparent 60%);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* ── Header ── */
+    header {
+      width: 100%;
+      max-width: 560px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .logo {
+      font-size: 2.4rem;
+      font-weight: 900;
+      background: linear-gradient(135deg, var(--accent), var(--accent3));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      letter-spacing: -1px;
+    }
+
+    .header-scores {
+      display: flex;
+      gap: 10px;
+    }
+
+    .score-box {
+      background: var(--card);
+      border-radius: 12px;
+      padding: 8px 18px;
+      text-align: center;
+      min-width: 80px;
+      border: 1px solid rgba(255,255,255,.06);
+    }
+
+    .score-box .label {
+      font-size: .65rem;
+      font-weight: 700;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .score-box .value {
+      font-size: 1.3rem;
+      font-weight: 800;
+      color: var(--text);
+      transition: transform .15s ease, color .15s ease;
+    }
+
+    .score-box .value.bump {
+      transform: scale(1.25);
+      color: var(--gold);
+    }
+
+    /* ── Level selector ── */
+    .level-bar {
+      width: 100%;
+      max-width: 560px;
+      display: flex;
+      gap: 8px;
+      margin-bottom: 14px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .level-btn {
+      flex: 1;
+      padding: 10px 6px;
+      border: 2px solid rgba(255,255,255,.08);
+      border-radius: 12px;
+      background: var(--card);
+      color: var(--muted);
+      font-size: .8rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all .2s ease;
+      text-align: center;
+    }
+
+    .level-btn .lname { display: block; font-size: .95rem; color: var(--text); }
+    .level-btn .lsub  { display: block; font-size: .68rem; margin-top: 2px; }
+
+    .level-btn:hover { border-color: var(--accent); background: rgba(124,106,255,.15); }
+
+    .level-btn.active {
+      border-color: var(--accent);
+      background: linear-gradient(135deg, rgba(124,106,255,.3), rgba(0,212,255,.15));
+      color: var(--text);
+    }
+
+    .level-btn.locked {
+      opacity: .35;
+      cursor: not-allowed;
+    }
+
+    /* ── Stats row ── */
+    .stats-row {
+      width: 100%;
+      max-width: 560px;
+      display: flex;
+      gap: 8px;
+      margin-bottom: 14px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .stat-chip {
+      flex: 1;
+      background: var(--card);
+      border-radius: 10px;
+      padding: 8px 12px;
+      border: 1px solid rgba(255,255,255,.05);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .stat-chip .slabel {
+      font-size: .6rem;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: .8px;
+      font-weight: 700;
+    }
+
+    .stat-chip .sval {
+      font-size: 1.1rem;
+      font-weight: 800;
+      color: var(--accent3);
+    }
+
+    /* ── Accuracy bar ── */
+    .accuracy-wrap {
+      width: 100%;
+      max-width: 560px;
+      margin-bottom: 14px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .accuracy-header {
+      display: flex;
+      justify-content: space-between;
+      font-size: .72rem;
+      font-weight: 700;
+      color: var(--muted);
+      margin-bottom: 5px;
+    }
+
+    .accuracy-track {
+      height: 8px;
+      background: rgba(255,255,255,.08);
+      border-radius: 99px;
+      overflow: hidden;
+    }
+
+    .accuracy-fill {
+      height: 100%;
+      border-radius: 99px;
+      transition: width .4s ease, background .4s ease;
+      background: linear-gradient(90deg, var(--accent2), var(--accent), var(--accent3));
+    }
+
+    /* ── Game board wrapper ── */
+    .board-wrapper {
+      position: relative;
+      z-index: 1;
+    }
+
+    .board-bg {
+      border-radius: var(--radius);
+      background: var(--card);
+      border: 1px solid rgba(255,255,255,.07);
+      padding: var(--gap);
+      box-shadow: 0 20px 60px rgba(0,0,0,.5), 0 0 0 1px rgba(124,106,255,.1);
+      position: relative;
+    }
+
+    .grid {
+      display: grid;
+      gap: var(--gap);
+    }
+
+    /* ── Cells ── */
+    .cell {
+      border-radius: 10px;
+      background: rgba(255,255,255,.04);
+      border: 1px solid rgba(255,255,255,.05);
+    }
+
+    /* ── Tiles ── */
+    .tile-container {
+      position: absolute;
+      inset: var(--gap);
+      pointer-events: none;
+    }
+
+    .tile {
+      position: absolute;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 10px;
+      font-weight: 900;
+      transition: left var(--transition), top var(--transition);
+      will-change: left, top, transform;
+      user-select: none;
+    }
+
+    .tile.new-tile {
+      animation: popIn .18s ease forwards;
+    }
+
+    .tile.merged {
+      animation: popIn .2s ease forwards, glowPulse .35s ease forwards;
+      z-index: 10;
+    }
+
+    @keyframes popIn {
+      0%   { transform: scale(.3); opacity: 0; }
+      60%  { transform: scale(1.12); }
+      100% { transform: scale(1); opacity: 1; }
+    }
+
+    @keyframes glowPulse {
+      0%   { box-shadow: 0 0 0 0 rgba(255,215,0,.7); }
+      50%  { box-shadow: 0 0 20px 8px rgba(255,215,0,.4); }
+      100% { box-shadow: 0 0 0 0 rgba(255,215,0,0); }
+    }
+
+    /* tile colors */
+    .t2    { background:#2e3a6e; color:#c5cae9; }
+    .t4    { background:#3a2e6e; color:#d1c4e9; }
+    .t8    { background:#7c4dff; color:#fff; }
+    .t16   { background:#651fff; color:#fff; }
+    .t32   { background:#ff4081; color:#fff; }
+    .t64   { background:#f50057; color:#fff; }
+    .t128  { background:#ff6d00; color:#fff; text-shadow:0 1px 3px rgba(0,0,0,.4); }
+    .t256  { background:#ff9100; color:#fff; text-shadow:0 1px 3px rgba(0,0,0,.4); }
+    .t512  { background:#ffd600; color:#333; text-shadow:none; }
+    .t1024 { background:#aeea00; color:#1b3a00; }
+    .t2048 { background:linear-gradient(135deg,#ffd600,#ff6d00); color:#fff;
+             box-shadow:0 0 30px rgba(255,214,0,.6); }
+    .t4096 { background:linear-gradient(135deg,#00e5ff,#2979ff); color:#fff;
+             box-shadow:0 0 30px rgba(0,229,255,.6); }
+    .t8192 { background:linear-gradient(135deg,#ff4081,#651fff); color:#fff;
+             box-shadow:0 0 30px rgba(255,64,129,.6); }
+    .tbig  { background:linear-gradient(135deg,#b2ff59,#00e5ff); color:#1a237e; }
+
+    /* ── Overlay ── */
+    .overlay {
+      display: none;
+      position: absolute;
+      inset: 0;
+      border-radius: var(--radius);
+      background: rgba(13,13,26,.88);
+      backdrop-filter: blur(6px);
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 16px;
+      z-index: 20;
+    }
+
+    .overlay.show { display: flex; }
+
+    .overlay-title {
+      font-size: 2rem;
+      font-weight: 900;
+    }
+
+    .overlay-sub {
+      font-size: .95rem;
+      color: var(--muted);
+      text-align: center;
+      padding: 0 24px;
+    }
+
+    /* ── Buttons ── */
+    .btn-row {
+      width: 100%;
+      max-width: 560px;
+      display: flex;
+      gap: 10px;
+      margin-top: 14px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .btn {
+      flex: 1;
+      padding: 12px;
+      border: none;
+      border-radius: 12px;
+      font-size: .9rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: transform .1s ease, opacity .1s ease;
+    }
+
+    .btn:active { transform: scale(.96); }
+
+    .btn-primary {
+      background: linear-gradient(135deg, var(--accent), var(--accent3));
+      color: #fff;
+    }
+
+    .btn-secondary {
+      background: var(--card);
+      color: var(--text);
+      border: 1px solid rgba(255,255,255,.1);
+    }
+
+    .btn-danger {
+      background: linear-gradient(135deg, var(--accent2), #f50057);
+      color: #fff;
+    }
+
+    /* ── Best tile badge ── */
+    .best-badge {
+      margin-top: 12px;
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      font-size: .78rem;
+      color: var(--muted);
+      position: relative;
+      z-index: 1;
+    }
+
+    .best-badge span { color: var(--gold); font-weight: 700; }
+
+    /* ── Level progress ── */
+    .lvl-progress {
+      width: 100%;
+      max-width: 560px;
+      margin-bottom: 14px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .lvl-progress-header {
+      display: flex;
+      justify-content: space-between;
+      font-size: .7rem;
+      color: var(--muted);
+      font-weight: 700;
+      margin-bottom: 5px;
+    }
+
+    .lvl-track {
+      height: 5px;
+      background: rgba(255,255,255,.07);
+      border-radius: 99px;
+    }
+
+    .lvl-fill {
+      height: 100%;
+      border-radius: 99px;
+      background: linear-gradient(90deg, var(--accent), var(--accent2));
+      transition: width .5s ease;
+    }
+
+    /* ── Toast ── */
+    #toast {
+      position: fixed;
+      bottom: 32px;
+      left: 50%;
+      transform: translateX(-50%) translateY(80px);
+      background: rgba(30,32,64,.95);
+      border: 1px solid rgba(124,106,255,.4);
+      color: var(--text);
+      padding: 12px 28px;
+      border-radius: 99px;
+      font-size: .9rem;
+      font-weight: 700;
+      transition: transform .3s ease, opacity .3s ease;
+      opacity: 0;
+      pointer-events: none;
+      z-index: 100;
+      white-space: nowrap;
+    }
+
+    #toast.show {
+      transform: translateX(-50%) translateY(0);
+      opacity: 1;
+    }
+
+    /* ── Combo indicator ── */
+    .combo-badge {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%) scale(0);
+      font-size: 2rem;
+      font-weight: 900;
+      color: var(--gold);
+      text-shadow: 0 0 20px rgba(255,215,0,.7);
+      pointer-events: none;
+      z-index: 200;
+      transition: none;
+    }
+
+    .combo-badge.fire {
+      animation: comboPop .6s ease forwards;
+    }
+
+    @keyframes comboPop {
+      0%   { transform: translate(-50%, -50%) scale(0); opacity: 1; }
+      40%  { transform: translate(-50%, -60%) scale(1.4); opacity: 1; }
+      100% { transform: translate(-50%, -80%) scale(1); opacity: 0; }
+    }
+
+    /* ── Responsive ── */
+    @media (max-width: 440px) {
+      .logo { font-size: 1.8rem; }
+      .score-box { min-width: 64px; padding: 6px 12px; }
+      .score-box .value { font-size: 1.1rem; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- Header -->
+<header>
+  <div class="logo">2048</div>
+  <div class="header-scores">
+    <div class="score-box">
+      <div class="label">Score</div>
+      <div class="value" id="score">0</div>
+    </div>
+    <div class="score-box">
+      <div class="label">Best</div>
+      <div class="value" id="best">0</div>
+    </div>
+  </div>
+</header>
+
+<!-- Level selector -->
+<div class="level-bar" id="levelBar"></div>
+
+<!-- Level progress -->
+<div class="lvl-progress">
+  <div class="lvl-progress-header">
+    <span id="lvlLabel">Level progress</span>
+    <span id="lvlPct">0%</span>
+  </div>
+  <div class="lvl-track"><div class="lvl-fill" id="lvlFill" style="width:0%"></div></div>
+</div>
+
+<!-- Stats row -->
+<div class="stats-row">
+  <div class="stat-chip"><div class="slabel">Moves</div><div class="sval" id="moves">0</div></div>
+  <div class="stat-chip"><div class="slabel">Merges</div><div class="sval" id="merges">0</div></div>
+  <div class="stat-chip"><div class="slabel">Combo</div><div class="sval" id="combo">x1</div></div>
+  <div class="stat-chip"><div class="slabel">Time</div><div class="sval" id="timer">0:00</div></div>
+</div>
+
+<!-- Accuracy bar -->
+<div class="accuracy-wrap">
+  <div class="accuracy-header">
+    <span>Move Accuracy</span>
+    <span id="accPct">—</span>
+  </div>
+  <div class="accuracy-track">
+    <div class="accuracy-fill" id="accFill" style="width:0%"></div>
+  </div>
+</div>
+
+<!-- Board -->
+<div class="board-wrapper">
+  <div class="board-bg" id="boardBg">
+    <div class="grid" id="grid"></div>
+    <div class="tile-container" id="tileContainer"></div>
+
+    <!-- Overlays -->
+    <div class="overlay" id="overlayWin">
+      <div class="overlay-title" style="background:linear-gradient(135deg,#ffd600,#ff6d00);-webkit-background-clip:text;-webkit-text-fill-color:transparent">🎉 You Win!</div>
+      <div class="overlay-sub" id="winSub">Amazing! Keep going or try next level.</div>
+      <div style="display:flex;gap:10px;margin-top:8px">
+        <button class="btn btn-primary" onclick="continueGame()">Keep Going</button>
+        <button class="btn btn-secondary" onclick="nextLevel()">Next Level</button>
+      </div>
+    </div>
+
+    <div class="overlay" id="overlayLose">
+      <div class="overlay-title" style="color:var(--accent2)">Game Over</div>
+      <div class="overlay-sub" id="loseSub">No more moves left!</div>
+      <div style="display:flex;gap:10px;margin-top:8px">
+        <button class="btn btn-primary" onclick="newGame()">Try Again</button>
+        <button class="btn btn-secondary" onclick="prevLevel()">Easier Level</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Action buttons -->
+<div class="btn-row">
+  <button class="btn btn-primary" onclick="newGame()">New Game</button>
+  <button class="btn btn-secondary" onclick="undoMove()">Undo</button>
+  <button class="btn btn-danger" onclick="resetAll()">Reset All</button>
+</div>
+
+<!-- Best tile badge -->
+<div class="best-badge" id="bestBadge" style="display:none">
+  Best tile: <span id="bestTile">—</span> &nbsp;|&nbsp; Best accuracy: <span id="bestAcc">—</span>
+</div>
+
+<!-- Toast -->
+<div id="toast"></div>
+
+<!-- Combo badge -->
+<div class="combo-badge" id="comboBadge"></div>
+
+<script>
+/* ============================================================
+   LEVEL DEFINITIONS
+   size: grid NxN
+   target: tile value to win
+   spawnRate4: probability of spawning a 4 instead of 2
+   name/sub/color: UI labels
+   scoreMultiplier: multiplies all score gains
+   ============================================================ */
+const LEVELS = [
+  { id:0, name:'Easy',    sub:'4×4 · 512',  size:4, target:512,  spawnRate4:.10, scoreMultiplier:1,   color:'#7c6aff', unlockScore:0     },
+  { id:1, name:'Classic', sub:'4×4 · 2048', size:4, target:2048, spawnRate4:.10, scoreMultiplier:1.5, color:'#00d4ff', unlockScore:0     },
+  { id:2, name:'Hard',    sub:'5×5 · 2048', size:5, target:2048, spawnRate4:.15, scoreMultiplier:2,   color:'#ff6a9e', unlockScore:500   },
+  { id:3, name:'Expert',  sub:'6×6 · 4096', size:6, target:4096, spawnRate4:.20, scoreMultiplier:3,   color:'#ffd700', unlockScore:2000  },
+  { id:4, name:'Master',  sub:'8×8 · 8192', size:8, target:8192, spawnRate4:.25, scoreMultiplier:5,   color:'#b2ff59', unlockScore:10000 },
+];
+
+/* ============================================================ STATE ============================================================ */
+let state = {
+  level: 0,
+  size: 4,
+  board: [],
+  score: 0,
+  best: 0,
+  bestByLevel: {},   // {levelId: bestScore}
+  moves: 0,
+  merges: 0,
+  productiveMoves: 0,  // moves that caused at least one merge
+  comboCount: 0,
+  comboStreak: 0,
+  won: false,
+  keepGoing: false,
+  over: false,
+  unlocked: new Set([0,1]),
+  history: [],       // for undo: [{board, score, moves, merges, productiveMoves}]
+  timerStart: null,
+  timerEl: 0,
+  elapsedBefore: 0,  // accumulated ms before last pause
+  bestAccByLevel: {},
+};
+
+let timerInterval = null;
+
+/* ============================================================ INIT ============================================================ */
+window.addEventListener('DOMContentLoaded', () => {
+  loadPersisted();
+  buildLevelBar();
+  startNewGame();
+  bindKeys();
+  bindSwipe();
+  tickTimer();
+});
+
+function loadPersisted() {
+  try {
+    const raw = localStorage.getItem('2048lvl_state');
+    if (!raw) return;
+    const s = JSON.parse(raw);
+    state.best = s.best || 0;
+    state.bestByLevel = s.bestByLevel || {};
+    state.bestAccByLevel = s.bestAccByLevel || {};
+    state.unlocked = new Set(s.unlocked || [0,1]);
+    state.level = s.lastLevel || 0;
+  } catch(e) {}
+}
+
+function savePersisted() {
+  try {
+    localStorage.setItem('2048lvl_state', JSON.stringify({
+      best: state.best,
+      bestByLevel: state.bestByLevel,
+      bestAccByLevel: state.bestAccByLevel,
+      unlocked: [...state.unlocked],
+      lastLevel: state.level,
+    }));
+  } catch(e) {}
+}
+
+/* ============================================================ LEVEL BAR ============================================================ */
+function buildLevelBar() {
+  const bar = document.getElementById('levelBar');
+  bar.innerHTML = '';
+  LEVELS.forEach(lv => {
+    const btn = document.createElement('button');
+    btn.className = 'level-btn' + (lv.id === state.level ? ' active' : '') + (!state.unlocked.has(lv.id) ? ' locked' : '');
+    btn.innerHTML = `<span class="lname">${lv.name}</span><span class="lsub" style="color:${lv.color}">${lv.sub}</span>`;
+    btn.onclick = () => {
+      if (!state.unlocked.has(lv.id)) { showToast(`Reach ${lv.unlockScore.toLocaleString()} pts to unlock!`); return; }
+      state.level = lv.id;
+      buildLevelBar();
+      startNewGame();
+    };
+    bar.appendChild(btn);
+  });
+}
+
+/* ============================================================ GAME INIT ============================================================ */
+function startNewGame() {
+  const lv = LEVELS[state.level];
+  state.size = lv.size;
+  state.board = emptyBoard();
+  state.score = 0;
+  state.moves = 0;
+  state.merges = 0;
+  state.productiveMoves = 0;
+  state.comboStreak = 0;
+  state.won = false;
+  state.keepGoing = false;
+  state.over = false;
+  state.history = [];
+  state.elapsedBefore = 0;
+  state.timerStart = Date.now();
+
+  spawnTile();
+  spawnTile();
+
+  buildGridDOM();
+  hideOverlays();
+  renderAll();
+  updateStats();
+  updateAccuracy();
+  updateLevelProgress();
+  updateBestBadge();
+}
+
+function newGame() { startNewGame(); }
+
+function nextLevel() {
+  const next = state.level + 1;
+  if (next < LEVELS.length && state.unlocked.has(next)) {
+    state.level = next;
+    buildLevelBar();
+    startNewGame();
+  } else {
+    showToast('No next level or locked!');
+    hideOverlays();
+    newGame();
+  }
+}
+
+function prevLevel() {
+  const prev = Math.max(0, state.level - 1);
+  state.level = prev;
+  buildLevelBar();
+  startNewGame();
+}
+
+function continueGame() {
+  state.keepGoing = true;
+  document.getElementById('overlayWin').classList.remove('show');
+}
+
+function resetAll() {
+  localStorage.removeItem('2048lvl_state');
+  state.best = 0;
+  state.bestByLevel = {};
+  state.bestAccByLevel = {};
+  state.unlocked = new Set([0,1]);
+  state.level = 0;
+  buildLevelBar();
+  startNewGame();
+  showToast('All data reset!');
+}
+
+/* ============================================================ BOARD ============================================================ */
+function emptyBoard() {
+  return Array.from({ length: state.size }, () => Array(state.size).fill(0));
+}
+
+function spawnTile() {
+  const empties = [];
+  for (let r = 0; r < state.size; r++)
+    for (let c = 0; c < state.size; c++)
+      if (!state.board[r][c]) empties.push([r, c]);
+  if (!empties.length) return;
+  const [r, c] = empties[Math.floor(Math.random() * empties.length)];
+  const lv = LEVELS[state.level];
+  state.board[r][c] = Math.random() < lv.spawnRate4 ? 4 : 2;
+  return [r, c];
+}
+
+/* ============================================================ DOM BUILD ============================================================ */
+let cellSize = 0;
+
+function buildGridDOM() {
+  const lv = LEVELS[state.level];
+  const N = lv.size;
+  const gapPx = 12;
+  // responsive cell size
+  const maxW = Math.min(window.innerWidth - 64, 520);
+  cellSize = Math.floor((maxW - gapPx * (N + 1)) / N);
+
+  const grid = document.getElementById('grid');
+  grid.style.gridTemplateColumns = `repeat(${N}, ${cellSize}px)`;
+  grid.innerHTML = '';
+  for (let i = 0; i < N * N; i++) {
+    const cell = document.createElement('div');
+    cell.className = 'cell';
+    cell.style.width = cellSize + 'px';
+    cell.style.height = cellSize + 'px';
+    grid.appendChild(cell);
+  }
+
+  document.getElementById('tileContainer').innerHTML = '';
+}
+
+/* ============================================================ RENDER ============================================================ */
+function renderAll() {
+  const container = document.getElementById('tileContainer');
+  container.innerHTML = '';
+
+  for (let r = 0; r < state.size; r++) {
+    for (let c = 0; c < state.size; c++) {
+      const val = state.board[r][c];
+      if (!val) continue;
+      const tile = makeTileEl(val, r, c);
+      container.appendChild(tile);
+    }
+  }
+}
+
+function makeTileEl(val, r, c, isNew = false, isMerged = false) {
+  const gapPx = 12;
+  const tile = document.createElement('div');
+  tile.className = 'tile ' + tileClass(val) + (isNew ? ' new-tile' : '') + (isMerged ? ' merged' : '');
+
+  const fs = tileFontSize(val, cellSize);
+  tile.style.cssText = `
+    width:${cellSize}px; height:${cellSize}px;
+    left:${c * (cellSize + gapPx)}px;
+    top:${r * (cellSize + gapPx)}px;
+    font-size:${fs}px;
+  `;
+  tile.textContent = val;
+  return tile;
+}
+
+function tileClass(v) {
+  if (v <= 8192) return 't' + v;
+  return 'tbig';
+}
+
+function tileFontSize(v, cs) {
+  const s = String(v).length;
+  const base = cs * 0.42;
+  if (s <= 2) return Math.round(base);
+  if (s === 3) return Math.round(base * .72);
+  if (s === 4) return Math.round(base * .58);
+  return Math.round(base * .46);
+}
+
+/* ============================================================ MOVE ENGINE ============================================================ */
+function move(dir) {
+  if (state.over) return;
+  const prev = JSON.stringify(state.board);
+  pushHistory();
+
+  let mergesThisMove = 0;
+  let scoreGained = 0;
+  const lv = LEVELS[state.level];
+  const container = document.getElementById('tileContainer');
+  container.innerHTML = '';
+
+  const gapPx = 12;
+
+  // process each row/col
+  for (let i = 0; i < state.size; i++) {
+    let line = getLine(i, dir);
+    const [newLine, gained, mergeCount, mergePositions] = mergeLine(line);
+    setLine(i, dir, newLine);
+    scoreGained += gained;
+    mergesThisMove += mergeCount;
+  }
+
+  if (JSON.stringify(state.board) === prev) {
+    // no change — wasted move
+    state.comboStreak = 0;
+    renderAll();
+    updateStats();
+    return;
+  }
+
+  // score
+  const multiplied = Math.round(scoreGained * lv.scoreMultiplier);
+  state.score += multiplied;
+  state.moves++;
+  state.merges += mergesThisMove;
+
+  if (mergesThisMove > 0) {
+    state.productiveMoves++;
+    state.comboStreak++;
+    if (state.comboStreak >= 3) showCombo(state.comboStreak);
+  } else {
+    state.comboStreak = 0;
+  }
+
+  // spawn
+  const spawned = spawnTile();
+
+  // animate: rebuild tiles with animation
+  for (let r = 0; r < state.size; r++) {
+    for (let c = 0; c < state.size; c++) {
+      const val = state.board[r][c];
+      if (!val) continue;
+      const isSpawned = spawned && spawned[0] === r && spawned[1] === c;
+      const tile = makeTileEl(val, r, c, isSpawned, false);
+      container.appendChild(tile);
+    }
+  }
+
+  // update best
+  if (state.score > state.best) {
+    state.best = state.score;
+    bumpScore('best');
+  }
+  bumpScore('score');
+
+  // unlock levels
+  checkUnlocks();
+
+  // check win/lose
+  checkWin();
+  checkLose();
+
+  updateStats();
+  updateAccuracy();
+  updateLevelProgress();
+  updateBestBadge();
+  savePersisted();
+}
+
+function getLine(i, dir) {
+  const line = [];
+  for (let j = 0; j < state.size; j++) {
+    switch(dir) {
+      case 'left':  line.push(state.board[i][j]); break;
+      case 'right': line.push(state.board[i][state.size - 1 - j]); break;
+      case 'up':    line.push(state.board[j][i]); break;
+      case 'down':  line.push(state.board[state.size - 1 - j][i]); break;
+    }
+  }
+  return line;
+}
+
+function setLine(i, dir, line) {
+  for (let j = 0; j < state.size; j++) {
+    switch(dir) {
+      case 'left':  state.board[i][j] = line[j]; break;
+      case 'right': state.board[i][state.size - 1 - j] = line[j]; break;
+      case 'up':    state.board[j][i] = line[j]; break;
+      case 'down':  state.board[state.size - 1 - j][i] = line[j]; break;
+    }
+  }
+}
+
+function mergeLine(line) {
+  // slide non-zeros left
+  let filtered = line.filter(x => x !== 0);
+  let gained = 0;
+  let merges = 0;
+  let positions = [];
+
+  for (let i = 0; i < filtered.length - 1; i++) {
+    if (filtered[i] === filtered[i + 1]) {
+      filtered[i] *= 2;
+      gained += filtered[i];
+      merges++;
+      positions.push(i);
+      filtered.splice(i + 1, 1);
+    }
+  }
+  while (filtered.length < line.length) filtered.push(0);
+  return [filtered, gained, merges, positions];
+}
+
+/* ============================================================ WIN / LOSE ============================================================ */
+function checkWin() {
+  if (state.won || state.keepGoing) return;
+  const target = LEVELS[state.level].target;
+  for (let r = 0; r < state.size; r++)
+    for (let c = 0; c < state.size; c++)
+      if (state.board[r][c] >= target) {
+        state.won = true;
+        const acc = calcAccuracy();
+        saveBestAcc(acc);
+        document.getElementById('winSub').textContent =
+          `Score: ${state.score.toLocaleString()} · Accuracy: ${acc}% · Moves: ${state.moves}`;
+        document.getElementById('overlayWin').classList.add('show');
+        return;
+      }
+}
+
+function checkLose() {
+  if (state.over) return;
+  // has empty cell?
+  for (let r = 0; r < state.size; r++)
+    for (let c = 0; c < state.size; c++)
+      if (!state.board[r][c]) return;
+  // check adjacent merges
+  for (let r = 0; r < state.size; r++)
+    for (let c = 0; c < state.size; c++) {
+      if (c < state.size - 1 && state.board[r][c] === state.board[r][c+1]) return;
+      if (r < state.size - 1 && state.board[r][c] === state.board[r+1][c]) return;
+    }
+  state.over = true;
+  document.getElementById('loseSub').textContent =
+    `Score: ${state.score.toLocaleString()} · Accuracy: ${calcAccuracy()}% · Moves: ${state.moves}`;
+  document.getElementById('overlayLose').classList.add('show');
+}
+
+function hideOverlays() {
+  document.getElementById('overlayWin').classList.remove('show');
+  document.getElementById('overlayLose').classList.remove('show');
+}
+
+/* ============================================================ ACCURACY ============================================================ */
+function calcAccuracy() {
+  if (!state.moves) return 0;
+  return Math.round((state.productiveMoves / state.moves) * 100);
+}
+
+function updateAccuracy() {
+  const acc = calcAccuracy();
+  document.getElementById('accPct').textContent = state.moves ? acc + '%' : '—';
+  document.getElementById('accFill').style.width = acc + '%';
+}
+
+function saveBestAcc(acc) {
+  const lid = state.level;
+  if (!state.bestAccByLevel[lid] || acc > state.bestAccByLevel[lid]) {
+    state.bestAccByLevel[lid] = acc;
+    savePersisted();
+  }
+}
+
+/* ============================================================ LEVEL PROGRESS ============================================================ */
+function updateLevelProgress() {
+  const lv = LEVELS[state.level];
+  // progress = max tile reached / target tile (logarithmic)
+  let maxTile = 0;
+  for (let r = 0; r < state.size; r++)
+    for (let c = 0; c < state.size; c++)
+      if (state.board[r][c] > maxTile) maxTile = state.board[r][c];
+
+  const maxLog = Math.log2(lv.target);
+  const curLog = maxTile ? Math.log2(maxTile) : 0;
+  const pct = Math.min(100, Math.round((curLog / maxLog) * 100));
+
+  document.getElementById('lvlLabel').textContent = `Level: ${lv.name} · Target: ${lv.target.toLocaleString()}`;
+  document.getElementById('lvlPct').textContent = pct + '%';
+  document.getElementById('lvlFill').style.width = pct + '%';
+}
+
+/* ============================================================ UNLOCK ============================================================ */
+function checkUnlocks() {
+  LEVELS.forEach(lv => {
+    if (!state.unlocked.has(lv.id) && state.best >= lv.unlockScore) {
+      state.unlocked.add(lv.id);
+      buildLevelBar();
+      showToast(`🔓 ${lv.name} unlocked!`);
+      savePersisted();
+    }
+  });
+}
+
+/* ============================================================ UNDO ============================================================ */
+function pushHistory() {
+  if (state.history.length >= 3) state.history.shift();
+  state.history.push({
+    board: state.board.map(r => [...r]),
+    score: state.score,
+    moves: state.moves,
+    merges: state.merges,
+    productiveMoves: state.productiveMoves,
+  });
+}
+
+function undoMove() {
+  if (!state.history.length) { showToast('Nothing to undo!'); return; }
+  const snap = state.history.pop();
+  state.board = snap.board;
+  state.score = snap.score;
+  state.moves = snap.moves;
+  state.merges = snap.merges;
+  state.productiveMoves = snap.productiveMoves;
+  state.over = false;
+  hideOverlays();
+  renderAll();
+  updateStats();
+  updateAccuracy();
+  updateLevelProgress();
+  showToast('Undo!');
+}
+
+/* ============================================================ STATS & UI ============================================================ */
+function updateStats() {
+  document.getElementById('score').textContent = state.score.toLocaleString();
+  document.getElementById('best').textContent = state.best.toLocaleString();
+  document.getElementById('moves').textContent = state.moves;
+  document.getElementById('merges').textContent = state.merges;
+  document.getElementById('combo').textContent = 'x' + Math.max(1, state.comboStreak);
+}
+
+function bumpScore(id) {
+  const el = document.getElementById(id);
+  el.classList.remove('bump');
+  void el.offsetWidth;
+  el.classList.add('bump');
+  setTimeout(() => el.classList.remove('bump'), 300);
+}
+
+function updateBestBadge() {
+  const lid = state.level;
+  const bScore = state.bestByLevel[lid] || 0;
+  const bAcc = state.bestAccByLevel[lid];
+
+  // update bestByLevel
+  if (!state.bestByLevel[lid] || state.score > state.bestByLevel[lid]) {
+    state.bestByLevel[lid] = state.score;
+  }
+
+  const badge = document.getElementById('bestBadge');
+  let maxTile = 0;
+  for (let r = 0; r < state.size; r++)
+    for (let c = 0; c < state.size; c++)
+      if (state.board[r][c] > maxTile) maxTile = state.board[r][c];
+
+  if (maxTile > 0) {
+    badge.style.display = 'flex';
+    document.getElementById('bestTile').textContent = maxTile.toLocaleString();
+    document.getElementById('bestAcc').textContent = bAcc != null ? bAcc + '%' : '—';
+  }
+}
+
+/* ============================================================ TIMER ============================================================ */
+function tickTimer() {
+  timerInterval = setInterval(() => {
+    if (!state.timerStart || state.over || state.won) return;
+    const ms = Date.now() - state.timerStart + state.elapsedBefore;
+    const s = Math.floor(ms / 1000) % 60;
+    const m = Math.floor(ms / 60000);
+    document.getElementById('timer').textContent = m + ':' + String(s).padStart(2,'0');
+  }, 500);
+}
+
+/* ============================================================ TOAST ============================================================ */
+let toastTimer = null;
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.classList.remove('show'), 2200);
+}
+
+/* ============================================================ COMBO BADGE ============================================================ */
+function showCombo(n) {
+  const el = document.getElementById('comboBadge');
+  el.textContent = n + 'x COMBO!';
+  el.classList.remove('fire');
+  void el.offsetWidth;
+  el.classList.add('fire');
+}
+
+/* ============================================================ INPUT ============================================================ */
+function bindKeys() {
+  window.addEventListener('keydown', e => {
+    const map = { ArrowLeft:'left', ArrowRight:'right', ArrowUp:'up', ArrowDown:'down',
+                  a:'left', d:'right', w:'up', s:'down',
+                  A:'left', D:'right', W:'up', S:'down' };
+    if (map[e.key]) { e.preventDefault(); move(map[e.key]); }
+  });
+}
+
+function bindSwipe() {
+  let startX, startY;
+  const board = document.getElementById('boardBg');
+  board.addEventListener('touchstart', e => {
+    startX = e.touches[0].clientX;
+    startY = e.touches[0].clientY;
+  }, { passive: true });
+  board.addEventListener('touchend', e => {
+    const dx = e.changedTouches[0].clientX - startX;
+    const dy = e.changedTouches[0].clientY - startY;
+    const threshold = 30;
+    if (Math.abs(dx) < threshold && Math.abs(dy) < threshold) return;
+    if (Math.abs(dx) > Math.abs(dy)) move(dx > 0 ? 'right' : 'left');
+    else move(dy > 0 ? 'down' : 'up');
+  }, { passive: true });
+}
+</script>
+</body>
+</html>
