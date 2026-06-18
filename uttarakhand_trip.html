@@ -67,6 +67,7 @@ select.ci{cursor:pointer;}
 .ps{background:#e6f4ea!important;color:#1e8e3e!important;font-weight:700!important;}
 .pm{background:#fce8e6!important;color:#c5221f!important;font-weight:700!important;}
 .pk{background:#fff8e1!important;color:#e37400!important;font-weight:700!important;}
+.pal{background:#f3e5f5!important;color:#7b1fa2!important;font-weight:700!important;}
 
 .ch{display:inline-block;padding:2px 7px;border-radius:8px;font-size:.7rem;font-weight:700;}
 .cStay{background:#e8f0fe;color:#1a73e8;}.cFood{background:#e6f4ea;color:#1e8e3e;}
@@ -205,7 +206,7 @@ const IS_SERVER = location.protocol === 'http:' || location.protocol === 'https:
 // ── CONSTANTS ────────────────────────────────────────────────
 const MEMBERS = ['Aditya','Sumedh','Manu Didi','Ashu'];
 const MC = {Aditya:'#1a73e8',Sumedh:'#34a853','Manu Didi':'#ea4335',Ashu:'#f9ab00'};
-const PC = {Aditya:'pa',Sumedh:'ps','Manu Didi':'pm',Ashu:'pk'};
+const PC = {Aditya:'pa',Sumedh:'ps','Manu Didi':'pm',Ashu:'pk',All:'pal'};
 const CATS = ['Stay','Food','Transport','Shopping','Activity','Other'];
 const CC = {Stay:'#1a73e8',Food:'#34a853',Transport:'#f9ab00',Shopping:'#9334e8',Activity:'#ea4335',Other:'#9e9e9e'};
 const LS = 'uttarakhand_trip_rows';
@@ -401,14 +402,14 @@ function renderTable() {
   const catOpts    = CATS.map(c=>`<option value="${c}">${c}</option>`).join('');
 
   tbody.innerHTML = rows.map((r,i)=>{
-    const vis = filter==='all' || r.paidBy===filter;
+    const vis = filter==='all' || r.paidBy===filter || r.paidBy==='All';
     const pc  = r.paidBy ? PC[r.paidBy]||'' : '';
     return `<tr id="r${r.id}" data-id="${r.id}" class="${vis?'':'hr'}">
       <td class="n">${i+1}</td>
       <td><input class="ci" data-f="desc"   value="${x(r.desc)}"  placeholder="Description"></td>
       <td><input class="ci am" data-f="amount" type="number" min="0" step="1" value="${r.amount}"></td>
       <td><select class="ci ${pc}" data-f="paidBy">
-        <option value="">— select —</option>${memberOpts.replace(`>${r.paidBy}<`,` selected>${r.paidBy}<`)}
+        <option value="">— select —</option>${memberOpts.replace(`>${r.paidBy}<`,` selected>${r.paidBy}<`)}<option value="All"${r.paidBy==='All'?' selected':''}>All (shared equally)</option>
       </select></td>
       <td><select class="ci" data-f="cat">
         ${catOpts.replace(`>${r.cat}<`,` selected>${r.cat}<`)}
@@ -443,7 +444,7 @@ document.getElementById('tbody').addEventListener('change', e=>{
   r[f] = e.target.value; save();
   if (f==='paidBy') {
     e.target.className = 'ci ' + (r.paidBy ? PC[r.paidBy]||'' : '');
-    if (filter!=='all') tr.classList.toggle('hr', r.paidBy!==filter);
+    if (filter!=='all') tr.classList.toggle('hr', r.paidBy!==filter && r.paidBy!=='All');
     scheduleTotals();
   } else if (f==='cat') {
     scheduleTotals();
@@ -466,7 +467,7 @@ function scheduleTotals() {
 }
 
 function updateTotals() {
-  const vis    = filter==='all' ? rows : rows.filter(r=>r.paidBy===filter);
+  const vis    = filter==='all' ? rows : rows.filter(r=>r.paidBy===filter || r.paidBy==='All');
   const total  = rows.reduce((s,r)=>s+safeAmt(r.amount),0);
   const vtotal = vis.reduce((s,r)=>s+safeAmt(r.amount),0);
   const pool   = Object.values(contribs).reduce((s,v)=>s+safeAmt(v),0);
@@ -487,12 +488,21 @@ function updateTotals() {
     <div class="sc"><div class="v">${rows.length}</div><div class="l">Total Entries</div></div>`;
 
   // ── Balanced per-person settlement calculation ──────────────
-  // Rule: expenses with paidBy → credited to that person personally.
-  //       expenses without paidBy → treated as paid from pool (split
-  //       proportional to each person's contribution). Pool shortfall
-  //       split equally so all nets always sum to zero.
+  // paidBy = member  → full amount credited to that person
+  // paidBy = 'All'   → amount split equally, each person credited amount/N
+  // paidBy = ''      → pool-funded (proportional to contributions)
   const paid = {}; MEMBERS.forEach(m=>paid[m]=0);
-  rows.forEach(r=>{ if(r.paidBy && paid[r.paidBy]!==undefined) paid[r.paidBy]+=safeAmt(r.amount); });
+  const paid_personal = {}; MEMBERS.forEach(m=>paid_personal[m]=0);
+  const paid_shared   = {}; MEMBERS.forEach(m=>paid_shared[m]=0);
+  rows.forEach(r=>{
+    const amt = safeAmt(r.amount);
+    if (r.paidBy === 'All') {
+      const share = amt / MEMBERS.length;
+      MEMBERS.forEach(m=>{ paid[m]+=share; paid_shared[m]+=share; });
+    } else if (r.paidBy && paid[r.paidBy]!==undefined) {
+      paid[r.paidBy]+=amt; paid_personal[r.paidBy]+=amt;
+    }
+  });
 
   const personal_total = Object.values(paid).reduce((s,v)=>s+v,0);
   const unaccounted    = total - personal_total;
@@ -505,6 +515,8 @@ function updateTotals() {
   document.getElementById('ppGrid').innerHTML = MEMBERS.map(m=>{
     const c         = contribs[m]||0;
     const p         = paid[m]||0;
+    const pp        = paid_personal[m]||0;
+    const ps        = paid_shared[m]||0;
     const pool_sh   = pool > 0 ? (c/pool)*pool_used : 0;
     const effective = p + pool_sh + deficit_pp;
     const net       = effective - fair;
@@ -512,7 +524,8 @@ function updateTotals() {
     const pct       = total>0 ? Math.min(100,(effective/total*100)).toFixed(1) : 0;
     const netCls    = net>=0 ? 'color:#1e8e3e;background:#e6f4ea' : 'color:#c5221f;background:#fce8e6';
     const lines     = [];
-    if (p > 0) lines.push(`Trip payments: ₹${fmt(p)}`);
+    if (pp > 0) lines.push(`Trip payments: ₹${fmt(pp)}`);
+    if (ps > 0) lines.push(`Shared: ₹${fmt(ps)}`);
     if (c > 0) lines.push(`Pre-trip: ₹${fmt(c)}`);
     if (deficit_pp > 0) lines.push(`Pool shortfall: ₹${fmt(deficit_pp)}`);
     return `<div class="ppc" style="border-top-color:${MC[m]}">
