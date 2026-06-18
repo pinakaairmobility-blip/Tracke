@@ -508,31 +508,35 @@ function updateTotals() {
   const unaccounted    = total - personal_total;
   const pool_used      = Math.min(unaccounted, pool);
   const deficit        = Math.max(0, unaccounted - pool);
-  const deficit_pp     = deficit / MEMBERS.length;
-  const fair           = total / MEMBERS.length;
+  // adj_fair = fair share of only the expenses that were actually paid (personal + pool).
+  // Unpaid pool-funded expenses (deficit) are excluded so each card's math reconciles:
+  //   actual_paid − adj_fair = net  (no hidden "effective" term needed)
+  const adj_fair = MEMBERS.length > 0 ? (personal_total + pool_used) / MEMBERS.length : 0;
 
   const nets = {};
   document.getElementById('ppGrid').innerHTML = MEMBERS.map(m=>{
-    const c         = contribs[m]||0;
-    const p         = paid[m]||0;
-    const pp        = paid_personal[m]||0;
-    const ps        = paid_shared[m]||0;
-    const pool_sh   = pool > 0 ? (c/pool)*pool_used : 0;
-    const effective = p + pool_sh + deficit_pp;
-    const net       = effective - fair;
-    nets[m]         = net;
-    const pct       = total>0 ? Math.min(100,(effective/total*100)).toFixed(1) : 0;
-    const netCls    = net>=0 ? 'color:#1e8e3e;background:#e6f4ea' : 'color:#c5221f;background:#fce8e6';
-    const lines     = [];
+    const c           = contribs[m]||0;
+    const pp          = paid_personal[m]||0;
+    const ps          = paid_shared[m]||0;
+    const p           = paid[m]||0;
+    const pool_sh     = pool > 0 ? (c/pool)*pool_used : 0;
+    const actual_paid = p + pool_sh;        // money actually contributed
+    const net         = actual_paid - adj_fair;  // = effective − fair (same value)
+    nets[m]           = net;
+    const pct         = adj_fair>0 ? Math.min(100,(actual_paid/adj_fair*100)).toFixed(1) : 0;
+    const netCls      = net>=0 ? 'color:#1e8e3e;background:#e6f4ea' : 'color:#c5221f;background:#fce8e6';
+    const lines       = [];
     if (pp > 0) lines.push(`Trip payments: ₹${fmt(pp)}`);
     if (ps > 0) lines.push(`Shared: ₹${fmt(ps)}`);
-    if (c > 0) lines.push(`Pre-trip: ₹${fmt(c)}`);
-    if (deficit_pp > 0) lines.push(`Pool shortfall: ₹${fmt(deficit_pp)}`);
+    if (c  > 0) lines.push(`Pre-trip: ₹${fmt(c)}`);
+    const fairNote = deficit > 0
+      ? `Fair share: ₹${fmt(adj_fair)} <span style="font-size:.7rem;color:var(--mu)">(₹${fmt(deficit)} pool shortfall excluded — see summary)</span>`
+      : `Fair share: ₹${fmt(adj_fair)}`;
     return `<div class="ppc" style="border-top-color:${MC[m]}">
       <h3 style="color:${MC[m]}">${m}</h3>
-      <div class="pv" style="color:${MC[m]}">₹${fmt(effective)}</div>
+      <div class="pv" style="color:${MC[m]}">₹${fmt(actual_paid)}</div>
       <div class="pm2">${lines.join(' · ')||'No payments recorded'}</div>
-      <div class="pm2" style="margin-top:3px">Fair share: ₹${fmt(fair)}</div>
+      <div class="pm2" style="margin-top:3px">${fairNote}</div>
       <div class="bar-bg"><div class="bar-fg" style="width:${pct}%;background:${MC[m]}"></div></div>
       <div class="net-line" style="${netCls}">${net>=0?'Gets back':'Owes'} ₹${fmt(Math.abs(net))}</div>
     </div>`;
