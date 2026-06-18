@@ -9,19 +9,17 @@
 *{box-sizing:border-box;margin:0;padding:0;}
 body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(--tx);font-size:14px;-webkit-font-smoothing:antialiased;}
 
-/* header */
 .topbar{background:linear-gradient(135deg,#1a237e,#1a73e8);color:#fff;padding:16px 20px;display:flex;align-items:center;justify-content:space-between;box-shadow:0 2px 10px rgba(0,0,0,.2);}
 .topbar h1{font-size:1.15rem;font-weight:700;}
 .topbar p{font-size:.78rem;opacity:.8;margin-top:2px;}
-.hbtns{display:flex;gap:8px;}
+.hbtns{display:flex;gap:8px;align-items:center;}
 .hbtn{background:rgba(255,255,255,.18);border:1px solid rgba(255,255,255,.3);color:#fff;padding:7px 14px;border-radius:8px;cursor:pointer;font-size:.8rem;font-weight:600;}
 .hbtn:hover{background:rgba(255,255,255,.3);}
 .hbtn.g{background:rgba(52,168,83,.6);}
+.badge{font-size:.7rem;padding:3px 8px;border-radius:10px;font-weight:700;background:rgba(255,255,255,.2);border:1px solid rgba(255,255,255,.3);}
 
-/* container */
 .wrap{max-width:1180px;margin:0 auto;padding:16px;}
 
-/* contributions card */
 .contrib-box{background:var(--card);border:1px solid var(--bd);border-radius:var(--ra);padding:16px;margin-bottom:16px;}
 .contrib-box h2{font-size:.8rem;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--mu);margin-bottom:12px;}
 .contrib-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:10px;}
@@ -34,7 +32,6 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(
 .pool-total .pt-lbl{font-size:.8rem;color:var(--mu);font-weight:600;}
 .pool-total .pt-val{font-size:1.1rem;font-weight:800;color:var(--p);}
 
-/* summary strip */
 .sum-strip{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;margin-bottom:14px;}
 .sc{background:var(--card);border:1px solid var(--bd);border-radius:var(--ra);padding:12px 14px;text-align:center;}
 .sc .v{font-size:1.2rem;font-weight:800;}
@@ -43,7 +40,6 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(
 .sc.surplus{border-left:4px solid var(--g);background:#e6f4ea;}
 .sc.deficit{border-left:4px solid var(--r);background:#fce8e6;}
 
-/* controls */
 .controls{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;flex-wrap:wrap;gap:8px;}
 .cl{display:flex;gap:6px;flex-wrap:wrap;align-items:center;}
 .btn{padding:7px 14px;border:none;border-radius:8px;font-size:.82rem;font-weight:600;cursor:pointer;transition:background .12s;}
@@ -53,7 +49,6 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(
 .fb{padding:5px 12px;border:1.5px solid var(--bd);background:var(--card);color:var(--mu);border-radius:20px;cursor:pointer;font-size:.76rem;font-weight:600;transition:all .12s;}
 .fb.on{color:#fff;border-color:transparent;}
 
-/* table */
 .tbl-wrap{background:var(--card);border:1px solid var(--bd);border-radius:var(--ra);overflow-x:auto;-webkit-overflow-scrolling:touch;}
 table{width:100%;border-collapse:collapse;min-width:760px;}
 thead th{background:#f6f8fa;padding:9px 10px;text-align:left;font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.4px;color:var(--mu);border-bottom:2px solid var(--bd);white-space:nowrap;}
@@ -62,46 +57,49 @@ tbody tr.hr{display:none;}
 td{padding:4px 6px;vertical-align:middle;}
 td.n{text-align:center;color:#aaa;font-size:.75rem;width:32px;}
 
-/* inputs */
 .ci{width:100%;border:1.5px solid transparent;border-radius:5px;padding:5px 7px;font-size:.86rem;font-family:inherit;background:transparent;color:var(--tx);outline:none;transition:border-color .12s,background .12s;}
 .ci:hover{border-color:var(--bd);background:#fafafa;}
 .ci:focus{border-color:var(--p);background:#fff;box-shadow:0 0 0 2px rgba(26,115,232,.1);}
 .ci.am{text-align:right;font-weight:600;width:100px;}
 select.ci{cursor:pointer;}
 
-/* paid-by colors */
 .pa{background:#e8f0fe!important;color:#1a73e8!important;font-weight:700!important;}
 .ps{background:#e6f4ea!important;color:#1e8e3e!important;font-weight:700!important;}
 .pm{background:#fce8e6!important;color:#c5221f!important;font-weight:700!important;}
 .pk{background:#fff8e1!important;color:#e37400!important;font-weight:700!important;}
 
-/* cat chips */
 .ch{display:inline-block;padding:2px 7px;border-radius:8px;font-size:.7rem;font-weight:700;}
 .cStay{background:#e8f0fe;color:#1a73e8;}.cFood{background:#e6f4ea;color:#1e8e3e;}
 .cTransport{background:#fff8e1;color:#e37400;}.cShopping{background:#f3e8fd;color:#7c3aed;}
 .cActivity{background:#fce8e6;color:#c5221f;}.cOther{background:#f0f0f0;color:#5f6368;}
-.cContrib{background:#e8f4fd;color:#0277bd;}
 
-/* delete */
 .db{background:none;border:none;color:#ccc;cursor:pointer;font-size:.9rem;padding:2px 6px;border-radius:4px;}
 .db:hover{background:#fce8e6;color:var(--r);}
 
-/* tfoot */
 tfoot tr{background:#f6f8fa;border-top:2px solid var(--bd);}
 tfoot td{padding:9px 10px;font-weight:700;font-size:.9rem;}
 #gtc{color:var(--p);font-size:1.05rem;text-align:right;}
 
-/* per person */
 .pp-grid{margin-top:14px;display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:12px;}
 .ppc{background:var(--card);border:1px solid var(--bd);border-radius:var(--ra);padding:14px;border-top:4px solid;}
 .ppc h3{font-size:.85rem;font-weight:700;margin-bottom:8px;}
 .ppc .pv{font-size:1.2rem;font-weight:800;}
-.ppc .pm2{font-size:.75rem;color:var(--mu);}
+.ppc .pm2{font-size:.75rem;color:var(--mu);margin-top:2px;}
 .bar-bg{height:6px;border-radius:3px;background:#eee;margin-top:8px;overflow:hidden;}
 .bar-fg{height:100%;border-radius:3px;transition:width .3s;}
 .net-line{margin-top:6px;font-size:.78rem;padding:3px 6px;border-radius:4px;display:inline-block;}
 
-/* cat breakdown */
+/* settlement section */
+.settle-box{margin-top:14px;background:var(--card);border:1px solid var(--bd);border-radius:var(--ra);padding:14px;}
+.settle-box h2{font-size:.76rem;font-weight:700;color:var(--mu);text-transform:uppercase;letter-spacing:.4px;margin-bottom:10px;}
+.txn{display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:8px;background:#f6f8fa;margin-bottom:6px;}
+.txn:last-child{margin-bottom:0;}
+.txn .from{font-weight:700;font-size:.88rem;}
+.txn .arrow{color:var(--mu);font-size:.8rem;}
+.txn .to{font-weight:700;font-size:.88rem;}
+.txn .amt{margin-left:auto;font-weight:800;font-size:.95rem;color:#c5221f;}
+.no-settle{color:var(--mu);font-size:.82rem;padding:6px 0;}
+
 .cat-box{margin-top:14px;background:var(--card);border:1px solid var(--bd);border-radius:var(--ra);padding:14px;}
 .cat-box h2{font-size:.76rem;font-weight:700;color:var(--mu);text-transform:uppercase;letter-spacing:.4px;margin-bottom:10px;}
 .cr{display:flex;align-items:center;gap:8px;padding:5px 0;border-bottom:1px solid #f5f5f5;}
@@ -110,7 +108,6 @@ tfoot td{padding:9px 10px;font-weight:700;font-size:.9rem;}
 .cr-fill{height:100%;border-radius:4px;transition:width .3s;}
 .cr-amt{font-weight:700;font-size:.84rem;min-width:85px;text-align:right;}
 
-/* toast */
 .toast{position:fixed;bottom:20px;right:20px;background:#323232;color:#fff;padding:9px 16px;border-radius:8px;font-size:.82rem;z-index:999;transform:translateY(60px);opacity:0;transition:all .25s;pointer-events:none;}
 .toast.on{transform:translateY(0);opacity:1;}
 
@@ -126,6 +123,7 @@ tfoot td{padding:9px 10px;font-weight:700;font-size:.9rem;}
     <p>Jim Corbett · Dehradun · Ghanjria · Badrinath · Pulna</p>
   </div>
   <div class="hbtns">
+    <span class="badge" id="modeBadge">📱 Offline</span>
     <button class="hbtn" onclick="window.print()">🖨️ Print</button>
     <button class="hbtn g" onclick="exportCSV()">⬇️ CSV</button>
   </div>
@@ -152,13 +150,13 @@ tfoot td{padding:9px 10px;font-weight:700;font-size:.9rem;}
       <button class="btn btn-p" onclick="addRow()">+ Add Row</button>
       <div class="flt" id="filterBtns">
         <button class="fb on" data-f="all" onclick="setFilter('all',this)">All</button>
-        <button class="fb" data-f="Aditya"   onclick="setFilter('Aditya',this)"   style="border-color:#1a73e8;color:#1a73e8">Aditya</button>
-        <button class="fb" data-f="Sumedh"   onclick="setFilter('Sumedh',this)"   style="border-color:#1e8e3e;color:#1e8e3e">Sumedh</button>
+        <button class="fb" data-f="Aditya"    onclick="setFilter('Aditya',this)"    style="border-color:#1a73e8;color:#1a73e8">Aditya</button>
+        <button class="fb" data-f="Sumedh"    onclick="setFilter('Sumedh',this)"    style="border-color:#1e8e3e;color:#1e8e3e">Sumedh</button>
         <button class="fb" data-f="Manu Didi" onclick="setFilter('Manu Didi',this)" style="border-color:#c5221f;color:#c5221f">Manu Didi</button>
-        <button class="fb" data-f="Ashu"     onclick="setFilter('Ashu',this)"     style="border-color:#e37400;color:#e37400">Ashu</button>
+        <button class="fb" data-f="Ashu"      onclick="setFilter('Ashu',this)"      style="border-color:#e37400;color:#e37400">Ashu</button>
       </div>
     </div>
-    <span style="font-size:.73rem;color:var(--mu)">Auto-saved · tap cell to edit</span>
+    <span style="font-size:.73rem;color:var(--mu)" id="syncStatus">Auto-saved · tap cell to edit</span>
   </div>
 
   <!-- TABLE -->
@@ -166,13 +164,8 @@ tfoot td{padding:9px 10px;font-weight:700;font-size:.9rem;}
     <table>
       <thead>
         <tr>
-          <th>#</th>
-          <th>Description</th>
-          <th>Amount (₹)</th>
-          <th>Paid By</th>
-          <th>Category</th>
-          <th>Notes</th>
-          <th></th>
+          <th>#</th><th>Description</th><th>Amount (₹)</th>
+          <th>Paid By</th><th>Category</th><th>Notes</th><th></th>
         </tr>
       </thead>
       <tbody id="tbody"></tbody>
@@ -190,6 +183,12 @@ tfoot td{padding:9px 10px;font-weight:700;font-size:.9rem;}
   <!-- PER PERSON -->
   <div class="pp-grid" id="ppGrid"></div>
 
+  <!-- SETTLEMENT -->
+  <div class="settle-box">
+    <h2>💸 Who Pays Who (Minimum Transactions)</h2>
+    <div id="settleDiv"></div>
+  </div>
+
   <!-- CATEGORY -->
   <div class="cat-box">
     <h2>Category Breakdown</h2>
@@ -200,16 +199,19 @@ tfoot td{padding:9px 10px;font-weight:700;font-size:.9rem;}
 <div class="toast" id="toast"></div>
 
 <script>
+// ── MODE ─────────────────────────────────────────────────────
+const IS_SERVER = location.protocol !== 'file:';
+
 // ── CONSTANTS ────────────────────────────────────────────────
 const MEMBERS = ['Aditya','Sumedh','Manu Didi','Ashu'];
 const MC = {Aditya:'#1a73e8',Sumedh:'#34a853','Manu Didi':'#ea4335',Ashu:'#f9ab00'};
 const PC = {Aditya:'pa',Sumedh:'ps','Manu Didi':'pm',Ashu:'pk'};
 const CATS = ['Stay','Food','Transport','Shopping','Activity','Other'];
 const CC = {Stay:'#1a73e8',Food:'#34a853',Transport:'#f9ab00',Shopping:'#9334e8',Activity:'#ea4335',Other:'#9e9e9e'};
-const LS = 'utrip_v2';
-const LC = 'utrip_contrib_v1';
+const LS = 'utrip_v3';
+const LC = 'utrip_contrib_v2';
 
-// ── DEFAULT EXPENSES ─────────────────────────────────────────
+// ── DEFAULT EXPENSES (cross-checked from handwritten notes) ──
 const DEFAULTS = [
   {desc:'Jim Corbett Booking (3399.95 × 2)',amount:6792, paidBy:'',cat:'Stay',      notes:''},
   {desc:'Airbnb Dehradun',                  amount:3573, paidBy:'',cat:'Stay',      notes:''},
@@ -227,14 +229,15 @@ const DEFAULTS = [
   {desc:'Dinner 3 June',                    amount:977,  paidBy:'',cat:'Food',      notes:''},
   {desc:'Stay Yuvraj Hotel',                amount:3075, paidBy:'',cat:'Stay',      notes:''},
   {desc:'Breakfast at Yuvraj',              amount:710,  paidBy:'',cat:'Food',      notes:''},
-  {desc:'Ghanjrla Taxi',                    amount:240,  paidBy:'',cat:'Transport', notes:''},
+  {desc:'Ghanjria Taxi',                    amount:240,  paidBy:'',cat:'Transport', notes:''},
   {desc:'Hotel Ghanjria Day 1',             amount:5000, paidBy:'',cat:'Stay',      notes:''},
   {desc:'Ghanghria Day 2 Stay',             amount:6000, paidBy:'',cat:'Stay',      notes:''},
   {desc:'Food',                             amount:1000, paidBy:'',cat:'Food',      notes:''},
   {desc:'Food',                             amount:540,  paidBy:'',cat:'Food',      notes:''},
   {desc:'Water Bottle',                     amount:1000, paidBy:'',cat:'Other',     notes:''},
+  {desc:'Food',                             amount:100,  paidBy:'',cat:'Food',      notes:''},
   {desc:'Cash To Ashu',                     amount:1000, paidBy:'',cat:'Other',     notes:''},
-  {desc:'11 Aish',                          amount:200,  paidBy:'',cat:'Other',     notes:''},
+  {desc:'Cash to Aishwarya',               amount:1000, paidBy:'',cat:'Other',     notes:''},
   {desc:'Stick',                            amount:700,  paidBy:'',cat:'Other',     notes:''},
   {desc:'Lunch Pulna',                      amount:575,  paidBy:'',cat:'Food',      notes:''},
   {desc:'Breakfast',                        amount:1010, paidBy:'',cat:'Food',      notes:''},
@@ -252,21 +255,70 @@ const DEFAULTS = [
 const DEFAULT_CONTRIBS = {Aditya:0, Sumedh:23000, 'Manu Didi':23000, Ashu:20000};
 
 // ── STATE ────────────────────────────────────────────────────
-let rows = [], contribs = {}, filter = 'all', _saveT, _totT;
+let rows = [], contribs = {}, filter = 'all', _saveT, _totT, _pollT;
 
-function loadData() {
-  try { rows = JSON.parse(localStorage.getItem(LS)) || null; } catch{}
-  if (!rows || !rows.length) rows = DEFAULTS.map((r,i)=>({...r,id:i+1}));
-  try { contribs = JSON.parse(localStorage.getItem(LC)) || null; } catch{}
-  if (!contribs) contribs = {...DEFAULT_CONTRIBS};
+// ── DATA LAYER (dual mode: server or localStorage) ───────────
+async function loadData() {
+  if (IS_SERVER) {
+    try {
+      const [rRes, cRes] = await Promise.all([
+        fetch('/api/trip/rows'),
+        fetch('/api/trip/contribs')
+      ]);
+      const rData = await rRes.json();
+      const cData = await cRes.json();
+      rows    = (rData && rData.length) ? rData : DEFAULTS.map((r,i)=>({...r,id:i+1}));
+      contribs = cData || {...DEFAULT_CONTRIBS};
+    } catch(e) {
+      rows    = DEFAULTS.map((r,i)=>({...r,id:i+1}));
+      contribs = {...DEFAULT_CONTRIBS};
+    }
+  } else {
+    try { rows = JSON.parse(localStorage.getItem(LS)) || null; } catch{}
+    if (!rows || !rows.length) rows = DEFAULTS.map((r,i)=>({...r,id:i+1}));
+    try { contribs = JSON.parse(localStorage.getItem(LC)) || null; } catch{}
+    if (!contribs) contribs = {...DEFAULT_CONTRIBS};
+  }
 }
 
 function save() {
-  clearTimeout(_saveT);
-  _saveT = setTimeout(()=>{
-    localStorage.setItem(LS, JSON.stringify(rows));
-    localStorage.setItem(LC, JSON.stringify(contribs));
-  }, 350);
+  if (IS_SERVER) {
+    clearTimeout(_saveT);
+    _saveT = setTimeout(async ()=>{
+      try {
+        await Promise.all([
+          fetch('/api/trip/rows',    {method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(rows)}),
+          fetch('/api/trip/contribs',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(contribs)})
+        ]);
+        document.getElementById('syncStatus').textContent = 'Saved to server · ' + new Date().toLocaleTimeString();
+      } catch(e) {
+        document.getElementById('syncStatus').textContent = 'Save failed — retrying…';
+      }
+    }, 800);
+  } else {
+    clearTimeout(_saveT);
+    _saveT = setTimeout(()=>{
+      localStorage.setItem(LS, JSON.stringify(rows));
+      localStorage.setItem(LC, JSON.stringify(contribs));
+    }, 350);
+  }
+}
+
+async function pollServer() {
+  if (!IS_SERVER) return;
+  try {
+    const [rRes, cRes] = await Promise.all([
+      fetch('/api/trip/rows'),
+      fetch('/api/trip/contribs')
+    ]);
+    const rData = await rRes.json();
+    const cData = await cRes.json();
+    if (rData) { rows = rData; renderTable(); }
+    if (cData) { contribs = cData; renderContribs(); }
+    scheduleTotals();
+    document.getElementById('syncStatus').textContent = 'Live sync · ' + new Date().toLocaleTimeString();
+  } catch{}
+  _pollT = setTimeout(pollServer, 15000);
 }
 
 function nid() { return rows.length ? Math.max(...rows.map(r=>r.id))+1 : 1; }
@@ -276,7 +328,7 @@ function renderContribs() {
   document.getElementById('contribGrid').innerHTML = MEMBERS.map(m=>`
     <div class="contrib-card" style="border-top-color:${MC[m]}">
       <div class="name" style="color:${MC[m]}">${m}</div>
-      <label>Amount Paid (₹)</label>
+      <label>Pre-trip contribution (₹)</label>
       <input class="amt-input" type="number" min="0" step="500" value="${contribs[m]||0}"
         style="color:${MC[m]};border-color:${MC[m]}44"
         data-member="${m}"
@@ -297,7 +349,7 @@ function updateContribTotal() {
   document.getElementById('poolTotal').textContent = '₹'+fmt(total);
 }
 
-// ── TABLE RENDER (only called on add/delete/filter) ──────────
+// ── TABLE RENDER (only on add/delete/filter/remote-sync) ─────
 function renderTable() {
   const tbody = document.getElementById('tbody');
   const memberOpts = MEMBERS.map(m=>`<option value="${m}">${m}</option>`).join('');
@@ -305,10 +357,10 @@ function renderTable() {
 
   tbody.innerHTML = rows.map((r,i)=>{
     const vis = filter==='all' || r.paidBy===filter;
-    const pc = r.paidBy ? PC[r.paidBy]||'' : '';
+    const pc  = r.paidBy ? PC[r.paidBy]||'' : '';
     return `<tr id="r${r.id}" data-id="${r.id}" class="${vis?'':'hr'}">
       <td class="n">${i+1}</td>
-      <td><input class="ci" data-f="desc" value="${x(r.desc)}" placeholder="Description"></td>
+      <td><input class="ci" data-f="desc"   value="${x(r.desc)}"  placeholder="Description"></td>
       <td><input class="ci am" data-f="amount" type="number" min="0" step="1" value="${r.amount}"></td>
       <td><select class="ci ${pc}" data-f="paidBy">
         <option value="">— select —</option>${memberOpts.replace(`>${r.paidBy}<`,` selected>${r.paidBy}<`)}
@@ -316,7 +368,7 @@ function renderTable() {
       <td><select class="ci" data-f="cat">
         ${catOpts.replace(`>${r.cat}<`,` selected>${r.cat}<`)}
       </select></td>
-      <td><input class="ci" data-f="notes" value="${x(r.notes)}" placeholder="Notes…"></td>
+      <td><input class="ci" data-f="notes"  value="${x(r.notes)}" placeholder="Notes…"></td>
       <td><button class="db" data-del="${r.id}">✕</button></td>
     </tr>`;
   }).join('');
@@ -345,11 +397,8 @@ document.getElementById('tbody').addEventListener('change', e=>{
   const r = rows.find(r=>r.id===id); if(!r) return;
   r[f] = e.target.value; save();
   if (f==='paidBy') {
-    // update class in-place — NO full re-render
     e.target.className = 'ci ' + (r.paidBy ? PC[r.paidBy]||'' : '');
-    if (filter!=='all') {
-      tr.classList.toggle('hr', r.paidBy!==filter);
-    }
+    if (filter!=='all') tr.classList.toggle('hr', r.paidBy!==filter);
     scheduleTotals();
   } else if (f==='cat') {
     scheduleTotals();
@@ -358,63 +407,107 @@ document.getElementById('tbody').addEventListener('change', e=>{
 
 document.getElementById('tbody').addEventListener('click', e=>{
   const btn = e.target.closest('[data-del]'); if(!btn) return;
-  const id = +btn.dataset.del;
+  const id  = +btn.dataset.del;
   if (!confirm('Delete this row?')) return;
   rows = rows.filter(r=>r.id!==id);
   document.getElementById('r'+id)?.remove();
   save(); scheduleTotals(); toast('Deleted');
 });
 
-// ── TOTALS (debounced, no DOM re-render of table) ────────────
+// ── TOTALS (debounced) ───────────────────────────────────────
 function scheduleTotals() {
   clearTimeout(_totT);
   _totT = setTimeout(updateTotals, 80);
 }
 
 function updateTotals() {
-  const vis   = filter==='all' ? rows : rows.filter(r=>r.paidBy===filter);
-  const total = rows.reduce((s,r)=>s+(r.amount||0),0);
-  const vtotal= vis.reduce((s,r)=>s+(r.amount||0),0);
-  const pool  = Object.values(contribs).reduce((s,v)=>s+v,0);
-  const diff  = pool - total;
+  const vis    = filter==='all' ? rows : rows.filter(r=>r.paidBy===filter);
+  const total  = rows.reduce((s,r)=>s+(r.amount||0),0);
+  const vtotal = vis.reduce((s,r)=>s+(r.amount||0),0);
+  const pool   = Object.values(contribs).reduce((s,v)=>s+v,0);
+  const diff   = pool - total;
 
   document.getElementById('gtc').textContent = '₹'+fmt(vtotal);
   document.getElementById('cntc').textContent =
     `${vis.length} of ${rows.length} rows${filter!=='all'?' (filtered)':''} · All expenses: ₹${fmt(total)}`;
 
-  // summary strip
   const surplus = diff >= 0;
   document.getElementById('sumStrip').innerHTML = `
     <div class="sc hi"><div class="v">₹${fmt(total)}</div><div class="l">Total Expenses</div></div>
     <div class="sc"><div class="v" style="color:#1e8e3e">₹${fmt(pool)}</div><div class="l">Pool Collected</div></div>
     <div class="sc ${surplus?'surplus':'deficit'}">
       <div class="v" style="color:${surplus?'#1e8e3e':'#c5221f'}">${surplus?'+':'-'}₹${fmt(Math.abs(diff))}</div>
-      <div class="l">${surplus?'Surplus':'Deficit'}</div>
+      <div class="l">${surplus?'Pool Surplus':'Pool Deficit'}</div>
     </div>
     <div class="sc"><div class="v">${rows.length}</div><div class="l">Total Entries</div></div>`;
 
-  // per person — paid via expenses + contributed
+  // ── Balanced per-person settlement calculation ──────────────
+  // Rule: expenses with paidBy → credited to that person personally.
+  //       expenses without paidBy → treated as paid from pool (split
+  //       proportional to each person's contribution). Pool shortfall
+  //       split equally so all nets always sum to zero.
   const paid = {}; MEMBERS.forEach(m=>paid[m]=0);
-  rows.forEach(r=>{ if(r.paidBy&&paid[r.paidBy]!==undefined) paid[r.paidBy]+=(r.amount||0); });
-  const fair = total/MEMBERS.length;
+  rows.forEach(r=>{ if(r.paidBy && paid[r.paidBy]!==undefined) paid[r.paidBy]+=(r.amount||0); });
 
+  const personal_total = Object.values(paid).reduce((s,v)=>s+v,0);
+  const unaccounted    = total - personal_total;
+  const pool_used      = Math.min(unaccounted, pool);
+  const deficit        = Math.max(0, unaccounted - pool);
+  const deficit_pp     = deficit / MEMBERS.length;
+  const fair           = total / MEMBERS.length;
+
+  const nets = {};
   document.getElementById('ppGrid').innerHTML = MEMBERS.map(m=>{
-    const c  = contribs[m]||0;
-    const p  = paid[m]||0;
-    const totalPaid = c + p;
-    const net = totalPaid - fair;
-    const pct = total>0 ? Math.min(100,(p/total*100)).toFixed(1) : 0;
-    const netCls = net>=0 ? 'color:#1e8e3e;background:#e6f4ea' : 'color:#c5221f;background:#fce8e6';
+    const c         = contribs[m]||0;
+    const p         = paid[m]||0;
+    const pool_sh   = pool > 0 ? (c/pool)*pool_used : 0;
+    const effective = p + pool_sh + deficit_pp;
+    const net       = effective - fair;
+    nets[m]         = net;
+    const pct       = total>0 ? Math.min(100,(effective/total*100)).toFixed(1) : 0;
+    const netCls    = net>=0 ? 'color:#1e8e3e;background:#e6f4ea' : 'color:#c5221f;background:#fce8e6';
+    const lines     = [];
+    if (p > 0) lines.push(`Trip payments: ₹${fmt(p)}`);
+    if (c > 0) lines.push(`Pre-trip: ₹${fmt(c)}`);
+    if (deficit_pp > 0) lines.push(`Pool shortfall: ₹${fmt(deficit_pp)}`);
     return `<div class="ppc" style="border-top-color:${MC[m]}">
       <h3 style="color:${MC[m]}">${m}</h3>
-      <div class="pv" style="color:${MC[m]}">₹${fmt(p)}</div>
-      <div class="pm2">Paid during trip · contributed ₹${fmt(c)}</div>
+      <div class="pv" style="color:${MC[m]}">₹${fmt(effective)}</div>
+      <div class="pm2">${lines.join(' · ')||'No payments recorded'}</div>
+      <div class="pm2" style="margin-top:3px">Fair share: ₹${fmt(fair)}</div>
       <div class="bar-bg"><div class="bar-fg" style="width:${pct}%;background:${MC[m]}"></div></div>
       <div class="net-line" style="${netCls}">${net>=0?'Gets back':'Owes'} ₹${fmt(Math.abs(net))}</div>
     </div>`;
   }).join('');
 
-  // category
+  // ── Settlement transactions (debt simplification) ────────────
+  const pos = [], neg = [];
+  Object.entries(nets).forEach(([m,n])=>{
+    const v = Math.round(n);
+    if (v > 0) pos.push({m, n:v});
+    else if (v < 0) neg.push({m, n:-v});
+  });
+  pos.sort((a,b)=>b.n-a.n);
+  neg.sort((a,b)=>b.n-a.n);
+  const txns = [];
+  let i=0, j=0;
+  while (i<neg.length && j<pos.length) {
+    const amt = Math.min(neg[i].n, pos[j].n);
+    if (amt > 0) txns.push({from:neg[i].m, to:pos[j].m, amount:amt});
+    neg[i].n -= amt; pos[j].n -= amt;
+    if (neg[i].n < 1) i++;
+    if (pos[j].n < 1) j++;
+  }
+  document.getElementById('settleDiv').innerHTML = txns.length
+    ? txns.map(t=>`<div class="txn">
+        <span class="from" style="color:${MC[t.from]||'#333'}">${t.from}</span>
+        <span class="arrow">→ pays →</span>
+        <span class="to"   style="color:${MC[t.to]||'#333'}">${t.to}</span>
+        <span class="amt">₹${fmt(t.amount)}</span>
+      </div>`).join('')
+    : '<div class="no-settle">All settled up — nothing to pay! 🎉</div>';
+
+  // ── Category breakdown ───────────────────────────────────────
   const catT = {}; CATS.forEach(c=>catT[c]=0);
   rows.forEach(r=>{ if(r.cat) catT[r.cat]=(catT[r.cat]||0)+(r.amount||0); });
   const cSorted = Object.entries(catT).filter(([,v])=>v>0).sort((a,b)=>b[1]-a[1]);
@@ -433,9 +526,8 @@ function updateTotals() {
 function addRow() {
   const r = {id:nid(),desc:'',amount:0,paidBy:'',cat:'Other',notes:''};
   rows.push(r);
-  const tbody = document.getElementById('tbody');
+  const tbody      = document.getElementById('tbody');
   const memberOpts = MEMBERS.map(m=>`<option value="${m}">${m}</option>`).join('');
-  const catOpts    = CATS.map(c=>`<option value="${c}">${c==='Other'?' selected':''}>${c}</option>`).join('');
   const tr = document.createElement('tr');
   tr.id = 'r'+r.id; tr.dataset.id = r.id;
   tr.className = filter!=='all'?'hr':'';
@@ -462,7 +554,6 @@ function setFilter(f, btn) {
   });
   btn.classList.add('on');
   if(f!=='all'){btn.style.background=MC[f]||'#1a73e8';btn.style.color='#fff';btn.style.borderColor='transparent';}
-  // toggle visibility without re-render
   rows.forEach(r=>{
     const tr=document.getElementById('r'+r.id);
     if(tr) tr.classList.toggle('hr', f!=='all' && r.paidBy!==f);
@@ -472,7 +563,7 @@ function setFilter(f, btn) {
 
 function exportCSV() {
   const hdr = ['#','Description','Amount','Paid By','Category','Notes'];
-  const out = [hdr.join(',')];
+  const out  = [hdr.join(',')];
   rows.forEach((r,i)=>out.push([i+1,`"${(r.desc||'').replace(/"/g,'""')}"`,r.amount||0,`"${r.paidBy||''}"`,`"${r.cat||''}"`,`"${(r.notes||'').replace(/"/g,'""')}"`].join(',')));
   out.push(`,,${rows.reduce((s,r)=>s+(r.amount||0),0)},,GRAND TOTAL,`);
   const a=document.createElement('a');
@@ -490,9 +581,16 @@ function toast(msg,d=2000){
 }
 
 // ── INIT ─────────────────────────────────────────────────────
-loadData();
-renderContribs();
-renderTable();
+(async()=>{
+  await loadData();
+  document.getElementById('modeBadge').textContent = IS_SERVER ? '🌐 Live Sync' : '📱 Offline';
+  renderContribs();
+  renderTable();
+  if (IS_SERVER) {
+    document.getElementById('syncStatus').textContent = 'Live sync active · auto-refreshes every 15s';
+    _pollT = setTimeout(pollServer, 15000);
+  }
+})();
 </script>
 </body>
 </html>

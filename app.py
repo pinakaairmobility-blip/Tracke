@@ -1,5 +1,5 @@
 from flask import Flask, jsonify, request, send_file
-import sqlite3, random, string, os
+import sqlite3, random, string, os, json
 
 app = Flask(__name__)
 DB = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'splittrack.db')
@@ -54,6 +54,10 @@ def init_db():
                 date TEXT NOT NULL,
                 FOREIGN KEY (group_id) REFERENCES groups(id) ON DELETE CASCADE
             );
+            CREATE TABLE IF NOT EXISTS trip_data (
+                key TEXT PRIMARY KEY,
+                value TEXT NOT NULL
+            );
         ''')
 
 def uid():
@@ -67,6 +71,28 @@ def gen_code():
 @app.route('/')
 def index():
     return send_file('contributions.html')
+
+@app.route('/trip')
+def trip_page():
+    return send_file('uttarakhand_trip.html')
+
+# ── Trip Data (shared key-value store for Uttarakhand spreadsheet) ──
+
+@app.route('/api/trip/<key>', methods=['GET'])
+def get_trip_data(key):
+    with get_conn() as c:
+        row = c.execute('SELECT value FROM trip_data WHERE key=?', (key,)).fetchone()
+        if row:
+            return jsonify(json.loads(row['value']))
+        return jsonify(None)
+
+@app.route('/api/trip/<key>', methods=['POST'])
+def set_trip_data(key):
+    data = request.json
+    with get_conn() as c:
+        c.execute('INSERT OR REPLACE INTO trip_data (key,value) VALUES (?,?)',
+                  (key, json.dumps(data)))
+    return jsonify({'ok': True})
 
 # ── Groups ──────────────────────────────────────────────────────
 
