@@ -336,30 +336,112 @@
 
 <script>
 // ──────────────────────────────────────────────────────────────
+//  MODE DETECTION  — file:// = offline/localStorage, http = server
+// ──────────────────────────────────────────────────────────────
+const IS_SERVER = location.protocol !== 'file:';
+
+// ──────────────────────────────────────────────────────────────
 //  STATE
 // ──────────────────────────────────────────────────────────────
 const S = { groups: [], gid: null, data: null, tab: 'expenses' };
 let splitType = 'equal', editSplitType = 'equal', editingExpId = null;
 
 // ──────────────────────────────────────────────────────────────
-//  API HELPER
+//  LOCAL STORE  (file:// — uses localStorage, single device)
 // ──────────────────────────────────────────────────────────────
-async function api(method, path, body = null) {
+const LS_KEY = 'splittrack_v3';
+function lsLoad() { try { return JSON.parse(localStorage.getItem(LS_KEY)) || { groups: [] }; } catch { return { groups: [] }; } }
+function lsSave(db) { localStorage.setItem(LS_KEY, JSON.stringify(db)); }
+function lsUid() { return Date.now().toString(36) + Math.random().toString(36).slice(2, 7); }
+function lsCode() { const c = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'; return Array.from({ length: 6 }, () => c[Math.random() * c.length | 0]).join(''); }
+
+const localStore = {
+  async getGroups() {
+    return lsLoad().groups.map(g => ({ id: g.id, name: g.name, icon: g.icon, currency: g.currency, code: g.code, members: g.members || [] }));
+  },
+  async createGroup(d) {
+    const db = lsLoad(), id = lsUid(), code = lsCode();
+    db.groups.push({ id, name: d.name, icon: d.icon || '📦', currency: d.currency || '₹', code, members: d.members || [], expenses: [], settlements: [] });
+    lsSave(db); return { id, code };
+  },
+  async deleteGroup(id) {
+    const db = lsLoad(); db.groups = db.groups.filter(g => g.id !== id); lsSave(db);
+  },
+  async joinByCode(code) {
+    const g = lsLoad().groups.find(g => g.code === code.toUpperCase());
+    if (!g) throw new Error('No group with that code'); return { id: g.id };
+  },
+  async addMember(gid, name) {
+    const db = lsLoad(), g = db.groups.find(g => g.id === gid);
+    if (g && !g.members.includes(name)) g.members.push(name); lsSave(db);
+  },
+  async removeMember(gid, name) {
+    const db = lsLoad(), g = db.groups.find(g => g.id === gid);
+    if (g) g.members = g.members.filter(m => m !== name); lsSave(db);
+  },
+  async getExpenses(gid) {
+    return lsLoad().groups.find(g => g.id === gid)?.expenses || [];
+  },
+  async addExpense(gid, d) {
+    const db = lsLoad(), g = db.groups.find(g => g.id === gid), id = lsUid();
+    if (g) (g.expenses = g.expenses || []).push({ id, ...d }); lsSave(db); return { id };
+  },
+  async updateExpense(gid, eid, d) {
+    const db = lsLoad(), g = db.groups.find(g => g.id === gid);
+    if (g) { const i = (g.expenses || []).findIndex(e => e.id === eid); if (i > -1) g.expenses[i] = { id: eid, ...d }; } lsSave(db);
+  },
+  async deleteExpense(gid, eid) {
+    const db = lsLoad(), g = db.groups.find(g => g.id === gid);
+    if (g) g.expenses = (g.expenses || []).filter(e => e.id !== eid); lsSave(db);
+  },
+  async getSettlements(gid) {
+    return lsLoad().groups.find(g => g.id === gid)?.settlements || [];
+  },
+  async addSettlement(gid, d) {
+    const db = lsLoad(), g = db.groups.find(g => g.id === gid), id = lsUid();
+    if (g) (g.settlements = g.settlements || []).push({ id, from_member: d.from, to_member: d.to, amount: d.amount, date: d.date });
+    lsSave(db); return { id };
+  },
+  async deleteSettlement(gid, sid) {
+    const db = lsLoad(), g = db.groups.find(g => g.id === gid);
+    if (g) g.settlements = (g.settlements || []).filter(s => s.id !== sid); lsSave(db);
+  },
+};
+
+// ──────────────────────────────────────────────────────────────
+//  SERVER STORE  (http:// — Flask API, multi-user)
+// ──────────────────────────────────────────────────────────────
+async function apiFetch(method, path, body = null) {
   const opts = { method, headers: { 'Content-Type': 'application/json' } };
   if (body) opts.body = JSON.stringify(body);
   const r = await fetch('/api' + path, opts);
-  if (!r.ok) {
-    const txt = await r.text().catch(() => r.statusText);
-    throw new Error(txt || r.statusText);
-  }
+  if (!r.ok) { const txt = await r.text().catch(() => r.statusText); throw new Error(txt || r.statusText); }
   return r.json();
 }
+
+const serverStore = {
+  async getGroups()              { return apiFetch('GET', '/groups'); },
+  async createGroup(d)           { return apiFetch('POST', '/groups', d); },
+  async deleteGroup(id)          { return apiFetch('DELETE', `/groups/${id}`); },
+  async joinByCode(code)         { return apiFetch('GET', `/groups/join/${code}`); },
+  async addMember(gid, name)     { return apiFetch('POST', `/groups/${gid}/members`, { name }); },
+  async removeMember(gid, name)  { return apiFetch('DELETE', `/groups/${gid}/members/${encodeURIComponent(name)}`); },
+  async getExpenses(gid)         { return apiFetch('GET', `/groups/${gid}/expenses`); },
+  async addExpense(gid, d)       { return apiFetch('POST', `/groups/${gid}/expenses`, d); },
+  async updateExpense(gid,eid,d) { return apiFetch('PUT', `/groups/${gid}/expenses/${eid}`, d); },
+  async deleteExpense(gid, eid)  { return apiFetch('DELETE', `/groups/${gid}/expenses/${eid}`); },
+  async getSettlements(gid)      { return apiFetch('GET', `/groups/${gid}/settlements`); },
+  async addSettlement(gid, d)    { return apiFetch('POST', `/groups/${gid}/settlements`, d); },
+  async deleteSettlement(gid,sid){ return apiFetch('DELETE', `/groups/${gid}/settlements/${sid}`); },
+};
+
+const store = IS_SERVER ? serverStore : localStore;
 
 // ──────────────────────────────────────────────────────────────
 //  LOAD / REFRESH
 // ──────────────────────────────────────────────────────────────
 async function loadGroups() {
-  S.groups = await api('GET', '/groups');
+  S.groups = await store.getGroups();
 }
 
 async function loadGroupData() {
@@ -367,8 +449,8 @@ async function loadGroupData() {
   const g = S.groups.find(x => x.id === S.gid);
   if (!g) { S.gid = null; S.data = null; return; }
   const [expenses, settlements] = await Promise.all([
-    api('GET', `/groups/${S.gid}/expenses`),
-    api('GET', `/groups/${S.gid}/settlements`),
+    store.getExpenses(S.gid),
+    store.getSettlements(S.gid),
   ]);
   S.data = { ...g, expenses, settlements };
 }
@@ -377,23 +459,24 @@ async function refresh(silent = false) {
   if (!silent) showLoading(true);
   try {
     await loadGroups();
-    if (S.gid && !S.groups.find(x => x.id === S.gid))
-      S.gid = S.groups[0]?.id || null;
+    if (S.gid && !S.groups.find(x => x.id === S.gid)) S.gid = S.groups[0]?.id || null;
     if (!S.gid && S.groups.length) S.gid = S.groups[0].id;
     await loadGroupData();
     render();
     document.getElementById('lastUpdated').textContent =
       'Updated ' + new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
   } catch (e) {
-    toast('Server error: ' + e.message, true);
+    toast('Error: ' + e.message, true);
   } finally {
     showLoading(false);
   }
 }
 
-// auto-refresh every 30s when tab visible
-setInterval(() => { if (!document.hidden) refresh(true); }, 30000);
-document.addEventListener('visibilitychange', () => { if (!document.hidden) refresh(true); });
+// auto-refresh every 30s only when running via server (multi-user)
+if (IS_SERVER) {
+  setInterval(() => { if (!document.hidden) refresh(true); }, 30000);
+  document.addEventListener('visibilitychange', () => { if (!document.hidden) refresh(true); });
+}
 
 // ──────────────────────────────────────────────────────────────
 //  UTILITIES
@@ -732,7 +815,7 @@ async function saveGroup() {
   if (!name) { toast('Enter a group name', true); return; }
   const members = document.getElementById('groupMembers').value.split(',').map(m => m.trim()).filter(Boolean);
   try {
-    const res = await api('POST', '/groups', {
+    const res = await store.createGroup({
       name,
       icon: document.getElementById('groupCategory').value,
       currency: document.getElementById('groupCurrency').value,
@@ -748,7 +831,7 @@ async function saveGroup() {
 async function deleteGroup(id) {
   if (!confirm('Delete this group and all expenses?')) return;
   try {
-    await api('DELETE', `/groups/${id}`);
+    await store.deleteGroup(id);
     if (S.gid === id) S.gid = null;
     await refresh();
     toast('Group deleted');
@@ -764,7 +847,7 @@ async function joinByCode() {
   const code = document.getElementById('joinCodeInput').value.trim().toUpperCase();
   if (code.length < 4) { toast('Enter a valid code', true); return; }
   try {
-    const res = await api('GET', `/groups/join/${code}`);
+    const res = await store.joinByCode(code);
     document.getElementById('joinCodeInput').value = '';
     S.gid = res.id; S.tab = 'expenses';
     await refresh();
@@ -783,7 +866,7 @@ async function addMember() {
   const name = document.getElementById('newMemberName').value.trim();
   if (!name) return;
   try {
-    await api('POST', `/groups/${S.gid}/members`, { name });
+    await store.addMember(S.gid, name);
     document.getElementById('newMemberName').value = '';
     await refresh(true);
     toast(`${name} added`);
@@ -794,7 +877,7 @@ async function removeMember(name) {
   const inUse = S.data.expenses.some(e => e.paid_by === name || Object.keys(e.splits).includes(name));
   if (inUse && !confirm(`${name} has expenses. Remove anyway?`)) return;
   try {
-    await api('DELETE', `/groups/${S.gid}/members/${encodeURIComponent(name)}`);
+    await store.removeMember(S.gid, name);
     await refresh(true);
     toast(`${name} removed`);
   } catch (e) { toast('Error: ' + e.message, true); }
@@ -902,7 +985,7 @@ async function saveExpense() {
   const btn = document.getElementById('saveExpBtn');
   btn.disabled = true;
   try {
-    await api('POST', `/groups/${S.gid}/expenses`, { description: desc, amount, date, category, paid_by, splits, notes });
+    await store.addExpense(S.gid, { description: desc, amount, date, category, paid_by, splits, notes });
     closeModal('expenseModal');
     await refresh(true);
     toast(`"${desc}" added`);
@@ -960,7 +1043,7 @@ async function updateExpense() {
   const btn = document.getElementById('updateExpBtn');
   btn.disabled = true;
   try {
-    await api('PUT', `/groups/${S.gid}/expenses/${editingExpId}`, { description: desc, amount, date, category, paid_by, splits, notes });
+    await store.updateExpense(S.gid, editingExpId, { description: desc, amount, date, category, paid_by, splits, notes });
     closeModal('editExpenseModal');
     await refresh(true);
     toast('Expense updated');
@@ -971,7 +1054,7 @@ async function updateExpense() {
 async function deleteExpense(eid) {
   if (!confirm('Delete this expense?')) return;
   try {
-    await api('DELETE', `/groups/${S.gid}/expenses/${eid}`);
+    await store.deleteExpense(S.gid, eid);
     await refresh(true);
     toast('Expense deleted');
   } catch (e) { toast('Error: ' + e.message, true); }
@@ -982,7 +1065,7 @@ async function deleteExpense(eid) {
 // ──────────────────────────────────────────────────────────────
 async function markSettled(from, to, amount) {
   try {
-    await api('POST', `/groups/${S.gid}/settlements`, { from, to, amount, date: today() });
+    await store.addSettlement(S.gid, { from, to, amount, date: today() });
     await refresh(true);
     toast(`${from} → ${to} recorded`);
   } catch (e) { toast('Error: ' + e.message, true); }
@@ -990,7 +1073,7 @@ async function markSettled(from, to, amount) {
 
 async function removeSettlement(sid) {
   try {
-    await api('DELETE', `/groups/${S.gid}/settlements/${sid}`);
+    await store.deleteSettlement(S.gid, sid);
     await refresh(true);
     toast('Settlement removed');
   } catch (e) { toast('Error: ' + e.message, true); }
@@ -1006,12 +1089,21 @@ function closeModal(id) { document.getElementById(id).classList.remove('open'); 
 document.querySelectorAll('.modal-backdrop').forEach(bd =>
   bd.addEventListener('click', e => { if (e.target === bd) bd.classList.remove('open'); }));
 
-// handle /join/<code> URL
+// mode badge
+(function() {
+  const el = document.getElementById('lastUpdated');
+  const badge = document.createElement('span');
+  badge.textContent = IS_SERVER ? '🌐 Live' : '📱 Offline';
+  badge.style.cssText = `font-size:.72rem;font-weight:700;padding:3px 10px;border-radius:12px;background:${IS_SERVER ? 'rgba(52,168,83,.35)' : 'rgba(255,255,255,.2)'};`;
+  el.parentNode.insertBefore(badge, el);
+})();
+
+// handle /join/<code> URL (server mode only)
 (function () {
   const m = location.pathname.match(/^\/join\/([A-Z0-9]+)$/i);
   if (m) {
     history.replaceState(null, '', '/');
-    api('GET', `/groups/join/${m[1]}`)
+    store.joinByCode(m[1])
       .then(r => { S.gid = r.id; })
       .catch(() => {})
       .finally(() => refresh());
