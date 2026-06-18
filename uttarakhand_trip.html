@@ -200,7 +200,7 @@ tfoot td{padding:9px 10px;font-weight:700;font-size:.9rem;}
 
 <script>
 // ── MODE ─────────────────────────────────────────────────────
-const IS_SERVER = location.protocol !== 'file:';
+const IS_SERVER = location.protocol === 'http:' || location.protocol === 'https:';
 
 // ── CONSTANTS ────────────────────────────────────────────────
 const MEMBERS = ['Aditya','Sumedh','Manu Didi','Ashu'];
@@ -208,7 +208,7 @@ const MC = {Aditya:'#1a73e8',Sumedh:'#34a853','Manu Didi':'#ea4335',Ashu:'#f9ab0
 const PC = {Aditya:'pa',Sumedh:'ps','Manu Didi':'pm',Ashu:'pk'};
 const CATS = ['Stay','Food','Transport','Shopping','Activity','Other'];
 const CC = {Stay:'#1a73e8',Food:'#34a853',Transport:'#f9ab00',Shopping:'#9334e8',Activity:'#ea4335',Other:'#9e9e9e'};
-const LS = 'utrip_v5';
+const LS = 'utrip_v6';
 const LC = 'utrip_contrib_v2';
 
 // ── DEFAULT EXPENSES (cross-checked from handwritten notes) ──
@@ -573,7 +573,7 @@ function exportCSV() {
   toast('CSV exported');
 }
 
-function fmt(n){return Number(n||0).toLocaleString('en-IN',{minimumFractionDigits:0,maximumFractionDigits:0});}
+function fmt(n){const v=Number(n||0);return isFinite(v)?v.toLocaleString('en-IN',{minimumFractionDigits:0,maximumFractionDigits:0}):'0';}
 
 function toast(msg,d=2000){
   const t=document.getElementById('toast');
