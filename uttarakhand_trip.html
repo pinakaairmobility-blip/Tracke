@@ -343,7 +343,9 @@ async function pollServer() {
 function nid() { return rows.length ? Math.max(...rows.map(r=>r.id))+1 : 1; }
 
 // clamp any value to a safe, finite, non-negative number
-function safeAmt(v) { const n = parseFloat(v); return (isFinite(n) && n >= 0) ? n : 0; }
+// MAX_AMT = 1 crore; anything higher is corrupt data (catches finite-but-huge values)
+const MAX_AMT = 10000000;
+function safeAmt(v) { const n = parseFloat(v); return (isFinite(n) && n >= 0 && n <= MAX_AMT) ? n : 0; }
 
 // sanitize a rows array loaded from storage or server
 function sanitizeRows(arr) {
@@ -381,7 +383,7 @@ function renderContribs() {
 }
 
 function updateContrib(member, val) {
-  contribs[member] = parseFloat(val)||0;
+  contribs[member] = safeAmt(val);
   save();
   updateContribTotal();
   scheduleTotals();
@@ -490,7 +492,7 @@ function updateTotals() {
   //       proportional to each person's contribution). Pool shortfall
   //       split equally so all nets always sum to zero.
   const paid = {}; MEMBERS.forEach(m=>paid[m]=0);
-  rows.forEach(r=>{ if(r.paidBy && paid[r.paidBy]!==undefined) paid[r.paidBy]+=(r.amount||0); });
+  rows.forEach(r=>{ if(r.paidBy && paid[r.paidBy]!==undefined) paid[r.paidBy]+=safeAmt(r.amount); });
 
   const personal_total = Object.values(paid).reduce((s,v)=>s+v,0);
   const unaccounted    = total - personal_total;
