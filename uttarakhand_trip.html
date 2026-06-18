@@ -208,7 +208,7 @@ const MC = {Aditya:'#1a73e8',Sumedh:'#34a853','Manu Didi':'#ea4335',Ashu:'#f9ab0
 const PC = {Aditya:'pa',Sumedh:'ps','Manu Didi':'pm',Ashu:'pk'};
 const CATS = ['Stay','Food','Transport','Shopping','Activity','Other'];
 const CC = {Stay:'#1a73e8',Food:'#34a853',Transport:'#f9ab00',Shopping:'#9334e8',Activity:'#ea4335',Other:'#9e9e9e'};
-const LS = 'utrip_v4';
+const LS = 'utrip_v5';
 const LC = 'utrip_contrib_v2';
 
 // ── DEFAULT EXPENSES (cross-checked from handwritten notes) ──
@@ -216,6 +216,7 @@ const DEFAULTS = [
   {desc:'Jim Corbett Booking (3399.95 × 2)',amount:6792, paidBy:'',cat:'Stay',      notes:''},
   {desc:'Airbnb Dehradun',                  amount:3573, paidBy:'',cat:'Stay',      notes:''},
   {desc:'Cab To Airport',                   amount:1020, paidBy:'',cat:'Transport', notes:''},
+  {desc:'Initial Flight',                   amount:0,    paidBy:'',cat:'Transport', notes:'Paid from pool contributions'},
   {desc:'Cab from Airport',                 amount:1350, paidBy:'',cat:'Transport', notes:''},
   {desc:'Lucknow Dutyfree',                 amount:7580, paidBy:'',cat:'Shopping',  notes:''},
   {desc:'Lunch Lucknow',                    amount:1195, paidBy:'',cat:'Food',      notes:''},
@@ -245,6 +246,7 @@ const DEFAULTS = [
   {desc:'Biryani',                          amount:3550, paidBy:'',cat:'Food',      notes:''},
   {desc:'Petrol at DIOP',                   amount:1457, paidBy:'',cat:'Transport', notes:''},
   {desc:'Cab to Airport (return)',          amount:0,    paidBy:'',cat:'Transport', notes:'Amount unknown'},
+  {desc:'Return Flight',                    amount:0,    paidBy:'',cat:'Transport', notes:'Paid from pool contributions'},
   {desc:'Petrol Ramnagar',                  amount:2550, paidBy:'',cat:'Transport', notes:''},
   {desc:'Petrol Badrinath',                 amount:2500, paidBy:'',cat:'Transport', notes:''},
   {desc:'Agoda',                            amount:5757, paidBy:'',cat:'Stay',      notes:''},
