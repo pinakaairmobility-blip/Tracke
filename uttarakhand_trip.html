@@ -1,0 +1,494 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🏔️ Uttarakhand Trip Expenses</title>
+<style>
+:root {
+  --primary: #1a73e8;
+  --success: #34a853;
+  --danger: #ea4335;
+  --warn: #f9ab00;
+  --bg: #f0f4f8;
+  --card: #fff;
+  --border: #d0d7de;
+  --text: #1c2128;
+  --muted: #656d76;
+  --radius: 10px;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'Segoe UI', system-ui, sans-serif; background: var(--bg); color: var(--text); font-size: 14px; }
+
+/* ── HEADER ── */
+.top-bar {
+  background: linear-gradient(135deg, #1a237e, #1a73e8);
+  color: #fff; padding: 20px 24px; display: flex; align-items: center; justify-content: space-between;
+  box-shadow: 0 2px 12px rgba(0,0,0,.2);
+}
+.top-bar h1 { font-size: 1.3rem; font-weight: 700; }
+.top-bar p  { font-size: .82rem; opacity: .85; margin-top: 2px; }
+.header-actions { display: flex; gap: 10px; }
+.hbtn {
+  background: rgba(255,255,255,.2); border: 1px solid rgba(255,255,255,.3); color: #fff;
+  padding: 8px 16px; border-radius: 8px; cursor: pointer; font-size: .82rem; font-weight: 600;
+  transition: background .15s;
+}
+.hbtn:hover { background: rgba(255,255,255,.3); }
+.hbtn.green { background: rgba(52,168,83,.7); border-color: rgba(52,168,83,.5); }
+
+/* ── LAYOUT ── */
+.container { max-width: 1200px; margin: 0 auto; padding: 20px 16px; }
+
+/* ── SUMMARY CARDS ── */
+.summary-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 12px; margin-bottom: 20px; }
+.scard {
+  background: var(--card); border: 1px solid var(--border); border-radius: var(--radius);
+  padding: 14px 16px; text-align: center;
+}
+.scard .val { font-size: 1.3rem; font-weight: 800; color: var(--primary); }
+.scard .lbl { font-size: .72rem; color: var(--muted); margin-top: 3px; font-weight: 600; text-transform: uppercase; letter-spacing: .5px; }
+.scard.grand { border-left: 4px solid var(--primary); background: #e8f0fe; }
+.scard.grand .val { color: var(--primary); }
+
+/* ── CONTROLS ── */
+.controls { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; flex-wrap: wrap; gap: 10px; }
+.controls-left { display: flex; gap: 8px; flex-wrap: wrap; }
+.btn {
+  padding: 8px 16px; border: none; border-radius: 8px; font-size: .83rem; font-weight: 600;
+  cursor: pointer; transition: all .15s; display: inline-flex; align-items: center; gap: 6px;
+}
+.btn-primary { background: var(--primary); color: #fff; }
+.btn-primary:hover { background: #1558b0; }
+.btn-outline { background: var(--card); border: 1.5px solid var(--border); color: var(--text); }
+.btn-outline:hover { border-color: var(--primary); color: var(--primary); }
+.btn-success { background: var(--success); color: #fff; }
+.btn-danger { background: var(--danger); color: #fff; }
+
+/* ── MEMBER FILTER ── */
+.member-filter { display: flex; gap: 6px; flex-wrap: wrap; }
+.mf-btn {
+  padding: 5px 14px; border: 1.5px solid var(--border); background: var(--card); color: var(--muted);
+  border-radius: 20px; cursor: pointer; font-size: .78rem; font-weight: 600; transition: all .15s;
+}
+.mf-btn.active { color: #fff; border-color: transparent; }
+
+/* ── TABLE ── */
+.table-wrap { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); overflow-x: auto; }
+table { width: 100%; border-collapse: collapse; min-width: 800px; }
+thead th {
+  background: #f6f8fa; padding: 10px 12px; text-align: left; font-size: .75rem;
+  font-weight: 700; text-transform: uppercase; letter-spacing: .5px; color: var(--muted);
+  border-bottom: 2px solid var(--border); white-space: nowrap; position: sticky; top: 0; z-index: 1;
+}
+tbody tr { border-bottom: 1px solid #f0f0f0; transition: background .12s; }
+tbody tr:hover { background: #f8f9ff; }
+tbody tr.hidden-row { display: none; }
+td { padding: 6px 8px; vertical-align: middle; }
+td.num { text-align: center; color: var(--muted); font-size: .78rem; width: 36px; }
+
+/* ── INPUTS INSIDE TABLE ── */
+.cell-input {
+  width: 100%; border: 1.5px solid transparent; border-radius: 6px; padding: 5px 8px;
+  font-size: .88rem; font-family: inherit; background: transparent; color: var(--text);
+  transition: all .15s; outline: none;
+}
+.cell-input:hover { border-color: var(--border); background: #fff; }
+.cell-input:focus { border-color: var(--primary); background: #fff; box-shadow: 0 0 0 3px rgba(26,115,232,.12); }
+.cell-input.amount { text-align: right; font-weight: 600; width: 110px; }
+
+select.cell-input { cursor: pointer; }
+
+/* ── PAID-BY COLORS ── */
+.pb-Aditya   { background: #e8f0fe !important; color: #1a73e8 !important; font-weight: 700 !important; }
+.pb-Sumedh   { background: #e6f4ea !important; color: #1e8e3e !important; font-weight: 700 !important; }
+.pb-Manu     { background: #fce8e6 !important; color: #c5221f !important; font-weight: 700 !important; }
+.pb-Ashu     { background: #fff8e1 !important; color: #e37400 !important; font-weight: 700 !important; }
+
+/* ── CATEGORY CHIPS ── */
+.cat-chip {
+  display: inline-block; padding: 2px 8px; border-radius: 10px; font-size: .72rem; font-weight: 700;
+  white-space: nowrap;
+}
+.cat-Stay      { background: #e8f0fe; color: #1a73e8; }
+.cat-Food      { background: #e6f4ea; color: #1e8e3e; }
+.cat-Transport { background: #fff8e1; color: #e37400; }
+.cat-Shopping  { background: #f3e8fd; color: #7c3aed; }
+.cat-Activity  { background: #fce8e6; color: #c5221f; }
+.cat-Other     { background: #f0f0f0; color: #5f6368; }
+
+/* ── DELETE BTN ── */
+.del-btn {
+  background: none; border: none; color: #ccc; cursor: pointer; font-size: 1rem;
+  padding: 2px 6px; border-radius: 4px; transition: all .15s;
+}
+.del-btn:hover { background: #fce8e6; color: var(--danger); }
+
+/* ── TFOOT ── */
+tfoot tr { background: #f6f8fa !important; border-top: 2px solid var(--border); }
+tfoot td { padding: 10px 12px; font-weight: 700; font-size: .92rem; }
+#grandTotalCell { color: var(--primary); font-size: 1.1rem; text-align: right; padding-right: 16px; }
+
+/* ── PER PERSON SUMMARY ── */
+.person-summary { margin-top: 20px; display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 14px; }
+.person-card {
+  background: var(--card); border: 1px solid var(--border); border-radius: var(--radius);
+  padding: 16px; border-top: 4px solid;
+}
+.person-card h3 { font-size: .88rem; font-weight: 700; margin-bottom: 10px; }
+.person-card .p-amount { font-size: 1.3rem; font-weight: 800; }
+.person-card .p-pct { font-size: .78rem; color: var(--muted); }
+.person-card .p-bar { height: 6px; border-radius: 3px; margin-top: 8px; background: #e0e0e0; overflow: hidden; }
+.person-card .p-fill { height: 100%; border-radius: 3px; transition: width .4s; }
+
+/* ── CATEGORY SUMMARY ── */
+.cat-summary { margin-top: 14px; background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); padding: 16px; }
+.cat-summary h2 { font-size: .85rem; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: .5px; margin-bottom: 12px; }
+.cat-row { display: flex; align-items: center; gap: 10px; padding: 6px 0; border-bottom: 1px solid #f0f0f0; }
+.cat-row:last-child { border-bottom: none; }
+.cat-bar-wrap { flex: 1; background: #f0f0f0; height: 8px; border-radius: 4px; overflow: hidden; }
+.cat-bar { height: 100%; border-radius: 4px; transition: width .4s; }
+.cat-amt { font-weight: 700; font-size: .88rem; min-width: 90px; text-align: right; }
+
+/* ── TOAST ── */
+.toast { position: fixed; bottom: 24px; right: 24px; background: #323232; color: #fff; padding: 10px 18px; border-radius: 8px; font-size: .85rem; z-index: 999; transform: translateY(60px); opacity: 0; transition: all .3s; }
+.toast.show { transform: translateY(0); opacity: 1; }
+
+@media print {
+  .top-bar, .controls, .hbtn, .del-btn { display: none !important; }
+  body { background: #fff; }
+  .table-wrap { border: none; }
+}
+@media (max-width: 600px) { .top-bar { flex-direction: column; align-items: flex-start; gap: 10px; } }
+</style>
+</head>
+<body>
+
+<div class="top-bar">
+  <div>
+    <h1>🏔️ Uttarakhand Trip — Expenses</h1>
+    <p>Jim Corbett · Dehradun · Ghanjria · Badrinath · Pulna</p>
+  </div>
+  <div class="header-actions">
+    <button class="hbtn" onclick="window.print()">🖨️ Print</button>
+    <button class="hbtn green" onclick="exportCSV()">⬇️ Export CSV</button>
+  </div>
+</div>
+
+<div class="container">
+
+  <!-- SUMMARY CARDS -->
+  <div class="summary-row" id="summaryCards"></div>
+
+  <!-- CONTROLS -->
+  <div class="controls">
+    <div class="controls-left">
+      <button class="btn btn-primary" onclick="addRow()">+ Add Row</button>
+      <div class="member-filter" id="memberFilter">
+        <button class="mf-btn active" data-filter="all" onclick="filterBy('all',this)">All</button>
+        <button class="mf-btn" data-filter="Aditya" onclick="filterBy('Aditya',this)" style="border-color:#1a73e8;color:#1a73e8">Aditya</button>
+        <button class="mf-btn" data-filter="Sumedh" onclick="filterBy('Sumedh',this)" style="border-color:#1e8e3e;color:#1e8e3e">Sumedh</button>
+        <button class="mf-btn" data-filter="Manu Didi" onclick="filterBy('Manu Didi',this)" style="border-color:#c5221f;color:#c5221f">Manu Didi</button>
+        <button class="mf-btn" data-filter="Ashu" onclick="filterBy('Ashu',this)" style="border-color:#e37400;color:#e37400">Ashu</button>
+      </div>
+    </div>
+    <div style="font-size:.78rem;color:var(--muted)">Auto-saved • Click any cell to edit</div>
+  </div>
+
+  <!-- TABLE -->
+  <div class="table-wrap">
+    <table id="expTable">
+      <thead>
+        <tr>
+          <th style="width:36px">#</th>
+          <th>Description</th>
+          <th style="width:120px">Amount (₹)</th>
+          <th style="width:140px">Paid By</th>
+          <th style="width:120px">Category</th>
+          <th>Notes</th>
+          <th style="width:36px"></th>
+        </tr>
+      </thead>
+      <tbody id="tableBody"></tbody>
+      <tfoot>
+        <tr>
+          <td></td>
+          <td style="font-size:.88rem;letter-spacing:.5px;color:var(--muted)">GRAND TOTAL</td>
+          <td id="grandTotalCell">₹0</td>
+          <td colspan="4" id="countCell" style="font-size:.8rem;color:var(--muted)"></td>
+        </tr>
+      </tfoot>
+    </table>
+  </div>
+
+  <!-- PER PERSON -->
+  <div class="person-summary" id="personSummary"></div>
+
+  <!-- CATEGORY SUMMARY -->
+  <div class="cat-summary">
+    <h2>Category Breakdown</h2>
+    <div id="catBreakdown"></div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ── DATA ─────────────────────────────────────────────────────
+const MEMBERS = ['Aditya', 'Sumedh', 'Manu Didi', 'Ashu'];
+const MEMBER_COLORS = { 'Aditya': '#1a73e8', 'Sumedh': '#34a853', 'Manu Didi': '#ea4335', 'Ashu': '#f9ab00' };
+const CATEGORIES = ['Stay', 'Food', 'Transport', 'Shopping', 'Activity', 'Other'];
+const CAT_COLORS  = { Stay:'#1a73e8', Food:'#34a853', Transport:'#f9ab00', Shopping:'#9334e8', Activity:'#ea4335', Other:'#5f6368' };
+const LS_KEY = 'uttarakhand_trip_v1';
+
+const DEFAULT_ROWS = [
+  { desc:'Jim Corbett Booking (3399.95 × 2)', amount:6792,  paidBy:'',        cat:'Stay',      notes:'' },
+  { desc:'Airbnb Dehradun',                    amount:3573,  paidBy:'',        cat:'Stay',      notes:'' },
+  { desc:'Cab To Airport',                     amount:1020,  paidBy:'',        cat:'Transport', notes:'' },
+  { desc:'Cab from Airport',                   amount:1350,  paidBy:'',        cat:'Transport', notes:'' },
+  { desc:'Lucknow Dutyfree',                   amount:7580,  paidBy:'',        cat:'Shopping',  notes:'' },
+  { desc:'Lunch Lucknow',                      amount:1195,  paidBy:'',        cat:'Food',      notes:'' },
+  { desc:'Self Drive Car',                     amount:22600, paidBy:'',        cat:'Transport', notes:'' },
+  { desc:'Shone Punjab',                       amount:1016,  paidBy:'',        cat:'Food',      notes:'' },
+  { desc:'Safari',                             amount:7700,  paidBy:'',        cat:'Activity',  notes:'' },
+  { desc:'Room Payment Corbett',               amount:6143,  paidBy:'',        cat:'Stay',      notes:'' },
+  { desc:'Toll Fastag',                        amount:300,   paidBy:'',        cat:'Transport', notes:'' },
+  { desc:'Inroom Dining Corbett',              amount:2113,  paidBy:'',        cat:'Food',      notes:'' },
+  { desc:'Breakfast Dubke Bhatt',              amount:630,   paidBy:'',        cat:'Food',      notes:'' },
+  { desc:'Dinner 3 June',                      amount:977,   paidBy:'',        cat:'Food',      notes:'' },
+  { desc:'Stay Yuvraj Hotel',                  amount:3075,  paidBy:'',        cat:'Stay',      notes:'' },
+  { desc:'Breakfast at Yuvraj',                amount:710,   paidBy:'',        cat:'Food',      notes:'' },
+  { desc:'Ghanjrla Taxi',                      amount:240,   paidBy:'',        cat:'Transport', notes:'' },
+  { desc:'Hotel Ghanjria Day 1',               amount:5000,  paidBy:'',        cat:'Stay',      notes:'' },
+  { desc:'Ghanghria Day 2 Stay',               amount:6000,  paidBy:'',        cat:'Stay',      notes:'' },
+  { desc:'Food',                               amount:1000,  paidBy:'',        cat:'Food',      notes:'' },
+  { desc:'Food',                               amount:540,   paidBy:'',        cat:'Food',      notes:'' },
+  { desc:'Water Bottle',                       amount:1000,  paidBy:'',        cat:'Other',     notes:'' },
+  { desc:'Cash To Ashu',                       amount:1000,  paidBy:'',        cat:'Other',     notes:'Settlement' },
+  { desc:'11 Aish',                            amount:200,   paidBy:'',        cat:'Other',     notes:'' },
+  { desc:'Stick',                              amount:700,   paidBy:'',        cat:'Other',     notes:'' },
+  { desc:'Lunch Pulna',                        amount:575,   paidBy:'',        cat:'Food',      notes:'' },
+  { desc:'Breakfast',                          amount:1010,  paidBy:'',        cat:'Food',      notes:'' },
+  { desc:'Lunch',                              amount:547,   paidBy:'',        cat:'Food',      notes:'' },
+  { desc:'Starter',                            amount:948,   paidBy:'',        cat:'Food',      notes:'' },
+  { desc:'Biryani',                            amount:3550,  paidBy:'',        cat:'Food',      notes:'' },
+  { desc:'Petrol at DIOP',                     amount:1457,  paidBy:'',        cat:'Transport', notes:'' },
+  { desc:'Cab to Airport (return)',            amount:0,     paidBy:'',        cat:'Transport', notes:'Amount unknown — fill in' },
+  { desc:'Petrol Ramnagar',                    amount:2550,  paidBy:'',        cat:'Transport', notes:'' },
+  { desc:'Petrol Badrinath',                   amount:2500,  paidBy:'',        cat:'Transport', notes:'' },
+  { desc:'Agoda',                              amount:5757,  paidBy:'',        cat:'Stay',      notes:'' },
+  { desc:'Yuvraj Hotel Return',                amount:3000,  paidBy:'',        cat:'Stay',      notes:'' },
+];
+
+// ── STATE ────────────────────────────────────────────────────
+let rows = [];
+let activeFilter = 'all';
+
+function loadRows() {
+  try {
+    const saved = JSON.parse(localStorage.getItem(LS_KEY));
+    rows = saved && saved.length ? saved : DEFAULT_ROWS.map((r,i) => ({ ...r, id: i+1 }));
+  } catch {
+    rows = DEFAULT_ROWS.map((r,i) => ({ ...r, id: i+1 }));
+  }
+}
+
+let saveTimer;
+function saveRows() {
+  clearTimeout(saveTimer);
+  saveTimer = setTimeout(() => localStorage.setItem(LS_KEY, JSON.stringify(rows)), 400);
+}
+
+function nextId() { return rows.length ? Math.max(...rows.map(r=>r.id)) + 1 : 1; }
+
+// ── RENDER TABLE ─────────────────────────────────────────────
+function renderTable() {
+  const tbody = document.getElementById('tableBody');
+  tbody.innerHTML = rows.map((r, idx) => {
+    const pbClass = r.paidBy ? 'pb-' + r.paidBy.replace(' Didi','').replace(' ','') : '';
+    const visible = activeFilter === 'all' || r.paidBy === activeFilter;
+    return `
+      <tr id="row-${r.id}" class="${visible ? '' : 'hidden-row'}">
+        <td class="num">${idx + 1}</td>
+        <td>
+          <input class="cell-input" value="${esc(r.desc)}"
+            onchange="updateField(${r.id},'desc',this.value)"
+            placeholder="Description">
+        </td>
+        <td>
+          <input class="cell-input amount" type="number" min="0" step="1" value="${r.amount}"
+            onchange="updateField(${r.id},'amount',parseFloat(this.value)||0)"
+            oninput="updateField(${r.id},'amount',parseFloat(this.value)||0)">
+        </td>
+        <td>
+          <select class="cell-input ${pbClass}" onchange="updateField(${r.id},'paidBy',this.value);renderTable()">
+            <option value="">— select —</option>
+            ${MEMBERS.map(m => `<option value="${m}" ${r.paidBy===m?'selected':''}>${m}</option>`).join('')}
+          </select>
+        </td>
+        <td>
+          <select class="cell-input" onchange="updateField(${r.id},'cat',this.value);renderTable()">
+            ${CATEGORIES.map(c => `<option value="${c}" ${r.cat===c?'selected':''}>${c}</option>`).join('')}
+          </select>
+        </td>
+        <td>
+          <input class="cell-input" value="${esc(r.notes)}"
+            onchange="updateField(${r.id},'notes',this.value)"
+            placeholder="Notes…">
+        </td>
+        <td>
+          <button class="del-btn" onclick="deleteRow(${r.id})" title="Delete row">✕</button>
+        </td>
+      </tr>`;
+  }).join('');
+
+  updateTotals();
+}
+
+function esc(s) { return String(s||'').replace(/"/g,'&quot;').replace(/</g,'&lt;'); }
+
+// ── TOTALS ───────────────────────────────────────────────────
+function updateTotals() {
+  const visibleRows = activeFilter === 'all' ? rows : rows.filter(r => r.paidBy === activeFilter);
+  const grand = visibleRows.reduce((s,r) => s + (r.amount||0), 0);
+  const total  = rows.reduce((s,r) => s + (r.amount||0), 0);
+
+  document.getElementById('grandTotalCell').textContent = '₹' + fmt(grand);
+  document.getElementById('countCell').textContent =
+    `${visibleRows.length} of ${rows.length} rows${activeFilter !== 'all' ? ' · filtered by ' + activeFilter : ''} · All: ₹${fmt(total)}`;
+
+  // summary cards
+  const filled = rows.filter(r => r.paidBy).length;
+  document.getElementById('summaryCards').innerHTML = `
+    <div class="scard grand">
+      <div class="val">₹${fmt(total)}</div>
+      <div class="lbl">Grand Total</div>
+    </div>
+    <div class="scard">
+      <div class="val">${rows.length}</div>
+      <div class="lbl">Total Entries</div>
+    </div>
+    <div class="scard">
+      <div class="val" style="color:var(--success)">${filled}</div>
+      <div class="lbl">Paid By Filled</div>
+    </div>
+    <div class="scard">
+      <div class="val" style="color:var(--warn)">${rows.length - filled}</div>
+      <div class="lbl">Awaiting Payer</div>
+    </div>`;
+
+  // per-person summary
+  const perPerson = {};
+  MEMBERS.forEach(m => perPerson[m] = 0);
+  rows.forEach(r => { if (r.paidBy && perPerson[r.paidBy] !== undefined) perPerson[r.paidBy] += (r.amount||0); });
+
+  document.getElementById('personSummary').innerHTML = MEMBERS.map(m => {
+    const amt = perPerson[m];
+    const pct = total > 0 ? (amt / total * 100).toFixed(1) : 0;
+    const color = MEMBER_COLORS[m];
+    return `<div class="person-card" style="border-top-color:${color}">
+      <h3 style="color:${color}">${m}</h3>
+      <div class="p-amount" style="color:${color}">₹${fmt(amt)}</div>
+      <div class="p-pct">${pct}% of total</div>
+      <div class="p-bar"><div class="p-fill" style="width:${pct}%;background:${color}"></div></div>
+    </div>`;
+  }).join('');
+
+  // category breakdown
+  const catTotals = {};
+  CATEGORIES.forEach(c => catTotals[c] = 0);
+  rows.forEach(r => { if (r.cat) catTotals[r.cat] = (catTotals[r.cat]||0) + (r.amount||0); });
+  const catSorted = Object.entries(catTotals).filter(([,v])=>v>0).sort((a,b)=>b[1]-a[1]);
+
+  document.getElementById('catBreakdown').innerHTML = catSorted.map(([cat, amt]) => {
+    const pct = total > 0 ? (amt / total * 100).toFixed(1) : 0;
+    const color = CAT_COLORS[cat];
+    return `<div class="cat-row">
+      <span class="cat-chip cat-${cat}" style="min-width:80px;text-align:center">${cat}</span>
+      <div class="cat-bar-wrap"><div class="cat-bar" style="width:${pct}%;background:${color}"></div></div>
+      <span class="cat-amt" style="color:${color}">₹${fmt(amt)}</span>
+      <span style="font-size:.78rem;color:var(--muted);min-width:40px;text-align:right">${pct}%</span>
+    </div>`;
+  }).join('');
+}
+
+function fmt(n) {
+  return Number(n||0).toLocaleString('en-IN', { minimumFractionDigits: 0, maximumFractionDigits: 0 });
+}
+
+// ── ACTIONS ──────────────────────────────────────────────────
+function updateField(id, field, value) {
+  const r = rows.find(r => r.id === id);
+  if (r) { r[field] = value; saveRows(); updateTotals(); }
+}
+
+function addRow() {
+  rows.push({ id: nextId(), desc: '', amount: 0, paidBy: '', cat: 'Other', notes: '' });
+  renderTable();
+  saveRows();
+  // focus new row description
+  setTimeout(() => {
+    const inputs = document.querySelectorAll('#tableBody tr:last-child .cell-input');
+    if (inputs[0]) inputs[0].focus();
+  }, 50);
+  toast('Row added');
+}
+
+function deleteRow(id) {
+  if (!confirm('Delete this row?')) return;
+  rows = rows.filter(r => r.id !== id);
+  renderTable();
+  saveRows();
+  toast('Row deleted');
+}
+
+function filterBy(filter, btn) {
+  activeFilter = filter;
+  document.querySelectorAll('.mf-btn').forEach(b => {
+    b.classList.remove('active');
+    b.style.background = '';
+    b.style.color = b.dataset.filter !== 'all' ? MEMBER_COLORS[b.dataset.filter] || '' : '';
+  });
+  btn.classList.add('active');
+  if (filter !== 'all') {
+    btn.style.background = MEMBER_COLORS[filter] || '#1a73e8';
+    btn.style.color = '#fff';
+  }
+  renderTable();
+}
+
+function exportCSV() {
+  const headers = ['#','Description','Amount','Paid By','Category','Notes'];
+  const csvRows = [headers.join(',')];
+  rows.forEach((r, i) => {
+    csvRows.push([
+      i+1,
+      `"${(r.desc||'').replace(/"/g,'""')}"`,
+      r.amount||0,
+      `"${r.paidBy||''}"`,
+      `"${r.cat||''}"`,
+      `"${(r.notes||'').replace(/"/g,'""')}"`
+    ].join(','));
+  });
+  const total = rows.reduce((s,r)=>s+(r.amount||0),0);
+  csvRows.push(`,,${total},,GRAND TOTAL,`);
+  const blob = new Blob([csvRows.join('\n')], { type: 'text/csv' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'uttarakhand_trip_expenses.csv';
+  a.click();
+  toast('CSV exported!');
+}
+
+function toast(msg, dur = 2200) {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('show');
+  clearTimeout(t._t); t._t = setTimeout(() => t.classList.remove('show'), dur);
+}
+
+// ── INIT ─────────────────────────────────────────────────────
+loadRows();
+renderTable();
+</script>
+</body>
+</html>
