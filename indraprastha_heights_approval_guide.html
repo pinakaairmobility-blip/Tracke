@@ -1,0 +1,823 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&display=swap');
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Inter', Arial, sans-serif;
+    font-size: 11px;
+    color: #1a1a1a;
+    background: #fff;
+    line-height: 1.6;
+  }
+
+  /* ── COVER PAGE ── */
+  .cover {
+    width: 100%;
+    height: 100vh;
+    background: linear-gradient(160deg, #1a1a2e 0%, #8B2E0F 60%, #c0501a 100%);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: flex-start;
+    padding: 60px;
+    page-break-after: always;
+    position: relative;
+  }
+  .cover::before {
+    content: '';
+    position: absolute;
+    top: 0; right: 0;
+    width: 40%;
+    height: 100%;
+    background: rgba(255,255,255,0.03);
+    clip-path: polygon(30% 0%, 100% 0%, 100% 100%, 0% 100%);
+  }
+  .cover-tag {
+    background: rgba(255,255,255,0.15);
+    color: #fff;
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    padding: 6px 16px;
+    border-radius: 20px;
+    margin-bottom: 32px;
+    display: inline-block;
+  }
+  .cover h1 {
+    font-size: 46px;
+    font-weight: 900;
+    color: #fff;
+    line-height: 1.1;
+    margin-bottom: 8px;
+  }
+  .cover h2 {
+    font-size: 20px;
+    font-weight: 400;
+    color: rgba(255,255,255,0.75);
+    margin-bottom: 40px;
+  }
+  .cover-divider {
+    width: 60px;
+    height: 3px;
+    background: #f4a261;
+    margin-bottom: 32px;
+    border-radius: 2px;
+  }
+  .cover-meta {
+    display: flex;
+    gap: 40px;
+    margin-top: 48px;
+  }
+  .cover-meta-item { color: rgba(255,255,255,0.8); font-size: 11px; }
+  .cover-meta-item strong { display: block; color: #fff; font-size: 13px; margin-bottom: 2px; }
+  .cover-bottom {
+    position: absolute;
+    bottom: 40px;
+    left: 60px;
+    right: 60px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    color: rgba(255,255,255,0.4);
+    font-size: 9px;
+    letter-spacing: 1px;
+  }
+
+  /* ── PAGE LAYOUT ── */
+  .page {
+    padding: 50px 55px;
+    page-break-after: always;
+    min-height: 100vh;
+  }
+  .page:last-child { page-break-after: auto; }
+
+  /* ── HEADER BAR ── */
+  .page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 2px solid #8B2E0F;
+    padding-bottom: 10px;
+    margin-bottom: 28px;
+  }
+  .page-header-title {
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: #8B2E0F;
+  }
+  .page-header-project {
+    font-size: 9px;
+    color: #999;
+    letter-spacing: 1px;
+  }
+
+  /* ── STAGE BADGE ── */
+  .stage-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 18px;
+  }
+  .stage-number {
+    background: #8B2E0F;
+    color: #fff;
+    font-size: 11px;
+    font-weight: 700;
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .stage-title {
+    font-size: 20px;
+    font-weight: 800;
+    color: #1a1a1a;
+  }
+  .stage-sub {
+    font-size: 10px;
+    color: #666;
+    margin-top: 2px;
+  }
+
+  /* ── STEP CARDS ── */
+  .steps { display: flex; flex-direction: column; gap: 14px; margin-top: 16px; }
+  .step {
+    border: 1px solid #e8e0d8;
+    border-left: 4px solid #8B2E0F;
+    border-radius: 6px;
+    padding: 14px 16px;
+    background: #fdfaf8;
+  }
+  .step-num { font-size: 9px; font-weight: 700; color: #8B2E0F; letter-spacing: 1px; margin-bottom: 4px; }
+  .step h4 { font-size: 12px; font-weight: 700; color: #1a1a1a; margin-bottom: 6px; }
+  .step p { font-size: 10.5px; color: #444; line-height: 1.6; }
+  .step .where { font-size: 10px; color: #8B2E0F; font-weight: 600; margin-top: 6px; }
+  .step .time { font-size: 10px; color: #666; font-style: italic; }
+
+  /* ── WARNING / TIP BOXES ── */
+  .alert {
+    border-radius: 6px;
+    padding: 12px 16px;
+    margin: 14px 0;
+    font-size: 10.5px;
+    line-height: 1.6;
+  }
+  .alert-critical { background: #fff0ed; border-left: 4px solid #e63e00; }
+  .alert-critical strong { color: #e63e00; }
+  .alert-tip { background: #f0f7ee; border-left: 4px solid #3a7d44; }
+  .alert-tip strong { color: #3a7d44; }
+  .alert-info { background: #f0f4ff; border-left: 4px solid #3a5bd9; }
+  .alert-info strong { color: #3a5bd9; }
+
+  /* ── TABLES ── */
+  table { width: 100%; border-collapse: collapse; margin: 14px 0; font-size: 10.5px; }
+  thead tr { background: #8B2E0F; color: #fff; }
+  thead th { padding: 9px 12px; text-align: left; font-weight: 600; font-size: 10px; }
+  tbody tr:nth-child(even) { background: #fdfaf8; }
+  tbody tr:nth-child(odd) { background: #fff; }
+  tbody td { padding: 8px 12px; border-bottom: 1px solid #ede8e3; color: #333; }
+  tbody td strong { color: #8B2E0F; }
+
+  /* ── CHECKLIST ── */
+  .checklist { list-style: none; padding: 0; margin: 12px 0; }
+  .checklist li {
+    padding: 7px 0 7px 26px;
+    position: relative;
+    font-size: 10.5px;
+    color: #333;
+    border-bottom: 1px dashed #ede8e3;
+  }
+  .checklist li::before {
+    content: '☐';
+    position: absolute;
+    left: 0;
+    color: #8B2E0F;
+    font-size: 13px;
+  }
+
+  /* ── TIMELINE ── */
+  .timeline { margin: 16px 0; }
+  .tl-row {
+    display: flex;
+    gap: 0;
+    margin-bottom: 4px;
+    align-items: stretch;
+  }
+  .tl-month {
+    width: 90px;
+    min-width: 90px;
+    font-size: 10px;
+    font-weight: 700;
+    color: #8B2E0F;
+    padding: 8px 10px;
+    background: #fdf0ea;
+    border-radius: 4px 0 0 4px;
+    display: flex;
+    align-items: center;
+  }
+  .tl-content {
+    flex: 1;
+    font-size: 10.5px;
+    color: #333;
+    padding: 8px 12px;
+    background: #fdfaf8;
+    border: 1px solid #ede8e3;
+    border-left: none;
+    border-radius: 0 4px 4px 0;
+  }
+
+  /* ── CONTACT CARDS ── */
+  .contacts { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 16px; }
+  .contact-card {
+    flex: 1;
+    min-width: 180px;
+    border: 1px solid #ede8e3;
+    border-radius: 8px;
+    padding: 14px;
+    background: #fdfaf8;
+  }
+  .contact-card .icon { font-size: 20px; margin-bottom: 8px; }
+  .contact-card h5 { font-size: 11px; font-weight: 700; color: #1a1a1a; margin-bottom: 4px; }
+  .contact-card p { font-size: 10px; color: #666; line-height: 1.5; }
+
+  /* ── FSI BOX ── */
+  .fsi-box {
+    background: linear-gradient(135deg, #1a1a2e, #8B2E0F);
+    color: #fff;
+    border-radius: 10px;
+    padding: 20px 24px;
+    margin: 16px 0;
+  }
+  .fsi-box h4 { font-size: 13px; font-weight: 700; margin-bottom: 12px; color: #f4a261; }
+  .fsi-grid { display: flex; gap: 20px; flex-wrap: wrap; }
+  .fsi-item { flex: 1; min-width: 120px; }
+  .fsi-item .label { font-size: 9px; color: rgba(255,255,255,0.6); letter-spacing: 1px; text-transform: uppercase; }
+  .fsi-item .value { font-size: 18px; font-weight: 800; color: #fff; }
+  .fsi-item .unit { font-size: 10px; color: rgba(255,255,255,0.7); }
+
+  /* ── SECTION DIVIDER ── */
+  .section-divider {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin: 24px 0 16px;
+  }
+  .section-divider span { font-size: 10px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; color: #999; white-space: nowrap; }
+  .section-divider::before, .section-divider::after { content: ''; flex: 1; height: 1px; background: #ede8e3; }
+
+  /* ── FOOTER ── */
+  .footer {
+    position: fixed;
+    bottom: 20px;
+    left: 55px;
+    right: 55px;
+    display: flex;
+    justify-content: space-between;
+    font-size: 8px;
+    color: #bbb;
+    border-top: 1px solid #ede8e3;
+    padding-top: 6px;
+  }
+
+  h3 { font-size: 14px; font-weight: 700; color: #1a1a1a; margin: 20px 0 10px; }
+  p { font-size: 10.5px; color: #444; line-height: 1.65; margin-bottom: 8px; }
+  strong { font-weight: 700; }
+  em { color: #8B2E0F; font-style: normal; font-weight: 600; }
+</style>
+</head>
+<body>
+
+<!-- ══════════════════════════════════════════
+     COVER PAGE
+══════════════════════════════════════════ -->
+<div class="cover">
+  <div class="cover-tag">Confidential — Project Document</div>
+  <h1>Indraprastha<br>Heights</h1>
+  <h2>Complete Building Approval Guide</h2>
+  <div class="cover-divider"></div>
+  <p style="color:rgba(255,255,255,0.7); font-size:11px; max-width:420px; line-height:1.7;">
+    Step-by-step regulatory roadmap for obtaining building permissions,
+    NOCs, RERA registration and Occupancy Certificate for a G+4
+    residential project at Dasak Shiwar, Nashik Road, Nashik.
+  </p>
+  <div class="cover-meta">
+    <div class="cover-meta-item"><strong>Owner</strong>Mr. Dyaneshwar Satbhai</div>
+    <div class="cover-meta-item"><strong>Plot</strong>No. 7B, SR No. 56, Dasak Shiwar</div>
+    <div class="cover-meta-item"><strong>Authority</strong>Nashik Municipal Corporation</div>
+    <div class="cover-meta-item"><strong>Regulation</strong>UDCPR 2020 + MahaRERA</div>
+  </div>
+  <div class="cover-bottom">
+    <span>INDRAPRASTHA HEIGHTS — NASHIK ROAD</span>
+    <span>PREPARED JUNE 2026 — CONFIDENTIAL</span>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     PAGE 1 — OVERVIEW + STAGE 1
+══════════════════════════════════════════ -->
+<div class="page">
+  <div class="page-header">
+    <span class="page-header-title">Overview &amp; Stage 1 — Land Clearance</span>
+    <span class="page-header-project">Indraprastha Heights, Nashik</span>
+  </div>
+
+  <div class="fsi-box">
+    <h4>Project Snapshot</h4>
+    <div class="fsi-grid">
+      <div class="fsi-item"><div class="label">Plot Area</div><div class="value">~1,090</div><div class="unit">sqm (37.15m × 29.38m)</div></div>
+      <div class="fsi-item"><div class="label">Total Saleable</div><div class="value">29,100</div><div class="unit">sq ft</div></div>
+      <div class="fsi-item"><div class="label">Building</div><div class="value">G+4</div><div class="unit">floors (5 storeys)</div></div>
+      <div class="fsi-item"><div class="label">West Road</div><div class="value">9m</div><div class="unit">proposed (primary frontage)</div></div>
+      <div class="fsi-item"><div class="label">East Road</div><div class="value">6→9m</div><div class="unit">existing / proposed</div></div>
+      <div class="fsi-item"><div class="label">Authority</div><div class="value">NMC</div><div class="unit">Nashik Municipal Corporation</div></div>
+    </div>
+  </div>
+
+  <div class="alert alert-critical">
+    <strong>Critical First Check:</strong> Confirm on the 7/12 extract whether your land is NA (Non-Agricultural) or agricultural. If agricultural, your entire timeline extends by 2–4 months before anything else can start.
+  </div>
+
+  <div class="stage-badge">
+    <div class="stage-number">1</div>
+    <div>
+      <div class="stage-title">Land &amp; Title Clearance</div>
+      <div class="stage-sub">Do this first — everything else depends on it</div>
+    </div>
+  </div>
+
+  <div class="steps">
+    <div class="step">
+      <div class="step-num">STEP 1.1</div>
+      <h4>7/12 Satbara Extract</h4>
+      <p>Confirms ownership, area, encumbrances, survey number. Your name (Mr. Dyaneshwar Satbhai) must appear clearly as the owner. Check for any liens, mortgages, or encumbrances.</p>
+      <div class="where">📍 Talathi office or online: bhulekh.mahabhumi.gov.in</div>
+      <div class="time">⏱ 1–3 days | Cost: Nominal</div>
+    </div>
+    <div class="step">
+      <div class="step-num">STEP 1.2</div>
+      <h4>Property Card (City Survey Record)</h4>
+      <p>Confirms plot measurements match your approved plan. Verifies SR No. 56, Plot 7B dimensions. Essential for AutoDCR submission later.</p>
+      <div class="where">📍 City Survey Office, Nashik Road</div>
+      <div class="time">⏱ 1–7 days | Cost: Nominal</div>
+    </div>
+    <div class="step">
+      <div class="step-num">STEP 1.3</div>
+      <h4>30-Year Title Search Report</h4>
+      <p>Engage a local advocate to search all registrations on this plot for the past 30 years. Confirms no dispute, court case, or mortgage. Banks require this for buyer home loans. Your buyers will not get loans without a clean title.</p>
+      <div class="where">📍 Sub-Registrar office records via local advocate</div>
+      <div class="time">⏱ 7–15 days | Cost: ₹5,000–15,000</div>
+    </div>
+    <div class="step">
+      <div class="step-num">STEP 1.4</div>
+      <h4>NA Order (Non-Agricultural Permission) — If Required</h4>
+      <p>If 7/12 shows Class-A/B agricultural land, you must convert it to NA before any building permission. This is your single longest-lead-time item. Apply immediately if needed — do not wait.</p>
+      <div class="where">📍 Sub-Divisional Officer (SDO), Nashik</div>
+      <div class="time">⏱ 2–4 months | Cost: ₹50–200/sqm premium to government</div>
+    </div>
+    <div class="step">
+      <div class="step-num">STEP 1.5</div>
+      <h4>Index II Copy</h4>
+      <p>Certified copy of all past property registrations. Confirms chain of ownership is clean.</p>
+      <div class="where">📍 Sub-Registrar office, Nashik Road</div>
+      <div class="time">⏱ 1–3 days | Cost: ₹200–500</div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     PAGE 2 — STAGE 2: TECHNICAL DOCUMENTS
+══════════════════════════════════════════ -->
+<div class="page">
+  <div class="page-header">
+    <span class="page-header-title">Stage 2 — Technical &amp; Architectural Preparation</span>
+    <span class="page-header-project">Indraprastha Heights, Nashik</span>
+  </div>
+
+  <div class="stage-badge">
+    <div class="stage-number">2</div>
+    <div>
+      <div class="stage-title">Technical &amp; Architectural Documents</div>
+      <div class="stage-sub">Guru Buildcon is your planner — confirm all items below with them</div>
+    </div>
+  </div>
+
+  <div class="steps">
+    <div class="step">
+      <div class="step-num">STEP 2.1</div>
+      <h4>Confirm Architect's CoA Registration</h4>
+      <p>Your architect (Guru Buildcon) must be registered with the <strong>Council of Architecture (CoA)</strong>. Their CoA number goes on every drawing submission. Verify this — NMC will reject plans from unlicensed architects.</p>
+      <div class="where">📍 Verify at: coa.gov.in</div>
+    </div>
+    <div class="step">
+      <div class="step-num">STEP 2.2</div>
+      <h4>Appoint Licensed Structural Engineer</h4>
+      <p>Separate from the architect. Must hold a valid structural engineering license recognized under UDCPR 2020 in Maharashtra. Signs all structural drawings and provides a stability certificate at each construction stage.</p>
+      <div class="time">⏱ Appoint now — needed for soil test too</div>
+    </div>
+    <div class="step">
+      <div class="step-num">STEP 2.3</div>
+      <h4>Soil Test / Bore Log Report</h4>
+      <p>Mandatory geotechnical investigation of your plot. Determines foundation type (isolated, combined, raft or pile). Structural engineer cannot finalize design without this. Hire a geotechnical lab in Nashik.</p>
+      <div class="time">⏱ 7–14 days | Cost: ₹15,000–40,000</div>
+    </div>
+    <div class="step">
+      <div class="step-num">STEP 2.4</div>
+      <h4>Prepare AutoDCR-Compatible Drawing Set</h4>
+      <p>NMC uses AutoDCR for online building plan submission. All drawings must be in DXF/DWG format with correct layer naming. Required drawings:</p>
+      <ul style="margin:6px 0 0 16px; font-size:10.5px; color:#444; line-height:1.8;">
+        <li>Site plan (plot, roads, setbacks clearly marked)</li>
+        <li>Floor plans — all floors including terrace &amp; stilt/ground parking</li>
+        <li>Elevations — all 4 sides (North, South, East, West)</li>
+        <li>Sections — minimum 2 (one longitudinal, one cross)</li>
+        <li>Parking layout plan (mandatory under UDCPR)</li>
+        <li>Drainage &amp; sewage disposal plan</li>
+        <li>Rainwater harvesting plan (mandatory for NMC)</li>
+        <li>Solar water heater provision plan (mandatory for new buildings)</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="section-divider"><span>FSI &amp; Regulation Check</span></div>
+
+  <table>
+    <thead>
+      <tr><th>Parameter</th><th>Rule (UDCPR 2020 / NMC)</th><th>Your Project</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>Basic FSI</td><td>1.5 for roads ≥ 9m</td><td>West road = 9m ✓</td></tr>
+      <tr><td>Permissible built-up (basic)</td><td>1,090 sqm × 1.5 = 1,635 sqm</td><td>Verify TDR loading for 29,100 sqft</td></tr>
+      <tr><td>Ground coverage</td><td>Max 40% of plot</td><td>436 sqm max footprint</td></tr>
+      <tr><td>Front setback</td><td>Minimum 3m</td><td>From west road boundary</td></tr>
+      <tr><td>Side setback</td><td>1.5m–3m (height-dependent)</td><td>Verify per approved plan</td></tr>
+      <tr><td>Rear setback</td><td>Minimum 3m</td><td>From plot boundary</td></tr>
+      <tr><td>Parking (ECS)</td><td>1 ECS per unit mandatory</td><td>Must show in parking plan</td></tr>
+      <tr><td>Building height</td><td>Depends on road width</td><td>9m road — G+4 permissible</td></tr>
+    </tbody>
+  </table>
+
+  <div class="alert alert-info">
+    <strong>Note on FSI:</strong> Your total saleable area of 29,100 sq ft (2,703 sqm) exceeds basic FSI allowance (~1,635 sqm). Confirm with your architect whether TDR (Transferable Development Rights) or Premium FSI payment to NMC has been factored into the plan. This significantly impacts your government fees.
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     PAGE 3 — STAGE 3: NOCs
+══════════════════════════════════════════ -->
+<div class="page">
+  <div class="page-header">
+    <span class="page-header-title">Stage 3 — NOC Collection (Run All in Parallel)</span>
+    <span class="page-header-project">Indraprastha Heights, Nashik</span>
+  </div>
+
+  <div class="stage-badge">
+    <div class="stage-number">3</div>
+    <div>
+      <div class="stage-title">NOC Collection</div>
+      <div class="stage-sub">Biggest time consumer — start ALL simultaneously, not one by one</div>
+    </div>
+  </div>
+
+  <div class="alert alert-critical">
+    <strong>Most Common Delay Cause:</strong> Builders apply for NOCs sequentially. Apply for ALL listed NOCs on Day 1. NMC will not sanction your building plan without every NOC in the list below.
+  </div>
+
+  <div class="steps">
+    <div class="step">
+      <div class="step-num">NOC 3.1 — MANDATORY</div>
+      <h4>Fire Department NOC</h4>
+      <p>Mandatory for G+4 and above buildings. Submit fire exit plan, wet riser design, fire extinguisher layout, fire staircase dimensions, smoke detection plan to NMC Fire Department.</p>
+      <div class="where">📍 Director of Fire Services, Nashik Municipal Corporation</div>
+      <div class="time">⏱ 30–60 days | Cost: Nominal govt fee + fire drawing preparation</div>
+    </div>
+    <div class="step">
+      <div class="step-num">NOC 3.2 — MANDATORY</div>
+      <h4>AAI Height Clearance (Airport Authority of India)</h4>
+      <p>Nashik has Ozar Airport. Your building must be checked against airport funnel height restrictions. Apply online — provide GPS coordinates of your plot and proposed building height. Do not skip this — NMC rejects plans without it.</p>
+      <div class="where">📍 Online: nocas.aai.aero</div>
+      <div class="time">⏱ 15–45 days | Cost: ₹500–2,000 application fee</div>
+    </div>
+    <div class="step">
+      <div class="step-num">NOC 3.3 — MANDATORY</div>
+      <h4>MSEDCL — Electrical Service Connection NOC</h4>
+      <p>Maharashtra State Electricity Distribution Co. Ltd. NOC for power connection to the building. Required before building permission is sanctioned.</p>
+      <div class="where">📍 MSEDCL Nashik Division office</div>
+      <div class="time">⏱ 15–30 days</div>
+    </div>
+    <div class="step">
+      <div class="step-num">NOC 3.4 — MANDATORY</div>
+      <h4>NMC Water &amp; Drainage Connection NOC</h4>
+      <p>Water supply connection NOC + drainage connection to NMC municipal sewer. Show drainage disposal plan in your drawings. Both must be submitted to NMC's water department.</p>
+      <div class="where">📍 NMC Water Department, Nashik Road Ward Office</div>
+      <div class="time">⏱ 15–30 days</div>
+    </div>
+    <div class="step">
+      <div class="step-num">NOC 3.5 — IF APPLICABLE</div>
+      <h4>Tree Authority NOC</h4>
+      <p>If any existing trees on the plot need to be removed for construction. Heavy penalties for unauthorized tree removal in NMC limits. If no trees on plot, obtain a self-declaration certificate instead.</p>
+      <div class="where">📍 NMC Tree Authority</div>
+      <div class="time">⏱ 30–60 days if applicable</div>
+    </div>
+    <div class="step">
+      <div class="step-num">NOC 3.6 — CHECK IF APPLICABLE</div>
+      <h4>Cantonment / Defense NOC</h4>
+      <p>Nashik Road has a cantonment zone nearby. If your plot falls within cantonment jurisdiction or the restricted zone, an additional NOC from Station Commander, Deolali/Nashik Road Cantonment is required. Verify with your advocate and architect immediately.</p>
+      <div class="where">📍 Station HQ, Nashik Road Cantonment</div>
+    </div>
+    <div class="step">
+      <div class="step-num">NOC 3.7 — MANDATORY for this project size</div>
+      <h4>MPCB — Maharashtra Pollution Control Board</h4>
+      <p>Environmental clearance for construction projects above a threshold area. Apply online. Required for NMC building sanction.</p>
+      <div class="where">📍 Online: environs.maharashtra.gov.in</div>
+      <div class="time">⏱ 30–60 days</div>
+    </div>
+  </div>
+
+  <div class="alert alert-tip">
+    <strong>Pro Tip:</strong> Create a NOC tracker sheet with application date, reference number, expected date, and status for each NOC. Chase each office every 10 days in person — physical follow-up works significantly faster than phone or email in Nashik.
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     PAGE 4 — STAGE 4 & 5: PLAN SANCTION + RERA
+══════════════════════════════════════════ -->
+<div class="page">
+  <div class="page-header">
+    <span class="page-header-title">Stage 4 — Building Plan Sanction &nbsp;|&nbsp; Stage 5 — MahaRERA</span>
+    <span class="page-header-project">Indraprastha Heights, Nashik</span>
+  </div>
+
+  <div class="stage-badge">
+    <div class="stage-number">4</div>
+    <div>
+      <div class="stage-title">Building Plan Submission &amp; Sanction</div>
+      <div class="stage-sub">NMC AutoDCR portal — architect submits on your behalf</div>
+    </div>
+  </div>
+
+  <div class="steps">
+    <div class="step">
+      <div class="step-num">STEP 4.1</div>
+      <h4>Submit on NMC AutoDCR Portal</h4>
+      <p>Your architect submits DXF/DWG drawings through NMC's online building permission portal. AutoDCR system auto-checks compliance with UDCPR 2020. All NOCs collected in Stage 3 must be attached as scanned documents.</p>
+      <div class="where">📍 NMC Building Permission Department (visit Nashik Road Ward Office for portal access details)</div>
+    </div>
+    <div class="step">
+      <div class="step-num">STEP 4.2</div>
+      <h4>Pay Government Fees</h4>
+      <p>Fees are calculated on total proposed construction area and include multiple components:</p>
+      <table style="margin-top:8px;">
+        <thead><tr><th>Fee Type</th><th>Basis</th></tr></thead>
+        <tbody>
+          <tr><td>Development charges</td><td>Per sqm of construction</td></tr>
+          <tr><td>Infrastructure charges</td><td>Per sqm</td></tr>
+          <tr><td>Premium FSI charges</td><td>If loading TDR/additional FSI</td></tr>
+          <tr><td>Plan scrutiny fee</td><td>Based on total built-up area</td></tr>
+          <tr><td>Water &amp; drainage betterment</td><td>One-time</td></tr>
+          <tr><td>Labour welfare cess</td><td>1% of construction cost (paid during construction)</td></tr>
+        </tbody>
+      </table>
+      <div class="alert alert-info" style="margin-top:10px;"><strong>Estimate:</strong> Total government fees for your project size: <strong>₹15–40 Lakhs</strong>. Get exact calculation from your architect and NMC before budgeting.</div>
+    </div>
+    <div class="step">
+      <div class="step-num">STEP 4.3</div>
+      <h4>NMC Technical Scrutiny</h4>
+      <p>NMC's Town Planning department reviews all drawings. They may raise written objections (queries). Your architect must respond to each query in writing with revised drawings or justification. Common objections: FSI calculation error, parking shortfall, setback violations, fire staircase width insufficient.</p>
+      <div class="time">⏱ 30–90 days</div>
+    </div>
+    <div class="step">
+      <div class="step-num">STEP 4.4</div>
+      <h4>Building Plan Sanction Letter Received</h4>
+      <p>NMC issues the formal building plan sanction (previously called IOD — Intimation of Disapproval under old regulations). This approves your plan subject to conditions. Keep multiple certified copies — needed for RERA, bank, buyers.</p>
+    </div>
+  </div>
+
+  <div class="stage-badge" style="margin-top:24px;">
+    <div class="stage-number">5</div>
+    <div>
+      <div class="stage-title">MahaRERA Registration</div>
+      <div class="stage-sub">Mandatory before any marketing, advertising, booking, or accepting money</div>
+    </div>
+  </div>
+
+  <div class="alert alert-critical">
+    <strong>Legal Requirement:</strong> Accepting even ₹1 as booking amount without RERA registration is a criminal offence under the Real Estate (Regulation and Development) Act, 2016. Do not market or accept bookings before this step.
+  </div>
+
+  <div class="steps">
+    <div class="step">
+      <div class="step-num">STEP 5.1</div>
+      <h4>Register on MahaRERA Portal</h4>
+      <div class="where">📍 maharera.mahaonline.gov.in</div>
+      <p style="margin-top:6px;">Documents required: building plan sanction, land ownership documents, architect's certificate, CA certificate (project cost &amp; financials), promoter PAN, Aadhaar, bank details.</p>
+    </div>
+    <div class="step">
+      <div class="step-num">STEP 5.2</div>
+      <h4>Open Dedicated Project Escrow Account</h4>
+      <p>Under RERA, <strong>70% of all money collected from buyers must go into a separate designated bank account</strong> and can only be used for that project's construction. Open this account before RERA registration — account details are submitted as part of RERA application.</p>
+    </div>
+    <div class="step">
+      <div class="step-num">STEP 5.3</div>
+      <h4>Declare Project Details &amp; Get RERA Number</h4>
+      <p>Declare all unit details (carpet areas only — RERA prohibits super built-up area sales), prices, amenities, completion date. RERA number is issued within 30 days of complete application. <strong>Every advertisement, hoarding, WhatsApp message, and brochure must display this RERA number.</strong></p>
+      <div class="time">⏱ 30 days | Cost: Registration fee based on project area</div>
+    </div>
+    <div class="step">
+      <div class="step-num">STEP 5.4</div>
+      <h4>Quarterly Progress Updates</h4>
+      <p>Once registered, you must upload construction progress photographs and financial updates to the MahaRERA portal every quarter throughout construction. Non-compliance attracts penalties.</p>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     PAGE 5 — STAGES 6, 7, 8: CC + CONSTRUCTION + OC
+══════════════════════════════════════════ -->
+<div class="page">
+  <div class="page-header">
+    <span class="page-header-title">Stage 6 — CC &nbsp;|&nbsp; Stage 7 — Construction &nbsp;|&nbsp; Stage 8 — Occupancy</span>
+    <span class="page-header-project">Indraprastha Heights, Nashik</span>
+  </div>
+
+  <div class="stage-badge">
+    <div class="stage-number">6</div>
+    <div>
+      <div class="stage-title">Commencement Certificate (CC)</div>
+      <div class="stage-sub">Legal permission to break ground — do not start construction before this</div>
+    </div>
+  </div>
+
+  <div class="steps">
+    <div class="step">
+      <div class="step-num">STEP 6.1</div>
+      <h4>Apply for Commencement Certificate</h4>
+      <p>Apply to NMC Building Department after receiving building plan sanction (Stage 4) and RERA registration (Stage 5). Submit both documents with your CC application.</p>
+    </div>
+    <div class="step">
+      <div class="step-num">STEP 6.2</div>
+      <h4>NMC Site Inspection</h4>
+      <p>NMC engineer physically visits the plot to confirm boundaries match the approved plan, no illegal construction has started, and setbacks are physically marked on site.</p>
+    </div>
+    <div class="step">
+      <div class="step-num">STEP 6.3</div>
+      <h4>CC Issued — Construction Can Begin</h4>
+      <p>Once CC is in hand, you can legally begin foundation work. Post the CC and approved plan on-site (NMC requirement — must be visible at all times during construction).</p>
+      <div class="time">⏱ 2–4 weeks from application</div>
+    </div>
+  </div>
+
+  <div class="stage-badge" style="margin-top:20px;">
+    <div class="stage-number">7</div>
+    <div>
+      <div class="stage-title">Construction Stage Approvals</div>
+      <div class="stage-sub">Critical checkpoints during construction — do not skip these</div>
+    </div>
+  </div>
+
+  <table>
+    <thead>
+      <tr><th>Construction Milestone</th><th>Required Action</th><th>By Whom</th></tr>
+    </thead>
+    <tbody>
+      <tr><td><strong>Foundation &amp; Plinth complete</strong></td><td>Call NMC for plinth inspection before raising columns above plinth level</td><td>NMC Engineer + Structural Engineer</td></tr>
+      <tr><td><strong>Each floor slab cast</strong></td><td>Structural engineer site visit + certificate for each slab</td><td>Licensed Structural Engineer</td></tr>
+      <tr><td><strong>Lift shaft construction</strong></td><td>Maharashtra Lift Inspector must approve shaft drawings before constructing shaft</td><td>Lift Inspector of Maharashtra</td></tr>
+      <tr><td><strong>External electrical work</strong></td><td>MSEDCL-approved licensed electrical contractor must execute all electrical work</td><td>Licensed Electrical Contractor</td></tr>
+      <tr><td><strong>Terrace / Top floor slab</strong></td><td>Final structural stability certificate from structural engineer</td><td>Licensed Structural Engineer</td></tr>
+      <tr><td><strong>Every quarter</strong></td><td>Upload construction photos + financial update to MahaRERA portal</td><td>Promoter / Developer</td></tr>
+    </tbody>
+  </table>
+
+  <div class="stage-badge" style="margin-top:20px;">
+    <div class="stage-number">8</div>
+    <div>
+      <div class="stage-title">Completion &amp; Occupancy Certificate (OC)</div>
+      <div class="stage-sub">Without OC, flats cannot be legally handed over and buyers cannot get bank loans</div>
+    </div>
+  </div>
+
+  <div class="steps">
+    <div class="step">
+      <div class="step-num">STEP 8.1</div>
+      <h4>Completion Certificate Application to NMC</h4>
+      <p>Submit with: architect's completion certificate (building as per sanctioned plan), structural engineer's stability certificate, fire department final NOC, lift inspection certificate, rainwater harvesting completion certificate, solar system installation certificate.</p>
+    </div>
+    <div class="step">
+      <div class="step-num">STEP 8.2</div>
+      <h4>NMC Final Physical Inspection</h4>
+      <p>NMC team inspects every floor. Any deviations from the sanctioned plan are flagged. Minor deviations may be compounded (penalty payment to regularize). Major deviations require demolition. Build exactly as per approved plan.</p>
+    </div>
+    <div class="step">
+      <div class="step-num">STEP 8.3</div>
+      <h4>Occupancy Certificate (OC) Issued</h4>
+      <p>The most important document. Without OC: flats cannot be legally handed over, buyers cannot get home loans from banks, society cannot be formed, water/electricity connections may be regularized. <strong>Handing over possession before OC is an offence under RERA.</strong></p>
+      <div class="time">⏱ 2–3 months from final inspection application</div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     PAGE 6 — STAGE 9 + MASTER TIMELINE + CONTACTS
+══════════════════════════════════════════ -->
+<div class="page">
+  <div class="page-header">
+    <span class="page-header-title">Stage 9 — Post Construction &nbsp;|&nbsp; Timeline &nbsp;|&nbsp; Key Contacts</span>
+    <span class="page-header-project">Indraprastha Heights, Nashik</span>
+  </div>
+
+  <div class="stage-badge">
+    <div class="stage-number">9</div>
+    <div>
+      <div class="stage-title">Post-Construction — Handover Stage</div>
+      <div class="stage-sub">After OC is received</div>
+    </div>
+  </div>
+
+  <div class="steps">
+    <div class="step">
+      <div class="step-num">STEP 9.1</div>
+      <h4>Form Co-operative Housing Society (CHS)</h4>
+      <p>Mandatory under Maharashtra law. Must be formed within 4 months of majority of flats being sold. Register with the District Deputy Registrar, Co-operative Societies, Nashik. Governed by Maharashtra Co-operative Societies Act, 1960. Draft bye-laws and elect committee at formation meeting.</p>
+    </div>
+    <div class="step">
+      <div class="step-num">STEP 9.2</div>
+      <h4>Conveyance of Land to Society</h4>
+      <p>Transfer land ownership to the registered society via conveyance deed. Mandatory under MOFA (Maharashtra Ownership Flats Act, 1963). If builder delays, society can apply for deemed conveyance through District Deputy Registrar. Complete this promptly — buyers will demand it.</p>
+    </div>
+    <div class="step">
+      <div class="step-num">STEP 9.3</div>
+      <h4>Individual MSEDCL Meter Connections</h4>
+      <p>Individual electricity meters for each flat. Separate common area meter for lift, passage lighting, water pump, terrace lights. Apply to MSEDCL Nashik after OC is in hand.</p>
+    </div>
+    <div class="step">
+      <div class="step-num">STEP 9.4</div>
+      <h4>Property Tax Registration with NMC</h4>
+      <p>Register each flat individually with NMC for property tax assessment. Buyers need this document for home loan processing and ownership proof. Issue tax receipts to buyers from Day 1 of possession.</p>
+    </div>
+  </div>
+
+  <div class="section-divider"><span>Master Timeline</span></div>
+
+  <div class="timeline">
+    <div class="tl-row"><div class="tl-month">NOW</div><div class="tl-content">7/12 check, title search, soil test, appoint structural engineer. If agricultural land: NA order application immediately.</div></div>
+    <div class="tl-row"><div class="tl-month">Month 1–2</div><div class="tl-content">Start all NOC applications in parallel (Fire, AAI, MSEDCL, Water, MPCB). AutoDCR drawing preparation by Guru Buildcon.</div></div>
+    <div class="tl-row"><div class="tl-month">Month 2–4</div><div class="tl-content">NOC collection ongoing. NA order (if needed) processing. Building plan AutoDCR submission to NMC.</div></div>
+    <div class="tl-row"><div class="tl-month">Month 4–6</div><div class="tl-content">NMC plan scrutiny. Respond to objections. Pay government fees. Building plan sanction received.</div></div>
+    <div class="tl-row"><div class="tl-month">Month 6–7</div><div class="tl-content">MahaRERA registration. Open escrow bank account. Marketing begins legally with RERA number.</div></div>
+    <div class="tl-row"><div class="tl-month">Month 7–8</div><div class="tl-content">Apply for Commencement Certificate. NMC site inspection. CC received.</div></div>
+    <div class="tl-row"><div class="tl-month">Month 8+</div><div class="tl-content">Construction begins. Stage inspections: plinth, each slab, lift shaft, electrical. MahaRERA quarterly updates.</div></div>
+    <div class="tl-row"><div class="tl-month">Month 26–38</div><div class="tl-content">Construction complete. OC application, final inspections, OC received. Flat possession to buyers.</div></div>
+    <div class="tl-row"><div class="tl-month">Post OC</div><div class="tl-content">Society formation, land conveyance, MSEDCL meters, property tax registration, MahaRERA project closure.</div></div>
+  </div>
+
+  <div class="section-divider"><span>Key Contacts &amp; References</span></div>
+
+  <div class="contacts">
+    <div class="contact-card">
+      <div class="icon">⚖️</div>
+      <h5>Property Advocate (Nashik)</h5>
+      <p>Title search, NA order application, Index II, society formation</p>
+    </div>
+    <div class="contact-card">
+      <div class="icon">🏗️</div>
+      <h5>Guru Buildcon</h5>
+      <p>AutoDCR plan preparation, drawing submissions, NOC coordination<br>Nashik Road, Nashik - 422101</p>
+    </div>
+    <div class="contact-card">
+      <div class="icon">🏛️</div>
+      <h5>NMC Building Dept.</h5>
+      <p>Plan sanction, plinth inspection, CC, OC<br>Nashik Road Ward Office, NMC</p>
+    </div>
+    <div class="contact-card">
+      <div class="icon">📋</div>
+      <h5>MahaRERA</h5>
+      <p>maharera.mahaonline.gov.in<br>RERA registration, quarterly updates, project closure</p>
+    </div>
+    <div class="contact-card">
+      <div class="icon">✈️</div>
+      <h5>AAI Height Clearance</h5>
+      <p>nocas.aai.aero<br>Airport height restriction NOC — Ozar Airport, Nashik</p>
+    </div>
+    <div class="contact-card">
+      <div class="icon">🧾</div>
+      <h5>CA (Chartered Accountant)</h5>
+      <p>RERA financial declaration, escrow account management, labour welfare cess</p>
+    </div>
+  </div>
+
+  <div class="alert alert-tip" style="margin-top:20px;">
+    <strong>First action this week:</strong> Check your 7/12 Satbara extract at bhulekh.mahabhumi.gov.in — confirm NA status of land. That single answer defines your entire approval timeline.
+  </div>
+</div>
+
+</body>
+</html>
