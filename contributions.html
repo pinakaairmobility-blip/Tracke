@@ -1,0 +1,1116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SplitTrack — Contribution Accounting</title>
+<style>
+  :root {
+    --primary:#1a73e8;--primary-dark:#1558b0;--success:#34a853;
+    --danger:#ea4335;--warn:#f9ab00;--bg:#f8f9fa;--card:#fff;
+    --border:#e0e0e0;--text:#202124;--muted:#5f6368;--radius:12px;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(--text);min-height:100vh;}
+
+  header{background:var(--primary);color:#fff;padding:0 24px;height:60px;display:flex;align-items:center;justify-content:space-between;box-shadow:0 2px 8px rgba(0,0,0,.2);position:sticky;top:0;z-index:100;}
+  header h1{font-size:1.2rem;font-weight:700;}
+  .header-right{display:flex;align-items:center;gap:12px;}
+  .refresh-btn{background:rgba(255,255,255,.2);border:none;color:#fff;padding:6px 14px;border-radius:20px;cursor:pointer;font-size:.82rem;font-weight:600;}
+  .refresh-btn:hover{background:rgba(255,255,255,.3);}
+  #lastUpdated{font-size:.75rem;opacity:.75;}
+
+  .app{max-width:1120px;margin:0 auto;padding:24px 16px;display:grid;grid-template-columns:290px 1fr;gap:20px;}
+  @media(max-width:760px){.app{grid-template-columns:1fr;}}
+
+  .sidebar{display:flex;flex-direction:column;gap:16px;}
+  .card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:18px;}
+  .card h2{font-size:.82rem;font-weight:700;text-transform:uppercase;letter-spacing:.6px;color:var(--muted);margin-bottom:14px;}
+
+  .group-item{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:8px;cursor:pointer;transition:background .15s;font-size:.92rem;}
+  .group-item:hover{background:#f1f3f4;}
+  .group-item.active{background:#e8f0fe;color:var(--primary);font-weight:600;}
+  .g-avatar{width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.9rem;flex-shrink:0;}
+  .g-meta{flex:1;min-width:0;}
+  .g-name{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .g-sub{font-size:.73rem;color:var(--muted);margin-top:1px;}
+  .del-btn{background:none;border:none;color:var(--muted);cursor:pointer;font-size:.9rem;opacity:0;padding:2px 6px;border-radius:4px;flex-shrink:0;}
+  .group-item:hover .del-btn{opacity:1;}
+
+  .main{display:flex;flex-direction:column;gap:16px;}
+  .tabs{display:flex;gap:4px;background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:4px;}
+  .tab{flex:1;padding:9px 4px;border:none;background:none;border-radius:8px;cursor:pointer;font-size:.83rem;font-weight:600;color:var(--muted);transition:all .15s;white-space:nowrap;}
+  .tab.active{background:var(--primary);color:#fff;}
+
+  label{font-size:.82rem;font-weight:600;color:var(--muted);display:block;margin-bottom:4px;}
+  input,select,textarea{width:100%;padding:9px 12px;border:1.5px solid var(--border);border-radius:8px;font-size:.9rem;font-family:inherit;outline:none;transition:border-color .15s;background:#fff;color:var(--text);}
+  input:focus,select:focus,textarea:focus{border-color:var(--primary);}
+  .form-row{display:flex;flex-direction:column;}
+  .form-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+  @media(max-width:500px){.form-grid{grid-template-columns:1fr;}}
+
+  .btn{padding:10px 20px;border:none;border-radius:8px;font-size:.9rem;font-weight:600;cursor:pointer;transition:all .15s;display:inline-flex;align-items:center;gap:6px;}
+  .btn-primary{background:var(--primary);color:#fff;}
+  .btn-primary:hover{background:var(--primary-dark);}
+  .btn-success{background:var(--success);color:#fff;}
+  .btn-danger{background:var(--danger);color:#fff;}
+  .btn-outline{background:none;border:1.5px solid var(--border);color:var(--text);}
+  .btn-outline:hover{border-color:var(--primary);color:var(--primary);}
+  .btn-sm{padding:6px 14px;font-size:.82rem;}
+  .btn:disabled{opacity:.5;cursor:not-allowed;}
+  .w-full{width:100%;}
+
+  .member-chips{display:flex;flex-wrap:wrap;gap:8px;min-height:36px;}
+  .chip{display:flex;align-items:center;gap:6px;padding:5px 12px;border-radius:20px;font-size:.82rem;font-weight:600;cursor:pointer;}
+  .chip input[type=checkbox]{display:none;}
+
+  .split-row{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--border);}
+  .split-row:last-child{border-bottom:none;}
+  .split-row .sname{flex:1;font-size:.9rem;}
+  .split-row input[type=number]{width:90px;text-align:right;}
+  .split-unit{color:var(--muted);font-size:.82rem;width:46px;text-align:right;}
+
+  .expense-item{display:flex;align-items:flex-start;gap:14px;padding:14px 0;border-bottom:1px solid var(--border);}
+  .expense-item:last-child{border-bottom:none;}
+  .exp-icon{width:42px;height:42px;border-radius:10px;background:#f1f3f4;display:flex;align-items:center;justify-content:center;font-size:1.2rem;flex-shrink:0;}
+  .exp-body{flex:1;min-width:0;}
+  .exp-title{font-weight:600;font-size:.95rem;}
+  .exp-meta{font-size:.78rem;color:var(--muted);margin-top:2px;}
+  .exp-right{display:flex;flex-direction:column;align-items:flex-end;gap:6px;flex-shrink:0;}
+  .exp-amount{font-weight:700;font-size:1rem;color:var(--primary);}
+
+  .balance-item{display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid var(--border);}
+  .balance-item:last-child{border-bottom:none;}
+  .bal-av{width:38px;height:38px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:.82rem;flex-shrink:0;}
+
+  .settle-item{display:flex;align-items:center;gap:10px;padding:12px 14px;background:#fff8e1;border:1px solid #ffe082;border-radius:10px;margin-bottom:10px;font-size:.88rem;}
+  .settle-item .s-av{width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.72rem;font-weight:700;flex-shrink:0;}
+  .settle-item .s-amt{font-weight:700;color:#e65100;margin-left:auto;white-space:nowrap;}
+  .mark-btn{background:var(--success);color:#fff;border:none;border-radius:6px;padding:5px 12px;font-size:.8rem;cursor:pointer;font-weight:600;flex-shrink:0;}
+
+  .summary-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;}
+  @media(max-width:500px){.summary-grid{grid-template-columns:1fr;}}
+  .summary-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:16px;text-align:center;}
+  .summary-card .val{font-size:1.4rem;font-weight:700;}
+  .summary-card .lbl{font-size:.76rem;color:var(--muted);margin-top:4px;}
+
+  .empty{text-align:center;padding:40px 20px;color:var(--muted);}
+  .empty .icon{font-size:2.4rem;margin-bottom:10px;}
+
+  .modal-backdrop{display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:200;align-items:center;justify-content:center;}
+  .modal-backdrop.open{display:flex;}
+  .modal{background:#fff;border-radius:16px;padding:24px;width:100%;max-width:520px;max-height:90vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,.25);}
+  .modal h3{font-size:1.1rem;font-weight:700;margin-bottom:18px;}
+  .modal-footer{display:flex;gap:10px;justify-content:flex-end;margin-top:20px;}
+
+  .toast{position:fixed;bottom:24px;right:24px;background:#323232;color:#fff;padding:12px 20px;border-radius:10px;font-size:.88rem;font-weight:500;z-index:999;transform:translateY(80px);opacity:0;transition:all .3s;max-width:320px;}
+  .toast.show{transform:translateY(0);opacity:1;}
+  .toast.err{background:#c62828;}
+
+  .pos{color:var(--success);} .neg{color:var(--danger);} .zero{color:var(--muted);}
+  .flex{display:flex;} .gap-8{gap:8px;} .gap-12{gap:12px;}
+  .mt-8{margin-top:8px;} .mt-12{margin-top:12px;} .mt-16{margin-top:16px;}
+  .text-sm{font-size:.85rem;} .text-muted{color:var(--muted);} .bold{font-weight:700;}
+  .hr{border:none;border-top:1px solid var(--border);margin:14px 0;}
+
+  .code-badge{display:inline-flex;align-items:center;gap:8px;background:#e8f0fe;color:var(--primary);padding:6px 14px;border-radius:20px;font-size:.82rem;font-weight:700;letter-spacing:1px;}
+  .code-badge button{background:none;border:none;cursor:pointer;color:var(--primary);font-size:.8rem;padding:0;}
+
+  .loading-overlay{display:none;position:fixed;inset:0;background:rgba(255,255,255,.6);z-index:500;align-items:center;justify-content:center;}
+  .loading-overlay.show{display:flex;}
+  .spinner{width:36px;height:36px;border:3px solid var(--border);border-top-color:var(--primary);border-radius:50%;animation:spin .7s linear infinite;}
+  @keyframes spin{to{transform:rotate(360deg);}}
+
+  .join-row{display:flex;gap:8px;margin-top:10px;}
+  .join-row input{flex:1;text-transform:uppercase;letter-spacing:2px;font-weight:700;}
+</style>
+</head>
+<body>
+
+<header>
+  <h1>💰 SplitTrack</h1>
+  <div class="header-right">
+    <span id="lastUpdated"></span>
+    <button class="refresh-btn" onclick="refresh()">↻ Refresh</button>
+  </div>
+</header>
+
+<div class="loading-overlay" id="loadingOverlay"><div class="spinner"></div></div>
+
+<div class="app">
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="card">
+      <h2>Groups</h2>
+      <div id="groupList"></div>
+      <button class="btn btn-primary w-full mt-8" onclick="openNewGroupModal()">+ New Group</button>
+      <hr class="hr">
+      <div style="font-size:.8rem;font-weight:700;color:var(--muted);margin-bottom:6px;">JOIN BY CODE</div>
+      <div class="join-row">
+        <input id="joinCodeInput" maxlength="6" placeholder="ABC123" oninput="this.value=this.value.toUpperCase()">
+        <button class="btn btn-outline btn-sm" onclick="joinByCode()">Join</button>
+      </div>
+    </div>
+    <div class="card" id="memberCard" style="display:none">
+      <h2>Members</h2>
+      <div id="memberList"></div>
+      <div class="flex gap-8 mt-8">
+        <input id="newMemberName" placeholder="Member name" style="flex:1" onkeydown="if(event.key==='Enter')addMember()">
+        <button class="btn btn-outline btn-sm" onclick="addMember()">Add</button>
+      </div>
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <main class="main" id="mainArea">
+    <div class="card empty" style="padding:60px 20px">
+      <div class="icon">💼</div>
+      <p class="bold">Loading…</p>
+    </div>
+  </main>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<!-- NEW GROUP MODAL -->
+<div class="modal-backdrop" id="newGroupModal">
+  <div class="modal">
+    <h3>Create New Group</h3>
+    <div class="form-row">
+      <label>Group Name</label>
+      <input id="groupName" placeholder="e.g. Goa Trip, Flat 4B, Office Lunch…" onkeydown="if(event.key==='Enter')saveGroup()">
+    </div>
+    <div class="form-grid mt-12">
+      <div class="form-row">
+        <label>Category</label>
+        <select id="groupCategory">
+          <option value="🏖️">🏖️ Trip / Vacation</option>
+          <option value="🏠">🏠 Home / Flat</option>
+          <option value="🍽️">🍽️ Food / Dining</option>
+          <option value="🎉">🎉 Party / Event</option>
+          <option value="💼">💼 Work / Office</option>
+          <option value="🛒">🛒 Shopping</option>
+          <option value="⚡">⚡ Utilities / Bills</option>
+          <option value="🎮">🎮 Entertainment</option>
+          <option value="🚗">🚗 Transport</option>
+          <option value="📦">📦 Other</option>
+        </select>
+      </div>
+      <div class="form-row">
+        <label>Currency</label>
+        <select id="groupCurrency">
+          <option value="₹">₹ INR</option>
+          <option value="$">$ USD</option>
+          <option value="€">€ EUR</option>
+          <option value="£">£ GBP</option>
+          <option value="¥">¥ JPY</option>
+          <option value="AED">AED</option>
+          <option value="SGD">SGD</option>
+        </select>
+      </div>
+    </div>
+    <div class="form-row mt-12">
+      <label>Initial Members (comma separated)</label>
+      <input id="groupMembers" placeholder="Alice, Bob, Charlie">
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" onclick="closeModal('newGroupModal')">Cancel</button>
+      <button class="btn btn-primary" onclick="saveGroup()">Create Group</button>
+    </div>
+  </div>
+</div>
+
+<!-- ADD EXPENSE MODAL -->
+<div class="modal-backdrop" id="expenseModal">
+  <div class="modal">
+    <h3>Add Expense</h3>
+    <div class="form-grid">
+      <div class="form-row" style="grid-column:1/-1">
+        <label>Description</label>
+        <input id="expDesc" placeholder="What was this for?">
+      </div>
+      <div class="form-row">
+        <label>Amount (<span id="expCurrLabel">₹</span>)</label>
+        <input id="expAmount" type="number" min="0.01" step="0.01" placeholder="0.00" oninput="recalcSplit()">
+      </div>
+      <div class="form-row">
+        <label>Date</label>
+        <input id="expDate" type="date">
+      </div>
+      <div class="form-row">
+        <label>Category</label>
+        <select id="expCategory">
+          <option value="🍽️">🍽️ Food</option><option value="🚗">🚗 Transport</option>
+          <option value="🏨">🏨 Stay</option><option value="🎟️">🎟️ Entertainment</option>
+          <option value="🛒">🛒 Shopping</option><option value="⚡">⚡ Utilities</option>
+          <option value="💊">💊 Health</option><option value="📦">📦 Other</option>
+        </select>
+      </div>
+      <div class="form-row">
+        <label>Paid by</label>
+        <select id="expPaidBy"></select>
+      </div>
+      <div class="form-row" style="grid-column:1/-1">
+        <label>Split type</label>
+        <div class="flex gap-8" id="splitTypeBtns">
+          <button class="btn btn-primary btn-sm" data-t="equal" onclick="setSplitType('equal')">Equal</button>
+          <button class="btn btn-outline btn-sm" data-t="exact" onclick="setSplitType('exact')">Exact</button>
+          <button class="btn btn-outline btn-sm" data-t="percent" onclick="setSplitType('percent')">%</button>
+          <button class="btn btn-outline btn-sm" data-t="shares" onclick="setSplitType('shares')">Shares</button>
+        </div>
+      </div>
+      <div class="form-row" style="grid-column:1/-1">
+        <label>Split between</label>
+        <div id="splitMembersCheck" class="member-chips" style="margin-bottom:10px"></div>
+        <div id="splitDetails"></div>
+        <div id="splitError" style="color:var(--danger);font-size:.8rem;margin-top:6px"></div>
+      </div>
+      <div class="form-row" style="grid-column:1/-1">
+        <label>Notes (optional)</label>
+        <textarea id="expNotes" rows="2" style="resize:vertical"></textarea>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" onclick="closeModal('expenseModal')">Cancel</button>
+      <button class="btn btn-primary" id="saveExpBtn" onclick="saveExpense()">Add Expense</button>
+    </div>
+  </div>
+</div>
+
+<!-- EDIT EXPENSE MODAL -->
+<div class="modal-backdrop" id="editExpenseModal">
+  <div class="modal">
+    <h3>Edit Expense</h3>
+    <div class="form-grid">
+      <div class="form-row" style="grid-column:1/-1">
+        <label>Description</label>
+        <input id="editExpDesc">
+      </div>
+      <div class="form-row">
+        <label>Amount (<span id="editExpCurrLabel">₹</span>)</label>
+        <input id="editExpAmount" type="number" min="0.01" step="0.01" oninput="recalcEditSplit()">
+      </div>
+      <div class="form-row">
+        <label>Date</label>
+        <input id="editExpDate" type="date">
+      </div>
+      <div class="form-row">
+        <label>Category</label>
+        <select id="editExpCategory">
+          <option value="🍽️">🍽️ Food</option><option value="🚗">🚗 Transport</option>
+          <option value="🏨">🏨 Stay</option><option value="🎟️">🎟️ Entertainment</option>
+          <option value="🛒">🛒 Shopping</option><option value="⚡">⚡ Utilities</option>
+          <option value="💊">💊 Health</option><option value="📦">📦 Other</option>
+        </select>
+      </div>
+      <div class="form-row">
+        <label>Paid by</label>
+        <select id="editExpPaidBy"></select>
+      </div>
+      <div class="form-row" style="grid-column:1/-1">
+        <label>Split type</label>
+        <div class="flex gap-8" id="editSplitTypeBtns">
+          <button class="btn btn-primary btn-sm" data-t="equal" onclick="setEditSplitType('equal')">Equal</button>
+          <button class="btn btn-outline btn-sm" data-t="exact" onclick="setEditSplitType('exact')">Exact</button>
+          <button class="btn btn-outline btn-sm" data-t="percent" onclick="setEditSplitType('percent')">%</button>
+          <button class="btn btn-outline btn-sm" data-t="shares" onclick="setEditSplitType('shares')">Shares</button>
+        </div>
+      </div>
+      <div class="form-row" style="grid-column:1/-1">
+        <label>Split between</label>
+        <div id="editSplitMembersCheck" class="member-chips" style="margin-bottom:10px"></div>
+        <div id="editSplitDetails"></div>
+        <div id="editSplitError" style="color:var(--danger);font-size:.8rem;margin-top:6px"></div>
+      </div>
+      <div class="form-row" style="grid-column:1/-1">
+        <label>Notes (optional)</label>
+        <textarea id="editExpNotes" rows="2" style="resize:vertical"></textarea>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" onclick="closeModal('editExpenseModal')">Cancel</button>
+      <button class="btn btn-primary" id="updateExpBtn" onclick="updateExpense()">Save Changes</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ──────────────────────────────────────────────────────────────
+//  MODE DETECTION  — file:// = offline/localStorage, http = server
+// ──────────────────────────────────────────────────────────────
+const IS_SERVER = location.protocol !== 'file:';
+
+// ──────────────────────────────────────────────────────────────
+//  STATE
+// ──────────────────────────────────────────────────────────────
+const S = { groups: [], gid: null, data: null, tab: 'expenses' };
+let splitType = 'equal', editSplitType = 'equal', editingExpId = null;
+
+// ──────────────────────────────────────────────────────────────
+//  LOCAL STORE  (file:// — uses localStorage, single device)
+// ──────────────────────────────────────────────────────────────
+const LS_KEY = 'splittrack_v3';
+function lsLoad() { try { return JSON.parse(localStorage.getItem(LS_KEY)) || { groups: [] }; } catch { return { groups: [] }; } }
+function lsSave(db) { localStorage.setItem(LS_KEY, JSON.stringify(db)); }
+function lsUid() { return Date.now().toString(36) + Math.random().toString(36).slice(2, 7); }
+function lsCode() { const c = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'; return Array.from({ length: 6 }, () => c[Math.random() * c.length | 0]).join(''); }
+
+const localStore = {
+  async getGroups() {
+    return lsLoad().groups.map(g => ({ id: g.id, name: g.name, icon: g.icon, currency: g.currency, code: g.code, members: g.members || [] }));
+  },
+  async createGroup(d) {
+    const db = lsLoad(), id = lsUid(), code = lsCode();
+    db.groups.push({ id, name: d.name, icon: d.icon || '📦', currency: d.currency || '₹', code, members: d.members || [], expenses: [], settlements: [] });
+    lsSave(db); return { id, code };
+  },
+  async deleteGroup(id) {
+    const db = lsLoad(); db.groups = db.groups.filter(g => g.id !== id); lsSave(db);
+  },
+  async joinByCode(code) {
+    const g = lsLoad().groups.find(g => g.code === code.toUpperCase());
+    if (!g) throw new Error('No group with that code'); return { id: g.id };
+  },
+  async addMember(gid, name) {
+    const db = lsLoad(), g = db.groups.find(g => g.id === gid);
+    if (g && !g.members.includes(name)) g.members.push(name); lsSave(db);
+  },
+  async removeMember(gid, name) {
+    const db = lsLoad(), g = db.groups.find(g => g.id === gid);
+    if (g) g.members = g.members.filter(m => m !== name); lsSave(db);
+  },
+  async getExpenses(gid) {
+    return lsLoad().groups.find(g => g.id === gid)?.expenses || [];
+  },
+  async addExpense(gid, d) {
+    const db = lsLoad(), g = db.groups.find(g => g.id === gid), id = lsUid();
+    if (g) (g.expenses = g.expenses || []).push({ id, ...d }); lsSave(db); return { id };
+  },
+  async updateExpense(gid, eid, d) {
+    const db = lsLoad(), g = db.groups.find(g => g.id === gid);
+    if (g) { const i = (g.expenses || []).findIndex(e => e.id === eid); if (i > -1) g.expenses[i] = { id: eid, ...d }; } lsSave(db);
+  },
+  async deleteExpense(gid, eid) {
+    const db = lsLoad(), g = db.groups.find(g => g.id === gid);
+    if (g) g.expenses = (g.expenses || []).filter(e => e.id !== eid); lsSave(db);
+  },
+  async getSettlements(gid) {
+    return lsLoad().groups.find(g => g.id === gid)?.settlements || [];
+  },
+  async addSettlement(gid, d) {
+    const db = lsLoad(), g = db.groups.find(g => g.id === gid), id = lsUid();
+    if (g) (g.settlements = g.settlements || []).push({ id, from_member: d.from, to_member: d.to, amount: d.amount, date: d.date });
+    lsSave(db); return { id };
+  },
+  async deleteSettlement(gid, sid) {
+    const db = lsLoad(), g = db.groups.find(g => g.id === gid);
+    if (g) g.settlements = (g.settlements || []).filter(s => s.id !== sid); lsSave(db);
+  },
+};
+
+// ──────────────────────────────────────────────────────────────
+//  SERVER STORE  (http:// — Flask API, multi-user)
+// ──────────────────────────────────────────────────────────────
+async function apiFetch(method, path, body = null) {
+  const opts = { method, headers: { 'Content-Type': 'application/json' } };
+  if (body) opts.body = JSON.stringify(body);
+  const r = await fetch('/api' + path, opts);
+  if (!r.ok) { const txt = await r.text().catch(() => r.statusText); throw new Error(txt || r.statusText); }
+  return r.json();
+}
+
+const serverStore = {
+  async getGroups()              { return apiFetch('GET', '/groups'); },
+  async createGroup(d)           { return apiFetch('POST', '/groups', d); },
+  async deleteGroup(id)          { return apiFetch('DELETE', `/groups/${id}`); },
+  async joinByCode(code)         { return apiFetch('GET', `/groups/join/${code}`); },
+  async addMember(gid, name)     { return apiFetch('POST', `/groups/${gid}/members`, { name }); },
+  async removeMember(gid, name)  { return apiFetch('DELETE', `/groups/${gid}/members/${encodeURIComponent(name)}`); },
+  async getExpenses(gid)         { return apiFetch('GET', `/groups/${gid}/expenses`); },
+  async addExpense(gid, d)       { return apiFetch('POST', `/groups/${gid}/expenses`, d); },
+  async updateExpense(gid,eid,d) { return apiFetch('PUT', `/groups/${gid}/expenses/${eid}`, d); },
+  async deleteExpense(gid, eid)  { return apiFetch('DELETE', `/groups/${gid}/expenses/${eid}`); },
+  async getSettlements(gid)      { return apiFetch('GET', `/groups/${gid}/settlements`); },
+  async addSettlement(gid, d)    { return apiFetch('POST', `/groups/${gid}/settlements`, d); },
+  async deleteSettlement(gid,sid){ return apiFetch('DELETE', `/groups/${gid}/settlements/${sid}`); },
+};
+
+const store = IS_SERVER ? serverStore : localStore;
+
+// ──────────────────────────────────────────────────────────────
+//  LOAD / REFRESH
+// ──────────────────────────────────────────────────────────────
+async function loadGroups() {
+  S.groups = await store.getGroups();
+}
+
+async function loadGroupData() {
+  if (!S.gid) { S.data = null; return; }
+  const g = S.groups.find(x => x.id === S.gid);
+  if (!g) { S.gid = null; S.data = null; return; }
+  const [expenses, settlements] = await Promise.all([
+    store.getExpenses(S.gid),
+    store.getSettlements(S.gid),
+  ]);
+  S.data = { ...g, expenses, settlements };
+}
+
+async function refresh(silent = false) {
+  if (!silent) showLoading(true);
+  try {
+    await loadGroups();
+    if (S.gid && !S.groups.find(x => x.id === S.gid)) S.gid = S.groups[0]?.id || null;
+    if (!S.gid && S.groups.length) S.gid = S.groups[0].id;
+    await loadGroupData();
+    render();
+    document.getElementById('lastUpdated').textContent =
+      'Updated ' + new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+  } catch (e) {
+    toast('Error: ' + e.message, true);
+  } finally {
+    showLoading(false);
+  }
+}
+
+// auto-refresh every 30s only when running via server (multi-user)
+if (IS_SERVER) {
+  setInterval(() => { if (!document.hidden) refresh(true); }, 30000);
+  document.addEventListener('visibilitychange', () => { if (!document.hidden) refresh(true); });
+}
+
+// ──────────────────────────────────────────────────────────────
+//  UTILITIES
+// ──────────────────────────────────────────────────────────────
+const COLORS = ['#1a73e8','#34a853','#ea4335','#f9ab00','#9334e8','#00acc1','#f6892b','#5c6bc0','#e91e8c','#00897b'];
+function memberColor(name) {
+  let h = 0; for (const c of name) h = (h * 31 + c.charCodeAt(0)) & 0xffff;
+  return COLORS[h % COLORS.length];
+}
+function initials(name) {
+  return name.trim().split(/\s+/).map(w => w[0]).join('').toUpperCase().slice(0, 2);
+}
+function fmtAmt(n, curr) {
+  return curr + Math.abs(n).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+}
+function today() { return new Date().toISOString().slice(0, 10); }
+
+function showLoading(v) {
+  document.getElementById('loadingOverlay').classList.toggle('show', v);
+}
+
+function toast(msg, err = false, dur = 3000) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = 'toast show' + (err ? ' err' : '');
+  clearTimeout(t._tid);
+  t._tid = setTimeout(() => t.classList.remove('show'), dur);
+}
+
+// ──────────────────────────────────────────────────────────────
+//  DEBT SIMPLIFICATION
+// ──────────────────────────────────────────────────────────────
+function computeBalances(data) {
+  const bal = {};
+  data.members.forEach(m => bal[m] = 0);
+  data.expenses.forEach(exp => {
+    bal[exp.paid_by] = (bal[exp.paid_by] || 0) + exp.amount;
+    Object.entries(exp.splits).forEach(([m, v]) => { bal[m] = (bal[m] || 0) - v; });
+  });
+  data.settlements.forEach(s => {
+    bal[s.from_member] = (bal[s.from_member] || 0) + s.amount;
+    bal[s.to_member]   = (bal[s.to_member]   || 0) - s.amount;
+  });
+  return bal;
+}
+
+function simplifyDebts(balances) {
+  const pos = [], neg = [];
+  Object.entries(balances).forEach(([p, v]) => {
+    const r = Math.round(v * 100) / 100;
+    if (r >  0.005) pos.push({ p, v: r });
+    if (r < -0.005) neg.push({ p, v: -r });
+  });
+  pos.sort((a, b) => b.v - a.v); neg.sort((a, b) => b.v - a.v);
+  const txns = []; let i = 0, j = 0;
+  while (i < pos.length && j < neg.length) {
+    const s = Math.min(pos[i].v, neg[j].v);
+    if (s > 0.005) txns.push({ from: neg[j].p, to: pos[i].p, amount: Math.round(s * 100) / 100 });
+    pos[i].v -= s; neg[j].v -= s;
+    if (pos[i].v < 0.005) i++;
+    if (neg[j].v < 0.005) j++;
+  }
+  return txns;
+}
+
+// ──────────────────────────────────────────────────────────────
+//  SPLIT CALC
+// ──────────────────────────────────────────────────────────────
+function calcEqualSplit(amount, members) {
+  if (!members.length) return {};
+  const each = Math.floor((amount / members.length) * 100) / 100;
+  const rem = Math.round((amount - each * members.length) * 100);
+  const splits = {};
+  members.forEach((m, i) => splits[m] = each + (i < rem ? 0.01 : 0));
+  return splits;
+}
+
+function calcSplits(amount, members, type, pfx = '') {
+  if (type === 'equal') return { splits: calcEqualSplit(amount, members), valid: true, err: '' };
+  const splits = {}; let err = '', valid = true;
+  if (type === 'exact') {
+    let total = 0;
+    members.forEach(m => {
+      const v = parseFloat(document.getElementById(`${pfx}sp_${CSS.escape(m)}`)?.value || 0);
+      splits[m] = v; total += v;
+    });
+    if (Math.abs(total - amount) > 0.01) { valid = false; err = `Sum ${total.toFixed(2)} ≠ ${amount.toFixed(2)}`; }
+  } else if (type === 'percent') {
+    let total = 0;
+    members.forEach(m => {
+      const v = parseFloat(document.getElementById(`${pfx}sp_${CSS.escape(m)}`)?.value || 0);
+      splits[m] = Math.round(amount * v) / 100; total += v;
+    });
+    if (Math.abs(total - 100) > 0.01) { valid = false; err = `Percentages sum to ${total.toFixed(1)}% (need 100%)`; }
+  } else if (type === 'shares') {
+    let total = 0; const sh = {};
+    members.forEach(m => { sh[m] = parseFloat(document.getElementById(`${pfx}sp_${CSS.escape(m)}`)?.value || 1); total += sh[m]; });
+    members.forEach(m => splits[m] = Math.round(amount * sh[m] / total * 100) / 100);
+    const diff = Math.round((amount - Object.values(splits).reduce((a, b) => a + b, 0)) * 100);
+    if (diff && members.length) splits[members[0]] = Math.round((splits[members[0]] + diff / 100) * 100) / 100;
+  }
+  return { splits, valid, err };
+}
+
+// ──────────────────────────────────────────────────────────────
+//  RENDER
+// ──────────────────────────────────────────────────────────────
+function render() {
+  renderSidebar();
+  renderMain();
+}
+
+function renderSidebar() {
+  const gl = document.getElementById('groupList');
+  if (!S.groups.length) {
+    gl.innerHTML = '<p class="text-sm text-muted">No groups yet.</p>';
+  } else {
+    gl.innerHTML = S.groups.map(g => `
+      <div class="group-item ${g.id === S.gid ? 'active' : ''}" onclick="selectGroup('${g.id}')">
+        <div class="g-avatar" style="background:${memberColor(g.name)};color:#fff">${g.icon}</div>
+        <div class="g-meta">
+          <div class="g-name">${g.name}</div>
+          <div class="g-sub">${g.members.length} members</div>
+        </div>
+        <button class="del-btn" onclick="event.stopPropagation();deleteGroup('${g.id}')">✕</button>
+      </div>`).join('');
+  }
+
+  const mc = document.getElementById('memberCard');
+  if (!S.data) { mc.style.display = 'none'; return; }
+  mc.style.display = 'block';
+  document.getElementById('memberList').innerHTML = S.data.members.map(m => `
+    <div style="display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid var(--border)">
+      <div class="bal-av" style="background:${memberColor(m)};color:#fff;width:28px;height:28px;font-size:.7rem">${initials(m)}</div>
+      <span style="flex:1;font-size:.88rem">${m}</span>
+      <button onclick="removeMember('${m}')" style="background:none;border:none;cursor:pointer;color:var(--muted)">✕</button>
+    </div>`).join('');
+}
+
+function renderMain() {
+  const area = document.getElementById('mainArea');
+  if (!S.data) {
+    area.innerHTML = `<div class="card empty" style="padding:60px 20px">
+      <div class="icon">💼</div>
+      <p class="bold">${S.groups.length ? 'Select a group' : 'No groups yet'}</p>
+      <p class="text-sm text-muted mt-8">Create a group and share the invite code with your friends.</p>
+    </div>`;
+    return;
+  }
+  const g = S.data;
+  const totalExp = g.expenses.reduce((s, e) => s + e.amount, 0);
+  const debts = simplifyDebts(computeBalances(g));
+
+  area.innerHTML = `
+    <div class="summary-grid">
+      <div class="summary-card">
+        <div class="val">${g.icon}</div>
+        <div class="lbl">${g.name}</div>
+        <div style="margin-top:8px"><span class="code-badge">
+          ${g.code}
+          <button onclick="copyCode('${g.code}')" title="Copy invite code">📋</button>
+        </span></div>
+      </div>
+      <div class="summary-card">
+        <div class="val" style="color:var(--primary)">${fmtAmt(totalExp, g.currency)}</div>
+        <div class="lbl">Total Expenses</div>
+      </div>
+      <div class="summary-card">
+        <div class="val" style="color:var(--warn)">${debts.length}</div>
+        <div class="lbl">Pending Settlements</div>
+      </div>
+    </div>
+    <div class="tabs">
+      <button class="tab ${S.tab === 'expenses' ? 'active' : ''}" onclick="switchTab('expenses')">📋 Expenses</button>
+      <button class="tab ${S.tab === 'balances' ? 'active' : ''}" onclick="switchTab('balances')">⚖️ Balances</button>
+      <button class="tab ${S.tab === 'settle' ? 'active' : ''}" onclick="switchTab('settle')">🤝 Settle Up</button>
+      <button class="tab ${S.tab === 'activity' ? 'active' : ''}" onclick="switchTab('activity')">📊 Activity</button>
+    </div>
+    <div id="tabContent"></div>`;
+
+  renderTab();
+}
+
+function renderTab() {
+  const el = document.getElementById('tabContent');
+  if (!el || !S.data) return;
+  const g = S.data;
+  if (S.tab === 'expenses') renderExpenses(g, el);
+  else if (S.tab === 'balances') renderBalances(g, el);
+  else if (S.tab === 'settle') renderSettle(g, el);
+  else if (S.tab === 'activity') renderActivity(g, el);
+}
+
+function renderExpenses(g, el) {
+  let html = `<div class="card">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
+      <h2 style="margin:0">Expenses (${g.expenses.length})</h2>
+      <button class="btn btn-primary btn-sm" onclick="openAddExpense()">+ Add Expense</button>
+    </div>`;
+  if (!g.expenses.length) {
+    html += `<div class="empty"><div class="icon">🧾</div><p>No expenses yet.</p></div>`;
+  } else {
+    html += g.expenses.map(exp => {
+      const splitLines = Object.entries(exp.splits)
+        .map(([m, v]) => `${m}: ${fmtAmt(v, g.currency)}`).join(' · ');
+      return `<div class="expense-item">
+        <div class="exp-icon">${exp.category}</div>
+        <div class="exp-body">
+          <div class="exp-title">${exp.description}</div>
+          <div class="exp-meta">Paid by <strong>${exp.paid_by}</strong> · ${exp.date}</div>
+          <div class="exp-meta">${splitLines}</div>
+          ${exp.notes ? `<div class="exp-meta" style="font-style:italic">"${exp.notes}"</div>` : ''}
+        </div>
+        <div class="exp-right">
+          <div class="exp-amount">${fmtAmt(exp.amount, g.currency)}</div>
+          <div class="flex gap-8">
+            <button class="btn btn-outline btn-sm" onclick="openEditExpense('${exp.id}')">Edit</button>
+            <button class="btn btn-danger btn-sm" onclick="deleteExpense('${exp.id}')">Delete</button>
+          </div>
+        </div>
+      </div>`;
+    }).join('');
+  }
+  el.innerHTML = html + '</div>';
+}
+
+function renderBalances(g, el) {
+  const bals = computeBalances(g);
+  const sorted = Object.entries(bals).sort((a, b) => b[1] - a[1]);
+  let html = `<div class="card"><h2>Member Balances</h2>`;
+  if (!sorted.length) {
+    html += `<div class="empty"><div class="icon">⚖️</div><p>Add members and expenses to see balances.</p></div>`;
+  } else {
+    html += sorted.map(([name, bal]) => {
+      const cls = bal > 0.005 ? 'pos' : bal < -0.005 ? 'neg' : 'zero';
+      const label = bal > 0.005 ? `gets back ${fmtAmt(bal, g.currency)}`
+                  : bal < -0.005 ? `owes ${fmtAmt(bal, g.currency)}`
+                  : 'settled up';
+      return `<div class="balance-item">
+        <div class="bal-av" style="background:${memberColor(name)};color:#fff">${initials(name)}</div>
+        <div style="flex:1"><div style="font-weight:600">${name}</div><div style="font-size:.78rem;color:var(--muted)">${label}</div></div>
+        <div class="bold ${cls}">${bal >= 0 ? '+' : ''}${fmtAmt(bal, g.currency)}</div>
+      </div>`;
+    }).join('');
+  }
+  el.innerHTML = html + '</div>';
+}
+
+function renderSettle(g, el) {
+  const debts = simplifyDebts(computeBalances(g));
+  let html = `<div class="card"><h2>Settle Up</h2>`;
+  if (!debts.length) {
+    html += `<div class="empty"><div class="icon">🎉</div><p class="bold">All settled!</p><p class="text-sm text-muted mt-8">No outstanding payments.</p></div>`;
+  } else {
+    html += `<p class="text-sm text-muted" style="margin-bottom:14px">${debts.length} payment${debts.length > 1 ? 's' : ''} to settle all debts:</p>`;
+    html += debts.map(d => `
+      <div class="settle-item">
+        <div class="s-av" style="background:${memberColor(d.from)};color:#fff">${initials(d.from)}</div>
+        <span><strong>${d.from}</strong> → <strong>${d.to}</strong></span>
+        <span class="s-amt">${fmtAmt(d.amount, g.currency)}</span>
+        <button class="mark-btn" onclick="markSettled('${d.from}','${d.to}',${d.amount})">Mark Paid</button>
+      </div>`).join('');
+  }
+  const hist = g.settlements;
+  if (hist.length) {
+    html += `<hr class="hr"><h2 style="margin-bottom:10px">Settlement History</h2>`;
+    html += [...hist].reverse().map(s => `
+      <div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--border);font-size:.85rem">
+        <span style="flex:1"><strong>${s.from_member}</strong> paid <strong>${s.to_member}</strong></span>
+        <span class="pos bold">${fmtAmt(s.amount, g.currency)}</span>
+        <span class="text-muted">${s.date}</span>
+        <button onclick="removeSettlement('${s.id}')" style="background:none;border:none;color:var(--muted);cursor:pointer">✕</button>
+      </div>`).join('');
+  }
+  el.innerHTML = html + '</div>';
+}
+
+function renderActivity(g, el) {
+  const paid = {}, owed = {};
+  g.members.forEach(m => { paid[m] = 0; owed[m] = 0; });
+  g.expenses.forEach(e => {
+    paid[e.paid_by] = (paid[e.paid_by] || 0) + e.amount;
+    Object.entries(e.splits).forEach(([m, v]) => { owed[m] = (owed[m] || 0) + v; });
+  });
+  const catTotals = {};
+  g.expenses.forEach(e => { catTotals[e.category] = (catTotals[e.category] || 0) + e.amount; });
+  const catSorted = Object.entries(catTotals).sort((a, b) => b[1] - a[1]);
+  const total = g.expenses.reduce((s, e) => s + e.amount, 0);
+
+  let html = `<div class="card"><h2>Spending Breakdown</h2>`;
+  if (!g.expenses.length) {
+    html += `<div class="empty"><div class="icon">📊</div><p>No data yet.</p></div>`;
+  } else {
+    html += `<p style="font-size:.8rem;font-weight:700;color:var(--muted);margin-bottom:10px">BY MEMBER</p>`;
+    html += g.members.map(m => {
+      const pct = total > 0 ? (paid[m] / total * 100).toFixed(1) : 0;
+      return `<div style="display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--border)">
+        <div class="bal-av" style="background:${memberColor(m)};color:#fff">${initials(m)}</div>
+        <div style="flex:1">
+          <div style="font-weight:600">${m}</div>
+          <div style="font-size:.76rem;color:var(--muted)">Paid ${fmtAmt(paid[m] || 0, g.currency)} · Owes ${fmtAmt(owed[m] || 0, g.currency)}</div>
+          <div style="background:#e0e0e0;border-radius:4px;height:6px;margin-top:5px;overflow:hidden">
+            <div style="background:${memberColor(m)};height:100%;width:${pct}%"></div>
+          </div>
+        </div>
+        <div style="font-size:.82rem;color:var(--muted)">${pct}%</div>
+      </div>`;
+    }).join('');
+    html += `<p style="font-size:.8rem;font-weight:700;color:var(--muted);margin:18px 0 10px">BY CATEGORY</p>`;
+    html += catSorted.map(([cat, amt]) => {
+      const pct = total > 0 ? (amt / total * 100).toFixed(1) : 0;
+      return `<div style="display:flex;align-items:center;gap:12px;padding:8px 0;border-bottom:1px solid var(--border)">
+        <span style="font-size:1.1rem">${cat}</span>
+        <div style="flex:1"><div style="background:#e0e0e0;border-radius:4px;height:8px;overflow:hidden">
+          <div style="background:var(--primary);height:100%;width:${pct}%"></div></div></div>
+        <span style="font-weight:600;min-width:90px;text-align:right">${fmtAmt(amt, g.currency)}</span>
+        <span style="color:var(--muted);font-size:.78rem;min-width:36px;text-align:right">${pct}%</span>
+      </div>`;
+    }).join('');
+  }
+  el.innerHTML = html + '</div>';
+}
+
+// ──────────────────────────────────────────────────────────────
+//  GROUP ACTIONS
+// ──────────────────────────────────────────────────────────────
+function openNewGroupModal() {
+  document.getElementById('groupName').value = '';
+  document.getElementById('groupMembers').value = '';
+  document.getElementById('newGroupModal').classList.add('open');
+  setTimeout(() => document.getElementById('groupName').focus(), 100);
+}
+
+async function saveGroup() {
+  const name = document.getElementById('groupName').value.trim();
+  if (!name) { toast('Enter a group name', true); return; }
+  const members = document.getElementById('groupMembers').value.split(',').map(m => m.trim()).filter(Boolean);
+  try {
+    const res = await store.createGroup({
+      name,
+      icon: document.getElementById('groupCategory').value,
+      currency: document.getElementById('groupCurrency').value,
+      members,
+    });
+    closeModal('newGroupModal');
+    S.gid = res.id; S.tab = 'expenses';
+    await refresh();
+    toast(`Group "${name}" created — code: ${res.code}`);
+  } catch (e) { toast('Error: ' + e.message, true); }
+}
+
+async function deleteGroup(id) {
+  if (!confirm('Delete this group and all expenses?')) return;
+  try {
+    await store.deleteGroup(id);
+    if (S.gid === id) S.gid = null;
+    await refresh();
+    toast('Group deleted');
+  } catch (e) { toast('Error: ' + e.message, true); }
+}
+
+function selectGroup(id) {
+  S.gid = id; S.tab = 'expenses';
+  refresh();
+}
+
+async function joinByCode() {
+  const code = document.getElementById('joinCodeInput').value.trim().toUpperCase();
+  if (code.length < 4) { toast('Enter a valid code', true); return; }
+  try {
+    const res = await store.joinByCode(code);
+    document.getElementById('joinCodeInput').value = '';
+    S.gid = res.id; S.tab = 'expenses';
+    await refresh();
+    toast('Joined group!');
+  } catch (e) { toast('Invalid or unknown code', true); }
+}
+
+function copyCode(code) {
+  const url = window.location.origin + '/join/' + code;
+  navigator.clipboard.writeText(url).then(() => toast('Invite link copied!')).catch(() => {
+    navigator.clipboard.writeText(code).then(() => toast('Code copied: ' + code));
+  });
+}
+
+async function addMember() {
+  const name = document.getElementById('newMemberName').value.trim();
+  if (!name) return;
+  try {
+    await store.addMember(S.gid, name);
+    document.getElementById('newMemberName').value = '';
+    await refresh(true);
+    toast(`${name} added`);
+  } catch (e) { toast('Error: ' + e.message, true); }
+}
+
+async function removeMember(name) {
+  const inUse = S.data.expenses.some(e => e.paid_by === name || Object.keys(e.splits).includes(name));
+  if (inUse && !confirm(`${name} has expenses. Remove anyway?`)) return;
+  try {
+    await store.removeMember(S.gid, name);
+    await refresh(true);
+    toast(`${name} removed`);
+  } catch (e) { toast('Error: ' + e.message, true); }
+}
+
+// ──────────────────────────────────────────────────────────────
+//  EXPENSE ACTIONS
+// ──────────────────────────────────────────────────────────────
+function openAddExpense() {
+  if (!S.data?.members.length) { toast('Add members first', true); return; }
+  splitType = 'equal';
+  document.getElementById('expCurrLabel').textContent = S.data.currency;
+  document.getElementById('expDesc').value = '';
+  document.getElementById('expAmount').value = '';
+  document.getElementById('expDate').value = today();
+  document.getElementById('expNotes').value = '';
+  document.getElementById('expCategory').value = '🍽️';
+  document.getElementById('splitError').textContent = '';
+  document.getElementById('expPaidBy').innerHTML =
+    S.data.members.map(m => `<option>${m}</option>`).join('');
+  document.getElementById('splitMembersCheck').innerHTML = '';
+  setSplitType('equal');
+  document.getElementById('expenseModal').classList.add('open');
+  setTimeout(() => document.getElementById('expDesc').focus(), 100);
+}
+
+function setSplitType(type) {
+  splitType = type;
+  document.querySelectorAll('#splitTypeBtns .btn').forEach(b =>
+    b.className = b.dataset.t === type ? 'btn btn-primary btn-sm' : 'btn btn-outline btn-sm');
+  renderSplitMembersCheck('splitMembersCheck', 'splitDetails', '');
+  renderSplitInputs('splitDetails', '', splitType, S.data);
+}
+
+function renderSplitMembersCheck(chkId, detId, pfx) {
+  const g = S.data;
+  const el = document.getElementById(chkId);
+  if (!el.children.length) {
+    el.innerHTML = g.members.map(m => `
+      <label class="chip" style="background:${memberColor(m)};color:#fff">
+        <input type="checkbox" value="${m}" checked onchange="renderSplitInputs('${detId}','${pfx}',${pfx ? 'editSplitType' : 'splitType'},S.data)">
+        ${initials(m)} ${m.split(' ')[0]}
+      </label>`).join('');
+  }
+}
+
+function getCheckedIn(chkId) {
+  return [...document.querySelectorAll(`#${chkId} input[type=checkbox]:checked`)].map(c => c.value);
+}
+
+function renderSplitInputs(detId, pfx, type, g) {
+  const curr = typeof type === 'string' ? type : (pfx ? editSplitType : splitType);
+  const amount = parseFloat(document.getElementById(pfx ? 'editExpAmount' : 'expAmount').value) || 0;
+  const members = getCheckedIn(pfx ? 'editSplitMembersCheck' : 'splitMembersCheck');
+  const det = document.getElementById(detId);
+  if (!members.length) { det.innerHTML = ''; return; }
+  if (curr === 'equal') {
+    det.innerHTML = `<p class="text-sm text-muted">Each pays <strong>${fmtAmt(amount / members.length, g.currency)}</strong></p>`;
+  } else if (curr === 'exact') {
+    det.innerHTML = members.map(m => `
+      <div class="split-row"><div class="sname">${m}</div>
+      <input type="number" id="${pfx}sp_${CSS.escape(m)}" min="0" step="0.01" placeholder="0.00" oninput="validateSplit('${pfx}')">
+      </div>`).join('');
+  } else if (curr === 'percent') {
+    const pct = (100 / members.length).toFixed(1);
+    det.innerHTML = members.map(m => `
+      <div class="split-row"><div class="sname">${m}</div>
+      <input type="number" id="${pfx}sp_${CSS.escape(m)}" min="0" max="100" step="0.1" value="${pct}" oninput="validateSplit('${pfx}')">
+      <span class="split-unit">%</span></div>`).join('');
+    validateSplit(pfx);
+  } else if (curr === 'shares') {
+    det.innerHTML = members.map(m => `
+      <div class="split-row"><div class="sname">${m}</div>
+      <input type="number" id="${pfx}sp_${CSS.escape(m)}" min="1" step="1" value="1" oninput="validateSplit('${pfx}')">
+      <span class="split-unit">share</span></div>`).join('');
+    validateSplit(pfx);
+  }
+}
+
+function recalcSplit() { renderSplitInputs('splitDetails', '', splitType, S.data); }
+function recalcEditSplit() { renderSplitInputs('editSplitDetails', 'edit', editSplitType, S.data); }
+
+function validateSplit(pfx) {
+  const amount = parseFloat(document.getElementById(pfx ? 'editExpAmount' : 'expAmount').value) || 0;
+  const members = getCheckedIn(pfx ? 'editSplitMembersCheck' : 'splitMembersCheck');
+  const type = pfx ? editSplitType : splitType;
+  const { err } = calcSplits(amount, members, type, pfx);
+  document.getElementById(pfx ? 'editSplitError' : 'splitError').textContent = err;
+}
+
+async function saveExpense() {
+  const g = S.data;
+  const desc = document.getElementById('expDesc').value.trim();
+  const amount = parseFloat(document.getElementById('expAmount').value);
+  const date = document.getElementById('expDate').value;
+  const category = document.getElementById('expCategory').value;
+  const paid_by = document.getElementById('expPaidBy').value;
+  const notes = document.getElementById('expNotes').value.trim();
+  const members = getCheckedIn('splitMembersCheck');
+  if (!desc) { toast('Enter a description', true); return; }
+  if (!amount || amount <= 0) { toast('Enter a valid amount', true); return; }
+  if (!members.length) { toast('Select at least one member', true); return; }
+  const { splits, valid, err } = calcSplits(amount, members, splitType, '');
+  if (!valid) { document.getElementById('splitError').textContent = err; return; }
+  const btn = document.getElementById('saveExpBtn');
+  btn.disabled = true;
+  try {
+    await store.addExpense(S.gid, { description: desc, amount, date, category, paid_by, splits, notes });
+    closeModal('expenseModal');
+    await refresh(true);
+    toast(`"${desc}" added`);
+  } catch (e) { toast('Error: ' + e.message, true); }
+  finally { btn.disabled = false; }
+}
+
+function openEditExpense(eid) {
+  const g = S.data;
+  const exp = g.expenses.find(e => e.id === eid);
+  if (!exp) return;
+  editingExpId = eid;
+  editSplitType = 'equal';
+  document.getElementById('editExpCurrLabel').textContent = g.currency;
+  document.getElementById('editExpDesc').value = exp.description;
+  document.getElementById('editExpAmount').value = exp.amount;
+  document.getElementById('editExpDate').value = exp.date;
+  document.getElementById('editExpCategory').value = exp.category;
+  document.getElementById('editExpNotes').value = exp.notes || '';
+  document.getElementById('editSplitError').textContent = '';
+  document.getElementById('editExpPaidBy').innerHTML =
+    g.members.map(m => `<option ${m === exp.paid_by ? 'selected' : ''}>${m}</option>`).join('');
+  // build member checkboxes with original selection
+  const chk = document.getElementById('editSplitMembersCheck');
+  chk.innerHTML = g.members.map(m => `
+    <label class="chip" style="background:${memberColor(m)};color:#fff">
+      <input type="checkbox" value="${m}" ${exp.splits[m] !== undefined ? 'checked' : ''} onchange="renderSplitInputs('editSplitDetails','edit',editSplitType,S.data)">
+      ${initials(m)} ${m.split(' ')[0]}
+    </label>`).join('');
+  setEditSplitType('equal');
+  document.getElementById('editExpenseModal').classList.add('open');
+}
+
+function setEditSplitType(type) {
+  editSplitType = type;
+  document.querySelectorAll('#editSplitTypeBtns .btn').forEach(b =>
+    b.className = b.dataset.t === type ? 'btn btn-primary btn-sm' : 'btn btn-outline btn-sm');
+  renderSplitInputs('editSplitDetails', 'edit', type, S.data);
+}
+
+async function updateExpense() {
+  const g = S.data;
+  const desc = document.getElementById('editExpDesc').value.trim();
+  const amount = parseFloat(document.getElementById('editExpAmount').value);
+  const date = document.getElementById('editExpDate').value;
+  const category = document.getElementById('editExpCategory').value;
+  const paid_by = document.getElementById('editExpPaidBy').value;
+  const notes = document.getElementById('editExpNotes').value.trim();
+  const members = getCheckedIn('editSplitMembersCheck');
+  if (!desc) { toast('Enter a description', true); return; }
+  if (!amount || amount <= 0) { toast('Enter a valid amount', true); return; }
+  if (!members.length) { toast('Select at least one member', true); return; }
+  const { splits, valid, err } = calcSplits(amount, members, editSplitType, 'edit');
+  if (!valid) { document.getElementById('editSplitError').textContent = err; return; }
+  const btn = document.getElementById('updateExpBtn');
+  btn.disabled = true;
+  try {
+    await store.updateExpense(S.gid, editingExpId, { description: desc, amount, date, category, paid_by, splits, notes });
+    closeModal('editExpenseModal');
+    await refresh(true);
+    toast('Expense updated');
+  } catch (e) { toast('Error: ' + e.message, true); }
+  finally { btn.disabled = false; }
+}
+
+async function deleteExpense(eid) {
+  if (!confirm('Delete this expense?')) return;
+  try {
+    await store.deleteExpense(S.gid, eid);
+    await refresh(true);
+    toast('Expense deleted');
+  } catch (e) { toast('Error: ' + e.message, true); }
+}
+
+// ──────────────────────────────────────────────────────────────
+//  SETTLEMENTS
+// ──────────────────────────────────────────────────────────────
+async function markSettled(from, to, amount) {
+  try {
+    await store.addSettlement(S.gid, { from, to, amount, date: today() });
+    await refresh(true);
+    toast(`${from} → ${to} recorded`);
+  } catch (e) { toast('Error: ' + e.message, true); }
+}
+
+async function removeSettlement(sid) {
+  try {
+    await store.deleteSettlement(S.gid, sid);
+    await refresh(true);
+    toast('Settlement removed');
+  } catch (e) { toast('Error: ' + e.message, true); }
+}
+
+// ──────────────────────────────────────────────────────────────
+//  UI HELPERS
+// ──────────────────────────────────────────────────────────────
+function switchTab(tab) { S.tab = tab; renderMain(); }
+
+function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+
+document.querySelectorAll('.modal-backdrop').forEach(bd =>
+  bd.addEventListener('click', e => { if (e.target === bd) bd.classList.remove('open'); }));
+
+// mode badge
+(function() {
+  const el = document.getElementById('lastUpdated');
+  const badge = document.createElement('span');
+  badge.textContent = IS_SERVER ? '🌐 Live' : '📱 Offline';
+  badge.style.cssText = `font-size:.72rem;font-weight:700;padding:3px 10px;border-radius:12px;background:${IS_SERVER ? 'rgba(52,168,83,.35)' : 'rgba(255,255,255,.2)'};`;
+  el.parentNode.insertBefore(badge, el);
+})();
+
+// handle /join/<code> URL (server mode only)
+(function () {
+  const m = location.pathname.match(/^\/join\/([A-Z0-9]+)$/i);
+  if (m) {
+    history.replaceState(null, '', '/');
+    store.joinByCode(m[1])
+      .then(r => { S.gid = r.id; })
+      .catch(() => {})
+      .finally(() => refresh());
+    return;
+  }
+  refresh();
+})();
+</script>
+</body>
+</html>
