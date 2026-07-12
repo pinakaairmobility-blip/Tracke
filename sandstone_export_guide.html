@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<style>
+* { margin:0; padding:0; box-sizing:border-box; }
+body { font-family: Arial, sans-serif; font-size:10.5px; color:#221d18; line-height:1.65; }
+
+/* COVER */
+.cover { min-height:100vh; background:linear-gradient(150deg,#1c1712 0%,#5a3a22 55%,#b97745 100%); display:flex; flex-direction:column; justify-content:center; padding:60px; page-break-after:always; position:relative; }
+.cover-tag { background:rgba(255,255,255,0.12); color:#fff; font-size:9px; font-weight:700; letter-spacing:3px; text-transform:uppercase; padding:6px 16px; border-radius:20px; margin-bottom:28px; width:fit-content; }
+.cover h1 { font-size:44px; font-weight:900; color:#fff; line-height:1.08; margin-bottom:8px; }
+.cover h2 { font-size:17px; font-weight:400; color:rgba(255,255,255,0.75); margin-bottom:34px; }
+.cover-line { width:55px; height:3px; background:#f0b27a; margin-bottom:26px; border-radius:2px; }
+.cover-desc { color:rgba(255,255,255,0.7); font-size:11px; max-width:500px; line-height:1.75; margin-bottom:38px; }
+.cover-grid { display:flex; flex-wrap:wrap; gap:26px 42px; }
+.cover-item .lbl { font-size:8.5px; color:rgba(255,255,255,0.5); letter-spacing:1.5px; text-transform:uppercase; }
+.cover-item .val { font-size:12px; font-weight:700; color:#fff; margin-top:2px; }
+.cover-foot { position:absolute; bottom:34px; left:60px; right:60px; display:flex; justify-content:space-between; font-size:8.5px; color:rgba(255,255,255,0.35); border-top:1px solid rgba(255,255,255,0.12); padding-top:10px; letter-spacing:1px; }
+
+/* PAGE */
+.page { padding:44px 52px; page-break-after:always; }
+.page:last-child { page-break-after:auto; }
+.ph { display:flex; justify-content:space-between; border-bottom:2px solid #8a4b24; padding-bottom:8px; margin-bottom:22px; }
+.ph-l { font-size:8.5px; font-weight:700; letter-spacing:2px; text-transform:uppercase; color:#8a4b24; }
+.ph-r { font-size:8.5px; color:#b3a294; }
+
+.sh { display:flex; align-items:center; gap:13px; margin-bottom:16px; }
+.sh-num { background:#8a4b24; color:#fff; font-size:13px; font-weight:800; min-width:36px; height:36px; border-radius:50%; display:flex; align-items:center; justify-content:center; }
+.sh-title { font-size:18px; font-weight:800; color:#1c1712; }
+.sh-sub { font-size:9.5px; color:#8c7d6f; margin-top:2px; }
+
+.ss { margin:16px 0 9px; font-size:12px; font-weight:800; color:#8a4b24; border-left:3px solid #8a4b24; padding-left:10px; }
+
+.step { border:1px solid #e8ddd2; border-left:4px solid #8a4b24; border-radius:5px; padding:12px 14px; background:#fbf7f2; margin-bottom:10px; }
+.step-id { font-size:8.5px; font-weight:700; color:#8a4b24; letter-spacing:1px; margin-bottom:3px; text-transform:uppercase; }
+.step h4 { font-size:11.5px; font-weight:800; color:#1c1712; margin-bottom:5px; }
+.step p, .step li { font-size:10.5px; color:#3d352d; line-height:1.62; }
+.step ul, .step ol { padding-left:16px; margin:5px 0; }
+.step li { margin-bottom:2px; }
+.meta { display:flex; gap:18px; margin-top:7px; flex-wrap:wrap; }
+.where { font-size:9.5px; color:#8a4b24; font-weight:700; }
+.time { font-size:9.5px; color:#6b5d50; }
+.cost { font-size:9.5px; color:#2a6a2a; font-weight:700; }
+
+.alert { border-radius:5px; padding:11px 14px; margin:11px 0; font-size:10.5px; line-height:1.6; }
+.ac { background:#fdeeea; border-left:4px solid #c2410c; } .ac strong{color:#c2410c;}
+.at { background:#eef6ec; border-left:4px solid #2e7d32; } .at strong{color:#2e7d32;}
+.ai { background:#eef2fb; border-left:4px solid #3d5bd9; } .ai strong{color:#3d5bd9;}
+.aw { background:#fdf8e6; border-left:4px solid #b8860b; } .aw strong{color:#b8860b;}
+
+table { width:100%; border-collapse:collapse; margin:10px 0; font-size:10px; }
+thead tr { background:#8a4b24; color:#fff; }
+thead th { padding:7px 10px; text-align:left; font-weight:700; font-size:9.5px; }
+tbody tr:nth-child(even){ background:#fbf7f2; }
+tbody td { padding:7px 10px; border-bottom:1px solid #efe6db; vertical-align:top; }
+tbody td strong { color:#8a4b24; }
+
+.formula { background:#1c1712; color:#fff; border-radius:7px; padding:15px 18px; margin:11px 0; font-family:'Courier New',monospace; }
+.formula .label { font-size:8.5px; color:rgba(255,255,255,0.5); letter-spacing:2px; text-transform:uppercase; margin-bottom:7px; font-family:Arial; }
+.formula .expr { font-size:11.5px; color:#f0b27a; font-weight:700; margin-bottom:5px; }
+.formula .eg { font-size:9.5px; color:rgba(255,255,255,0.7); }
+.formula .result { font-size:12px; color:#7de4a5; font-weight:700; margin-top:7px; }
+
+.chain { display:flex; flex-wrap:wrap; gap:8px; margin:12px 0; }
+.chain-node { flex:1; min-width:120px; background:#fbf7f2; border:1.5px solid #c98f5f; border-radius:8px; padding:11px; text-align:center; }
+.chain-node .cn-t { font-size:10.5px; font-weight:800; color:#8a4b24; }
+.chain-node .cn-d { font-size:9px; color:#6b5d50; margin-top:3px; line-height:1.45; }
+.chain-arrow { display:flex; align-items:center; font-size:15px; color:#c98f5f; font-weight:900; }
+
+.cl { list-style:none; padding:0; margin:7px 0; }
+.cl li { padding:5px 0 5px 22px; position:relative; font-size:10.5px; border-bottom:1px dashed #eee2d6; color:#3d352d; }
+.cl li::before { content:'☐'; position:absolute; left:0; color:#8a4b24; font-size:12px; }
+
+.dark-box { background:linear-gradient(135deg,#1c1712,#5a3a22); color:#fff; border-radius:8px; padding:17px 20px; margin:11px 0; }
+.dark-box h4 { font-size:12px; font-weight:700; color:#f0b27a; margin-bottom:9px; }
+.dark-box p, .dark-box li { font-size:10.5px; color:rgba(255,255,255,0.82); line-height:1.62; }
+.dark-box ul { padding-left:16px; margin-top:5px; }
+
+h3 { font-size:13px; font-weight:800; color:#1c1712; margin:14px 0 7px; }
+p { font-size:10.5px; color:#3d352d; line-height:1.62; margin-bottom:7px; }
+em { color:#8a4b24; font-style:normal; font-weight:700; }
+</style>
+</head>
+<body>
+
+<!-- COVER -->
+<div class="cover">
+  <div class="cover-tag">Business Setup Manual — Confidential</div>
+  <h1>Sandstone Export</h1>
+  <h2>Complete Setup Guide with the Perpetual Chain</h2>
+  <div class="cover-line"></div>
+  <p class="cover-desc">
+    Mine-to-market playbook for building a quarry-integrated sandstone export house:
+    JV structure, compliance stack, processing, proven-buyer acquisition, shipping and
+    payment mechanics, the ethical moat, realistic economics — and the reinvestment
+    ladder that turns a trading margin into a self-feeding, permanent business chain.
+  </p>
+  <div class="cover-grid">
+    <div class="cover-item"><div class="lbl">Raw Material</div><div class="val">Partner-Owned Mines, Rajasthan</div></div>
+    <div class="cover-item"><div class="lbl">Core Products</div><div class="val">Calibrated Paving · Cobbles · Sawn Premium</div></div>
+    <div class="cover-item"><div class="lbl">Primary Markets</div><div class="val">UK · Belgium · Germany · France</div></div>
+    <div class="cover-item"><div class="lbl">Launch Capital</div><div class="val">Under ₹8L at-risk before first container</div></div>
+    <div class="cover-item"><div class="lbl">Working Capital</div><div class="val">₹40–60L revolving (Year 1)</div></div>
+    <div class="cover-item"><div class="lbl">Year-3 Target</div><div class="val">10–15 containers/month · ₹1.2–2.2 Cr net</div></div>
+  </div>
+  <div class="cover-foot"><span>SANDSTONE EXPORT VENTURE — SETUP MANUAL</span><span>JULY 2026 · NOT FOR CIRCULATION</span></div>
+</div>
+
+<!-- PAGE 1 : THE PERPETUAL CHAIN -->
+<div class="page">
+  <div class="ph"><span class="ph-l">The Business Model &amp; The Perpetual Chain</span><span class="ph-r">Sandstone Export Manual</span></div>
+
+  <div class="sh"><div class="sh-num">1</div><div><div class="sh-title">The Perpetual Chain</div><div class="sh-sub">Why this business compounds instead of just repeating</div></div></div>
+
+  <p>A trader sells containers. A chain owns every link the container passes through — and every link feeds the next. This is the structure you are building:</p>
+
+  <div class="chain">
+    <div class="chain-node"><div class="cn-t">1. MINE</div><div class="cn-d">Partner's quarries. Raw stone at cost — the margin moat</div></div>
+    <div class="chain-arrow">→</div>
+    <div class="chain-node"><div class="cn-t">2. PROCESSING</div><div class="cn-d">Job-work Year 1 → own unit Year 3 (+5–8 margin points)</div></div>
+    <div class="chain-arrow">→</div>
+    <div class="chain-node"><div class="cn-t">3. EXPORT</div><div class="cn-d">UK/EU importers. Repeat monthly containers = trade annuity</div></div>
+    <div class="chain-arrow">→</div>
+    <div class="chain-node"><div class="cn-t">4. CASH</div><div class="cn-d">Margins fund audit, fairs, processing unit, working capital</div></div>
+  </div>
+  <div class="chain">
+    <div class="chain-node"><div class="cn-t">5. OWN PROJECTS</div><div class="cn-d">Stone clads your buildings, the Kumbhalgarh resort, Mande farmstay — at mine cost</div></div>
+    <div class="chain-arrow">→</div>
+    <div class="chain-node"><div class="cn-t">6. SHOWCASE</div><div class="cn-d">"As built in our own resort" — a catalogue no competitor can copy</div></div>
+    <div class="chain-arrow">→</div>
+    <div class="chain-node"><div class="cn-t">7. PREMIUM BUYERS</div><div class="cn-d">Audit + showcase unlock Tier-1 volumes at better mix</div></div>
+    <div class="chain-arrow">→</div>
+    <div class="chain-node"><div class="cn-t">8. EXPAND SOURCE</div><div class="cn-d">Second quarry lease / new colors — chain restarts, larger</div></div>
+  </div>
+
+  <div class="dark-box">
+    <h4>What makes it perpetual — four permanent forces</h4>
+    <ul>
+      <li><strong>Repeat-purchase demand:</strong> UK/EU landscaping is a replacement market — patios are re-laid, stock is re-ordered seasonally, every spring. Buyers who approve a supplier reorder for years.</li>
+      <li><strong>Owned raw material:</strong> the mine cannot be un-owned. Every future rupee of margin starts at a cost floor competitors can't reach.</li>
+      <li><strong>Compounding relationships:</strong> each fair, each audit, each on-time container adds buyers who never leave a reliable supplier — switching cost works FOR you once you're the incumbent.</li>
+      <li><strong>Downstream consumption:</strong> your own construction group is a captive customer of last resort — no dead stock, ever.</li>
+    </ul>
+  </div>
+
+  <div class="alert ac"><strong>The one thing that can break the chain — fix it first:</strong> if you are only "the exporter of the partner's stone," the partner can bypass you the day your buyers are visible on shipping documents. Section 2 exists so this can never happen. Do not skip to Section 3 without executing Section 2.</div>
+</div>
+
+<!-- PAGE 2 : JV STRUCTURE -->
+<div class="page">
+  <div class="ph"><span class="ph-l">Phase 0 — The JV Structure (Week 1–2)</span><span class="ph-r">Sandstone Export Manual</span></div>
+
+  <div class="sh"><div class="sh-num">2</div><div><div class="sh-title">The JV Agreement — Before Any Money Moves</div><div class="sh-sub">The paper that makes the chain yours, not just his</div></div></div>
+
+  <div class="ss">2.1 — The Term Sheet Skeleton (give this to your lawyer)</div>
+  <table>
+    <thead><tr><th>Clause</th><th>What it must say</th><th>Why</th></tr></thead>
+    <tbody>
+      <tr><td><strong>Entity</strong></td><td>New LLP or Pvt Ltd — the "Export Company". You + partner as members/shareholders at agreed split</td><td>Neutral vehicle; neither side's existing firm owns the buyers</td></tr>
+      <tr><td><strong>Exclusivity</strong></td><td>Export Company holds EXCLUSIVE international marketing &amp; sale rights to all output of the named mining leases, 7–10 years, renewable</td><td>Kills the bypass risk — buyers can only buy through the JV</td></tr>
+      <tr><td><strong>Transfer price</strong></td><td>Formula, not negotiation: mine-gate cost + agreed % (or fixed ₹/tonne, revised annually by index)</td><td>Every ₹20/m² here is ₹10k/container forever — lock it</td></tr>
+      <tr><td><strong>Supply commitment</strong></td><td>Minimum monthly tonnage the mines guarantee to the JV; JV gets first right over all export-grade material</td><td>You cannot promise buyers containers you can't fill</td></tr>
+      <tr><td><strong>Roles</strong></td><td>Partner: raw material, royalty/e-rawanna compliance. You: capital, processing, buyers, shipping, brand</td><td>Written roles prevent drift and blame</td></tr>
+      <tr><td><strong>Capital &amp; working capital</strong></td><td>Who funds the ₹40–60L revolving cycle, at what interest/priority</td><td>The silent killer of partnerships is unfunded WC</td></tr>
+      <tr><td><strong>Non-compete</strong></td><td>Partner will not sell export-grade stone to any other exporter or foreign buyer during the term</td><td>Closes the side-door</td></tr>
+      <tr><td><strong>Exit &amp; deadlock</strong></td><td>Buy-out formula (multiple of trailing profit), right of first refusal, arbitration seat</td><td>Decide the divorce terms at the wedding</td></tr>
+      <tr><td><strong>Audit consent</strong></td><td>Partner consents to third-party ethical/mining-compliance audits and to fixing findings</td><td>Your Tier-1 strategy depends on this</td></tr>
+    </tbody>
+  </table>
+
+  <div class="alert aw"><strong>Equity logic:</strong> a fair starting frame is 50:50 when he brings guaranteed feed-stock and you bring capital + market + operations. If he wants more, trade equity for a LOWER transfer price — margin certainty beats ownership percentage in a trading business.</div>
+
+  <div class="ss">2.2 — Verify the mine before you marry it</div>
+  <ul class="cl">
+    <li>Mining lease copy — validity dates, permitted mineral (sandstone), lease area</li>
+    <li>Royalty payment trail + e-rawanna (transit pass) compliance for the last 12 months — buyers' audits WILL check this</li>
+    <li>Monthly production capacity in tonnes — get 12 months of dispatch records, not a verbal number</li>
+    <li>Stone colors/beds actually available — photograph every face; match against the 5 target SKUs</li>
+    <li>Labour conditions as-is — PPE, wages, any minors on site: the pre-audit gap list starts here</li>
+    <li>Existing buyers of the mine's stone — names of exporters currently lifting material, and the consignee marks on their crates (your first proven-buyer list, free)</li>
+  </ul>
+</div>
+
+<!-- PAGE 3 : COMPLIANCE SETUP -->
+<div class="page">
+  <div class="ph"><span class="ph-l">Phase 1 — Company &amp; Compliance Stack (Week 2–4)</span><span class="ph-r">Sandstone Export Manual</span></div>
+
+  <div class="sh"><div class="sh-num">3</div><div><div class="sh-title">The Compliance Stack</div><div class="sh-sub">Every registration, in order, with cost and time</div></div></div>
+
+  <table>
+    <thead><tr><th>#</th><th>Registration</th><th>Where</th><th>Time</th><th>Cost</th></tr></thead>
+    <tbody>
+      <tr><td>1</td><td><strong>LLP / Pvt Ltd incorporation</strong> (the JV entity)</td><td>MCA portal via CA/CS</td><td>5–10 days</td><td>₹10–20k</td></tr>
+      <tr><td>2</td><td><strong>GST registration</strong> + <strong>LUT filing</strong> (Letter of Undertaking — exports become zero-rated, no IGST blocked in refunds)</td><td>GST portal</td><td>3–7 days</td><td>Nil</td></tr>
+      <tr><td>3</td><td><strong>IEC — Import Export Code</strong></td><td>DGFT portal (dgft.gov.in)</td><td>1–2 days</td><td>₹500</td></tr>
+      <tr><td>4</td><td><strong>Current account + AD Code</strong> registration at the port (Mundra) through your CHA</td><td>Your bank → customs</td><td>3–7 days</td><td>Nil</td></tr>
+      <tr><td>5</td><td><strong>CAPEXIL RCMC</strong> (export promotion council for stone — membership certificate needed for benefits &amp; fairs)</td><td>capexil.org</td><td>7–14 days</td><td>₹10–15k/yr</td></tr>
+      <tr><td>6</td><td><strong>ECGC policy</strong> (export credit insurance — covers buyer default)</td><td>ecgc.in</td><td>7–14 days</td><td>~₹40–60k/yr at your scale</td></tr>
+      <tr><td>7</td><td><strong>RoDTEP + Duty Drawback</strong> registration (export incentives — small % back on every shipment)</td><td>ICEGATE</td><td>With first shipment</td><td>Nil</td></tr>
+      <tr><td>8</td><td><strong>Customs data subscription</strong> (Volza / Export Genius) — the proven-buyer list</td><td>Online</td><td>Same day</td><td>₹30–60k/yr</td></tr>
+    </tbody>
+  </table>
+
+  <div class="alert at"><strong>Use an export CS/CA package:</strong> agents in Jaipur/Udaipur do items 1–7 as a bundle for ₹50–75k all-in. Your time goes to buyers and stone, not portals.</div>
+
+  <div class="ss">3.1 — The team at launch (lean)</div>
+  <table>
+    <thead><tr><th>Role</th><th>Who / cost</th><th>Note</th></tr></thead>
+    <tbody>
+      <tr><td>You</td><td>Buyers, pricing, partner relationship, QC standards</td><td>The business IS these four things</td></tr>
+      <tr><td>Yard supervisor (Rajasthan)</td><td>₹25–35k/mo, hired from an existing stone yard</td><td>Watches processing + loading. Non-negotiable hire</td></tr>
+      <tr><td>CHA + freight forwarder</td><td>Per-shipment fees</td><td>Interview 3; pick for stone experience at Mundra</td></tr>
+      <tr><td>Part-time accountant</td><td>₹8–12k/mo</td><td>GST refunds, LC document discipline</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- PAGE 4 : PRODUCT & PROCESSING -->
+<div class="page">
+  <div class="ph"><span class="ph-l">Phase 2 — Product &amp; Processing (Week 2–6, parallel)</span><span class="ph-r">Sandstone Export Manual</span></div>
+
+  <div class="sh"><div class="sh-num">4</div><div><div class="sh-title">Product Standard &amp; Processing Chain</div><div class="sh-sub">Sell exactly what the market already buys — at a tolerance it can trust</div></div></div>
+
+  <div class="ss">4.1 — The five launch SKUs (do not invent a sixth)</div>
+  <table>
+    <thead><tr><th>SKU</th><th>Formats</th><th>Segment</th></tr></thead>
+    <tbody>
+      <tr><td><strong>Kandla Grey</strong></td><td>Calibrated 22mm riven — 900×600, patio packs (15.25 / 18.9 m²), setts 100×100</td><td>Volume commodity — the door-opener</td></tr>
+      <tr><td><strong>Raj Green</strong></td><td>Calibrated 22mm riven + tumbled</td><td>Mid-premium, strongest UK repeat colour</td></tr>
+      <tr><td><strong>Autumn Brown</strong></td><td>Calibrated 22mm riven</td><td>Mid</td></tr>
+      <tr><td><strong>Fossil Mint</strong></td><td>Calibrated riven + sawn &amp; honed</td><td>Premium look, strong margins</td></tr>
+      <tr><td><strong>Modak Buff</strong></td><td>Riven + tumbled cobbles</td><td>Heritage/driveway segment</td></tr>
+    </tbody>
+  </table>
+
+  <div class="ss">4.2 — Non-negotiable quality spec (put this in every job-work contract)</div>
+  <ul class="cl">
+    <li>Calibration tolerance: <strong>22mm ±1.5mm</strong> — measured on every 10th slab, logged</li>
+    <li>Sizing tolerance: ±2mm on length/width; edges hand-dressed square</li>
+    <li>Colour blending: slabs pre-blended across pallets at the yard — UK complaint #1 is colour banding between crates</li>
+    <li>No cracked, oil-stained, or salt-bloom slabs packed — reject at yard, not at Felixstowe</li>
+    <li>Crating: ISPM-15 fumigated timber, foam interleaving, steel strapping, <strong>consignee mark + crate number stencilled</strong></li>
+    <li>Every container: photo log of every crate open + closed + being stuffed, shared to buyer same day</li>
+  </ul>
+
+  <div class="ss">4.3 — Processing: job-work first, factory later</div>
+  <div class="step">
+    <div class="step-id">Year 1 — Job-work</div>
+    <h4>Tie up 2 processing units (Bhilwara / Udaipur / Bundi belt)</h4>
+    <p>Negotiate per-m² rates for cutting + calibration + edge finish. Two units, not one — monsoon breakdowns and festival shutdowns are real. Payment terms: 50% on delivery to yard, 50% after your QC passes the lot. Target all-in processing ₹130–200/m² depending on finish.</p>
+  </div>
+  <div class="step">
+    <div class="step-id">Year 3 — Own unit (trigger: 12+ containers/month sustained)</div>
+    <h4>₹1.5–2.5 Cr: 2 gang saws / wire saw, calibration line, tumbler</h4>
+    <p>Adds 5–8 margin points and control of delivery dates. Site it near the mines, not the port — stone travels better finished than raw. Do NOT build this earlier; machines idle below 12 containers/month burn cash faster than job-work premiums ever did.</p>
+  </div>
+
+  <div class="ss">4.4 — The sample kit (10 units, ~₹1.5L with courier)</div>
+  <p>Wooden mini-crate (brand impression starts here): 150×150mm pieces of all 5 SKUs in each finish, spec card with tolerances, FOB price list, quarry photos, one page on the mine-owned single-chain story. Courier: DHL/FedEx, 20–25kg per kit.</p>
+</div>
+
+<!-- PAGE 5 : BUYERS -->
+<div class="page">
+  <div class="ph"><span class="ph-l">Phase 3 — Proven Buyers &amp; First Sales (Month 2–6)</span><span class="ph-r">Sandstone Export Manual</span></div>
+
+  <div class="sh"><div class="sh-num">5</div><div><div class="sh-title">Buyer Acquisition — The Three-Layer Evidence Stack</div><div class="sh-sub">Never spend a sample on an unproven door</div></div></div>
+
+  <table>
+    <thead><tr><th>Layer</th><th>Source</th><th>What it proves</th><th>Cost</th></tr></thead>
+    <tbody>
+      <tr><td>1</td><td><strong>Consignee marks</strong> on crates leaving with the partner's stone today (ask the exporters currently lifting from his mines)</td><td>Foreign companies already buying YOUR stone</td><td>Free — one phone call</td></tr>
+      <tr><td>2</td><td><strong>Customs data</strong> (Volza/Export Genius): HS 68022100 / 68029100 / 25161200 → UK, BE, DE, FR → last 12 months → sort by shipments</td><td>Named importers, volumes, prices paid, current suppliers</td><td>₹30–60k/yr</td></tr>
+      <tr><td>3</td><td><strong>Live RFQs</strong> — go4WorldBusiness sandstone buyer section, TradeKey, Alibaba RFQ</td><td>Buyers asking for containers this week (prioritise L/C-term inquiries)</td><td>Free to browse; ~$30–70/mo to unlock</td></tr>
+    </tbody>
+  </table>
+
+  <div class="ss">5.1 — The target list (validated this session; confirm volumes via Layer 2)</div>
+  <table>
+    <thead><tr><th>Tier</th><th>Buyers</th><th>Approach</th></tr></thead>
+    <tbody>
+      <tr><td><strong>Tier 2 — first strike (UK)</strong></td><td>Stone Paving Direct · Nustone · Pavestone · London Stone · Paving Stones Direct · Indistone · Global Stone</td><td>Sample kits month 3; all are direct importers, most publicly lean on ethical sourcing</td></tr>
+      <tr><td><strong>Tier 3 — EU</strong></td><td>Beltrami, Stoneasy (BE) · Excluton, Redsun (NL) · Seltra, Jonastone (DE)</td><td>After first UK container; Belgium's import volume is disproportionate</td></tr>
+      <tr><td><strong>Tier 1 — post-audit only</strong></td><td>Marshalls · Stonemarket · Talasey · Brett</td><td>6–12 month vendor onboarding; audit certificate is the entry ticket; volumes transform the P&amp;L</td></tr>
+    </tbody>
+  </table>
+
+  <div class="ss">5.2 — The informed first email (template)</div>
+  <div class="formula">
+    <div class="label">Cold email — send only after Layer-2 data confirms their purchases</div>
+    <div class="eg">Subject: Kandla Grey 22mm calibrated — direct from quarry owner (audit underway)</div>
+    <div class="eg" style="margin-top:6px;">"You currently import calibrated Kandla Grey from [their supplier, from customs data]. We OWN our quarries in Rajasthan — single-chain custody, ETI-standard audit in progress, dispatch photos on every crate. Identical spec, FOB Mundra: attached. A free sample crate can ship this week — what address should it go to?"</div>
+  </div>
+
+  <div class="ss">5.3 — The 3-question kill test (before quoting any RFQ/inquiry seriously)</div>
+  <ol style="padding-left:18px; font-size:10.5px; line-height:1.7;">
+    <li>"Which port do you clear at, and who is your clearing agent?" — fakes stumble</li>
+    <li>"Terms are 30% T/T advance + balance L/C at sight — confirm?" — brokers evaporate</li>
+    <li>"What did you pay per m² on your last container?" — real importers answer in one line</li>
+  </ol>
+  <div class="alert ac"><strong>Walk away instantly from:</strong> first-message orders of 10+ containers · requests for 60–90 day credit · any "registration/inspection fee" · free-email addresses with no company footprint.</div>
+
+  <div class="ss">5.4 — Fair calendar</div>
+  <p><em>India Stonemart, Jaipur (Feb)</em> — UK/EU buyers walk it; book a booth or minimum a buyer-meeting visit. <em>Marmomac, Verona (Sep)</em> — the global stone fair; visit year 1, exhibit year 2. Budget ₹3–6L per exhibited fair.</p>
+</div>
+
+<!-- PAGE 6 : SHIPPING & PAYMENT -->
+<div class="page">
+  <div class="ph"><span class="ph-l">Phase 4 — Shipping &amp; Payment Mechanics</span><span class="ph-r">Sandstone Export Manual</span></div>
+
+  <div class="sh"><div class="sh-num">6</div><div><div class="sh-title">Shipping, Documents &amp; Getting Paid</div><div class="sh-sub">The mechanics that separate exporters from ex-exporters</div></div></div>
+
+  <div class="ss">6.1 — Commercial rules, Year 1 (non-negotiable)</div>
+  <ul class="cl">
+    <li>Quote <strong>FOB Mundra only</strong> — freight volatility is the buyer's problem until you have scale</li>
+    <li>Payment: <strong>30% T/T advance + 70% L/C at sight</strong> (or CAD through bank for repeat buyers after 3 clean containers)</li>
+    <li>Every buyer under <strong>ECGC cover</strong> before container two</li>
+    <li>No open credit in year 1 — not for anyone, not for "trust building"</li>
+    <li>Currency: price list revised quarterly; re-quote if INR moves &gt;2% between order and shipment</li>
+  </ul>
+
+  <div class="ss">6.2 — Document set per shipment (your CHA drives; you check)</div>
+  <table>
+    <thead><tr><th>Document</th><th>Issued by</th><th>Watch-out</th></tr></thead>
+    <tbody>
+      <tr><td>Commercial Invoice + Packing List</td><td>You</td><td>Must match L/C wording EXACTLY — one spelling deviation = payment delay</td></tr>
+      <tr><td>Shipping Bill</td><td>CHA on ICEGATE</td><td>Correct HS code (68022100 calibrated) — drives RoDTEP refund</td></tr>
+      <tr><td>Bill of Lading</td><td>Shipping line</td><td>Consignee/notify party per L/C; "clean on board" only</td></tr>
+      <tr><td>Certificate of Origin</td><td>CAPEXIL / chamber</td><td>Needed for UK DCTS preferential duty where applicable</td></tr>
+      <tr><td>Fumigation / ISPM-15</td><td>Approved fumigator</td><td>Timber crates without it are refused at EU ports</td></tr>
+      <tr><td>Insurance certificate</td><td>Insurer</td><td>Even on FOB, insure yard-to-port leg</td></tr>
+    </tbody>
+  </table>
+
+  <div class="ss">6.3 — The loading protocol (where reputations are made)</div>
+  <ol style="padding-left:18px; font-size:10.5px; line-height:1.7;">
+    <li>Yard supervisor present at every stuffing — no exceptions, including festival weeks</li>
+    <li>Weighbridge slip per container — overweight at Mundra = unpacking in the sun at your cost</li>
+    <li>Photo log: every crate number, open + sealed, container door open, half-loaded, sealed with seal number visible</li>
+    <li>Same-day WhatsApp album to the buyer — this single habit builds more repeat business than any discount</li>
+  </ol>
+
+  <div class="formula">
+    <div class="label">Working capital cycle — know it cold</div>
+    <div class="expr">Cash out (stone + processing + crating) → Day 0–20 → Stuffed &amp; shipped → Day 25–35 → Docs negotiated under L/C → Day 35–50 → Money in</div>
+    <div class="result">₹4–8L revolves per container · 45–60 day cycle · 4 containers/month ≈ ₹40–60L revolving requirement</div>
+  </div>
+</div>
+
+<!-- PAGE 7 : ETHICAL MOAT + ECONOMICS -->
+<div class="page">
+  <div class="ph"><span class="ph-l">Phase 5 — The Ethical Moat &nbsp;|&nbsp; Phase 6 — Economics</span><span class="ph-r">Sandstone Export Manual</span></div>
+
+  <div class="sh"><div class="sh-num">7</div><div><div class="sh-title">The Ethical Moat</div><div class="sh-sub">The single highest-ROI investment in this entire plan</div></div></div>
+  <p>Rajasthan sandstone carries a documented reputation problem — bonded labour, child labour, silicosis. UK buying desks now procure against the ETI Base Code; Marshalls audits its Indian chain and publishes EPDs. Most exporters CANNOT prove chain custody because they buy from third-party mines. You own yours. Turn the industry's weakness into your certificate:</p>
+  <ol style="padding-left:18px; font-size:10.5px; line-height:1.7;">
+    <li><strong>Month 1:</strong> commission an ETI-standard pre-audit (SGS / Intertek / UL) of the mines — gap report in 4–6 weeks</li>
+    <li><strong>Month 2–4:</strong> fix the gaps — PPE, wage records, age verification, dust suppression, first-aid, drinking water. Typical cost ₹5–15L. Budget it without flinching</li>
+    <li><strong>Month 5–6:</strong> full audit → certificate → it goes on every quote, kit, and email footer: <em>"Mine-owned. Single chain. Independently audited."</em></li>
+    <li><strong>Year 2:</strong> Environmental Product Declaration (EPD) — the spec-sheet key to architect-specified projects and Tier-1 vendor lists</li>
+  </ol>
+
+  <div class="sh" style="margin-top:16px;"><div class="sh-num">8</div><div><div class="sh-title">Realistic Economics</div><div class="sh-sub">Container truth, then the honest three-year arc</div></div></div>
+
+  <table>
+    <thead><tr><th>Product (per 20ft ≈ 450–500 m²)</th><th>FOB ₹/m²</th><th>Cost ₹/m² (mine-integrated)</th><th>Container profit</th></tr></thead>
+    <tbody>
+      <tr><td>Riven Kandla Grey (commodity)</td><td>650–900</td><td>520–770</td><td><strong>₹50–90k</strong> (12–18%)</td></tr>
+      <tr><td>Premium colours, better grading</td><td>850–1,200</td><td>560–820</td><td><strong>₹90k–1.6L</strong> (15–22%)</td></tr>
+      <tr><td>Sawn / honed / tumbled</td><td>1,100–1,600</td><td>640–950</td><td><strong>₹1.5–2.5L</strong> (20–28%)</td></tr>
+    </tbody>
+  </table>
+
+  <table>
+    <thead><tr><th>Year</th><th>Containers</th><th>Revenue</th><th>Net</th><th>Profit</th></tr></thead>
+    <tbody>
+      <tr><td><strong>1</strong> (ramp 0→4/mo; setup + fairs + audit eat margin)</td><td>25–35</td><td>₹1.2–2 Cr</td><td>8–12%</td><td><strong>₹12–25L</strong></td></tr>
+      <tr><td><strong>2</strong> (5–8/mo; EU added; better mix)</td><td>60–90</td><td>₹3–5.5 Cr</td><td>12–15%</td><td><strong>₹40–75L</strong></td></tr>
+      <tr><td><strong>3</strong> (own processing; Tier-1 entry)</td><td>120–170</td><td>₹8–12 Cr</td><td>15–20%</td><td><strong>₹1.2–2.2 Cr</strong></td></tr>
+    </tbody>
+  </table>
+
+  <div class="alert aw"><strong>Margin levers, ranked:</strong> 1) SKU mix — every container shifted from riven to sawn/tumbled adds ~₹1L. 2) Own processing (Year 3) +5–8 points. 3) Audit → Tier-1 volumes. 4) The transfer-price formula you sign in Week 1 — it compounds more than everything else on this page.</div>
+</div>
+
+<!-- PAGE 8 : REINVESTMENT LADDER + RISK + 90 DAYS -->
+<div class="page">
+  <div class="ph"><span class="ph-l">The Reinvestment Ladder &nbsp;|&nbsp; Risk Register &nbsp;|&nbsp; 90-Day Checklist</span><span class="ph-r">Sandstone Export Manual</span></div>
+
+  <div class="sh"><div class="sh-num">9</div><div><div class="sh-title">The Reinvestment Ladder — Closing the Perpetual Chain</div><div class="sh-sub">Where each year's cash goes so the chain feeds itself</div></div></div>
+  <table>
+    <thead><tr><th>Stage</th><th>Cash goes into</th><th>Chain effect</th></tr></thead>
+    <tbody>
+      <tr><td><strong>Year 1</strong></td><td>Audit + fairs + working capital</td><td>Proven supplier status; buyers compound</td></tr>
+      <tr><td><strong>Year 2</strong></td><td>Export manager hire · EU expansion · EPD</td><td>You step back to strategy; the trade runs without your hours</td></tr>
+      <tr><td><strong>Year 3</strong></td><td>Own processing unit (₹1.5–2.5 Cr)</td><td>+5–8 margin points; delivery control; toll-processing for other exporters = new revenue line</td></tr>
+      <tr><td><strong>Year 3–4</strong></td><td>Stone into your own builds — Kumbhalgarh resort, Mande farmstay, group projects at mine cost</td><td>The showcase no competitor can copy; catalogue shoots in your own resort</td></tr>
+      <tr><td><strong>Year 5</strong></td><td>Second quarry lease / new colours · logistics leg (yard on the Vadhvan hinterland when the port matures)</td><td>The chain restarts, larger — mine → process → export → build → showcase → premium → mine</td></tr>
+    </tbody>
+  </table>
+
+  <div class="ss">Risk register — the six that actually kill stone exporters</div>
+  <table>
+    <thead><tr><th>Risk</th><th>Kill-switch</th></tr></thead>
+    <tbody>
+      <tr><td>Partner bypass</td><td>Section 2 executed BEFORE any market spend — exclusivity + non-compete + transfer formula</td></tr>
+      <tr><td>Rejected container (calibration/colour)</td><td>Yard supervisor at every stuffing · photo log · ±1.5mm measured &amp; logged · pre-blend pallets</td></tr>
+      <tr><td>Buyer default</td><td>30% advance + L/C at sight · ECGC on every buyer · no open credit Year 1</td></tr>
+      <tr><td>Currency swing</td><td>Quarterly price list · re-quote beyond 2% INR move · forward cover at Year-2 volumes</td></tr>
+      <tr><td>Monsoon supply gap</td><td>60-day finished-goods buffer stocked by August · two processing units</td></tr>
+      <tr><td>Royalty/e-rawanna lapse at mine</td><td>Compliance is partner's written obligation; quarterly reconciliation meeting — an audit finding here loses Tier-1 forever</td></tr>
+    </tbody>
+  </table>
+
+  <div class="ss">The 90-day checklist</div>
+  <ul class="cl">
+    <li><strong>Day 1:</strong> Partner call — exclusivity, transfer formula, 50:50; ask for lease docs + 12-month dispatch records + consignee marks of current lifters</li>
+    <li><strong>Week 1:</strong> Lawyer drafts term sheet · Volza trial · buyer sheet started (30 names)</li>
+    <li><strong>Week 1–2:</strong> Mine visit — verify stone, capacity, labour conditions; collect samples; shoot quarry photos; brief 2 job-work units; start 50 m² trial batch</li>
+    <li><strong>Week 2:</strong> SIGN the JV term sheet · incorporation + IEC + GST/LUT + AD code + CAPEXIL package started · cost sheet built (FOB/m² per SKU vs customs-data prices)</li>
+    <li><strong>Week 2–3:</strong> First domestic sales to 1–2 Jodhpur exporters (cash learning revenue) · ethical pre-audit commissioned</li>
+    <li><strong>Week 3:</strong> 10 sample kits assembled · informed emails to 15 Tier-2 buyers · kits couriered to top 5 · go4WorldBusiness RFQs answered (L/C ones first) · Stonemart booked</li>
+    <li><strong>Week 4:</strong> Follow-up calls · ECGC bound · 2 freight quotes Mundra–Felixstowe · ₹50L working capital ring-fenced</li>
+    <li><strong>Day 60–90:</strong> Trial container negotiated (30% + L/C) · stuffing under photo protocol · docs negotiated clean · money in · <strong>reorder request = the chain is alive</strong></li>
+  </ul>
+
+  <div class="dark-box">
+    <h4>The one-line operating philosophy</h4>
+    <p>Own the source, prove the chain, never ship on trust, photograph everything, and put every year's profit one link further down the chain. That is how a container trade becomes a permanent house.</p>
+  </div>
+</div>
+
+</body>
+</html>
