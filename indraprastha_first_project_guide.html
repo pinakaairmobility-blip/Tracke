@@ -1,0 +1,1007 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<style>
+* { margin:0; padding:0; box-sizing:border-box; }
+body { font-family: Arial, Helvetica, sans-serif; font-size:10.5px; color:#1a1a1a; line-height:1.62; }
+
+/* COVER */
+.cover { min-height:100vh; background:linear-gradient(155deg,#12122a 0%,#7a2509 55%,#c0501a 100%); display:flex; flex-direction:column; justify-content:center; padding:58px; page-break-after:always; position:relative; }
+.cover-tag { background:rgba(255,255,255,0.13); color:#fff; font-size:9px; font-weight:700; letter-spacing:3px; text-transform:uppercase; padding:6px 16px; border-radius:20px; margin-bottom:26px; width:fit-content; }
+.cover h1 { font-size:48px; font-weight:900; color:#fff; line-height:1.05; margin-bottom:6px; }
+.cover h2 { font-size:17px; font-weight:400; color:rgba(255,255,255,0.74); margin-bottom:32px; }
+.cover-line { width:55px; height:3px; background:#f4a261; margin-bottom:26px; border-radius:2px; }
+.cover-desc { color:rgba(255,255,255,0.7); font-size:11px; max-width:500px; line-height:1.75; margin-bottom:36px; }
+.cover-grid { display:flex; flex-wrap:wrap; gap:24px 40px; }
+.cover-item .lbl { font-size:8.5px; color:rgba(255,255,255,0.5); letter-spacing:1.5px; text-transform:uppercase; }
+.cover-item .val { font-size:12px; font-weight:700; color:#fff; margin-top:2px; }
+.cover-foot { position:absolute; bottom:32px; left:58px; right:58px; display:flex; justify-content:space-between; font-size:8.5px; color:rgba(255,255,255,0.35); border-top:1px solid rgba(255,255,255,0.1); padding-top:10px; letter-spacing:1px; }
+
+/* TOC */
+.toc { padding:46px 52px; page-break-after:always; }
+.toc-title { font-size:23px; font-weight:900; color:#7a2509; margin-bottom:4px; }
+.toc-sub { font-size:10px; color:#888; margin-bottom:22px; }
+.toc-part { font-size:8.5px; font-weight:700; letter-spacing:2px; text-transform:uppercase; color:#c0501a; margin:16px 0 5px; border-bottom:1px solid #f0e4da; padding-bottom:3px; }
+.toc-row { display:flex; gap:9px; padding:4px 0; border-bottom:1px dotted #eee; }
+.toc-n { font-size:10px; font-weight:700; color:#7a2509; min-width:24px; }
+.toc-t { font-size:10.5px; color:#333; flex:1; }
+
+/* PAGE */
+.page { padding:42px 50px; page-break-after:always; }
+.page:last-child { page-break-after:auto; }
+.ph { display:flex; justify-content:space-between; align-items:center; border-bottom:2px solid #7a2509; padding-bottom:8px; margin-bottom:20px; }
+.ph-l { font-size:8.5px; font-weight:700; letter-spacing:2px; text-transform:uppercase; color:#7a2509; }
+.ph-r { font-size:8.5px; color:#b0a79f; }
+
+.sh { display:flex; align-items:center; gap:12px; margin-bottom:14px; }
+.sh-n { background:#7a2509; color:#fff; font-size:13px; font-weight:800; min-width:34px; height:34px; border-radius:50%; display:flex; align-items:center; justify-content:center; }
+.sh-t { font-size:18px; font-weight:800; color:#12122a; }
+.sh-s { font-size:9.5px; color:#7b7168; margin-top:1px; }
+
+.ss { margin:15px 0 8px; font-size:12px; font-weight:800; color:#7a2509; border-left:3px solid #7a2509; padding-left:9px; }
+
+.box { border:1px solid #e6dcd3; border-left:4px solid #7a2509; border-radius:5px; padding:11px 13px; background:#fdfaf8; margin-bottom:9px; }
+.box-id { font-size:8.5px; font-weight:700; color:#7a2509; letter-spacing:1px; margin-bottom:3px; text-transform:uppercase; }
+.box h4 { font-size:11.5px; font-weight:800; color:#12122a; margin-bottom:5px; }
+.box p, .box li { font-size:10.5px; color:#3a3a3a; line-height:1.6; }
+.box ul, .box ol { padding-left:16px; margin:5px 0; }
+.box li { margin-bottom:2px; }
+.meta { display:flex; gap:16px; margin-top:6px; flex-wrap:wrap; }
+.where { font-size:9.5px; color:#7a2509; font-weight:700; }
+.time { font-size:9.5px; color:#666; }
+.cost { font-size:9.5px; color:#2a6a2a; font-weight:700; }
+
+.alert { border-radius:5px; padding:10px 13px; margin:10px 0; font-size:10.5px; line-height:1.6; }
+.ac { background:#fff0ed; border-left:4px solid #c0390e; } .ac strong{color:#c0390e;}
+.at { background:#eef7ec; border-left:4px solid #2e7d32; } .at strong{color:#2e7d32;}
+.ai { background:#eef2ff; border-left:4px solid #3d5bd9; } .ai strong{color:#3d5bd9;}
+.aw { background:#fffbea; border-left:4px solid #b8860b; } .aw strong{color:#b8860b;}
+
+table { width:100%; border-collapse:collapse; margin:9px 0; font-size:10px; }
+thead tr { background:#7a2509; color:#fff; }
+thead th { padding:7px 9px; text-align:left; font-weight:700; font-size:9.5px; }
+tbody tr:nth-child(even){ background:#fdfaf8; }
+tbody td { padding:6px 9px; border-bottom:1px solid #eee5dc; vertical-align:top; }
+tbody td strong { color:#7a2509; }
+
+.formula { background:#12122a; color:#fff; border-radius:7px; padding:14px 17px; margin:10px 0; font-family:'Courier New',monospace; }
+.formula .label { font-size:8.5px; color:rgba(255,255,255,0.5); letter-spacing:2px; text-transform:uppercase; margin-bottom:6px; font-family:Arial; }
+.formula .expr { font-size:11.5px; color:#f4a261; font-weight:700; margin-bottom:4px; }
+.formula .eg { font-size:9.5px; color:rgba(255,255,255,0.7); margin-bottom:2px; }
+.formula .result { font-size:12px; color:#5de4a0; font-weight:700; margin-top:6px; }
+
+.cl { list-style:none; padding:0; margin:6px 0; }
+.cl li { padding:5px 0 5px 21px; position:relative; font-size:10.5px; border-bottom:1px dashed #efe7df; color:#333; }
+.cl li::before { content:'☐'; position:absolute; left:0; color:#7a2509; font-size:12px; }
+
+.dark { background:linear-gradient(135deg,#12122a,#7a2509); color:#fff; border-radius:8px; padding:16px 19px; margin:10px 0; }
+.dark h4 { font-size:12px; font-weight:700; color:#f4a261; margin-bottom:8px; }
+.dark p, .dark li { font-size:10.5px; color:rgba(255,255,255,0.85); line-height:1.6; }
+.dark ul { padding-left:16px; margin-top:5px; }
+
+.tl-row { display:flex; margin-bottom:3px; }
+.tl-m { width:92px; min-width:92px; font-size:9.5px; font-weight:700; color:#7a2509; padding:7px 9px; background:#fdf0ea; border-radius:4px 0 0 4px; display:flex; align-items:center; }
+.tl-b { flex:1; font-size:10px; color:#333; padding:7px 11px; background:#fdfaf8; border:1px solid #eee5dc; border-left:none; border-radius:0 4px 4px 0; }
+
+.grid2 { display:flex; gap:10px; flex-wrap:wrap; }
+.g-card { flex:1; min-width:150px; background:#fdfaf8; border:1px solid #e6dcd3; border-radius:6px; padding:11px; }
+.g-card .g-l { font-size:8.5px; color:#999; letter-spacing:1px; text-transform:uppercase; }
+.g-card .g-v { font-size:16px; font-weight:800; color:#7a2509; margin:2px 0; }
+.g-card .g-u { font-size:9px; color:#777; }
+
+.script { background:#f6f6f4; border:1px dashed #c4b9ad; border-radius:5px; padding:11px 13px; font-size:10px; line-height:1.65; color:#2d2d2d; margin:8px 0; white-space:pre-wrap; font-family:Arial; }
+
+h3 { font-size:13px; font-weight:800; color:#12122a; margin:13px 0 6px; }
+p { font-size:10.5px; color:#3a3a3a; line-height:1.62; margin-bottom:6px; }
+em { color:#7a2509; font-style:normal; font-weight:700; }
+</style>
+</head>
+<body>
+
+<!-- ═══════ COVER ═══════ -->
+<div class="cover">
+  <div class="cover-tag">First Project Manual — Confidential</div>
+  <h1>Indraprastha<br>Heights</h1>
+  <h2>The Complete Beginner's Guide to Building &amp; Selling Your First Project</h2>
+  <div class="cover-line"></div>
+  <p class="cover-desc">
+    End-to-end operating manual for a first-time developer: deal maths, land &amp; title,
+    UDCPR 2020 rules for a G+6 building, every NOC and approval, MahaRERA compliance,
+    contractor selection and construction control, pricing, the full marketing and sales
+    playbook, collections, handover, and the beginner mistakes that destroy first projects.
+  </p>
+  <div class="cover-grid">
+    <div class="cover-item"><div class="lbl">Project</div><div class="val">Indraprastha Heights</div></div>
+    <div class="cover-item"><div class="lbl">Location</div><div class="val">Plot 7B, SR 56, Dasak Shiwar</div></div>
+    <div class="cover-item"><div class="lbl">Configuration</div><div class="val">Stilt Parking + 6 Floors</div></div>
+    <div class="cover-item"><div class="lbl">Product</div><div class="val">2BHK &amp; 3BHK</div></div>
+    <div class="cover-item"><div class="lbl">Saleable Area</div><div class="val">29,100 sq ft</div></div>
+    <div class="cover-item"><div class="lbl">Authority</div><div class="val">Nashik Municipal Corporation</div></div>
+    <div class="cover-item"><div class="lbl">Framework</div><div class="val">UDCPR 2020 · MahaRERA · MOFA</div></div>
+    <div class="cover-item"><div class="lbl">Plot</div><div class="val">37.15m × 29.38m · Corner</div></div>
+  </div>
+  <div class="cover-foot"><span>INDRAPRASTHA HEIGHTS — DASAK SHIWAR, NASHIK ROAD</span><span>FIRST PROJECT MANUAL · NOT FOR CIRCULATION</span></div>
+</div>
+
+<!-- ═══════ CONTENTS ═══════ -->
+<div class="toc">
+  <div class="toc-title">Contents</div>
+  <div class="toc-sub">Read Part A before spending another rupee. Parts B–F are execution.</div>
+
+  <div class="toc-part">Part A — Foundation (Do This First)</div>
+  <div class="toc-row"><div class="toc-n">1</div><div class="toc-t">Know Your Numbers — Deal Structure, Break-Even &amp; Survival Maths</div></div>
+  <div class="toc-row"><div class="toc-n">2</div><div class="toc-t">Cash Flow Plan — How a First Project Actually Gets Funded</div></div>
+  <div class="toc-row"><div class="toc-n">3</div><div class="toc-t">The Team You Must Assemble Before Anything Else</div></div>
+
+  <div class="toc-part">Part B — Legal, Rules &amp; Approvals</div>
+  <div class="toc-row"><div class="toc-n">4</div><div class="toc-t">Land, Title &amp; Ownership Verification</div></div>
+  <div class="toc-row"><div class="toc-n">5</div><div class="toc-t">UDCPR 2020 — Every Rule That Applies to Your G+6 Building</div></div>
+  <div class="toc-row"><div class="toc-n">6</div><div class="toc-t">The 24-Metre Rule — The Costliest Mistake You Can Make</div></div>
+  <div class="toc-row"><div class="toc-n">7</div><div class="toc-t">All NOCs — Offices, Documents, Timelines, Costs</div></div>
+  <div class="toc-row"><div class="toc-n">8</div><div class="toc-t">Building Plan Sanction — AutoDCR &amp; Government Fees</div></div>
+  <div class="toc-row"><div class="toc-n">9</div><div class="toc-t">MahaRERA — Registration, Escrow, Carpet Area, Penalties</div></div>
+  <div class="toc-row"><div class="toc-n">10</div><div class="toc-t">Commencement Certificate &amp; Demolition</div></div>
+
+  <div class="toc-part">Part C — Construction</div>
+  <div class="toc-row"><div class="toc-n">11</div><div class="toc-t">Contractor Selection &amp; Contract Structure</div></div>
+  <div class="toc-row"><div class="toc-n">12</div><div class="toc-t">Cost Control — Where First-Timers Lose 15% of Budget</div></div>
+  <div class="toc-row"><div class="toc-n">13</div><div class="toc-t">Specification Sheet — What to Build for This Market</div></div>
+  <div class="toc-row"><div class="toc-n">14</div><div class="toc-t">Stage-Wise Quality &amp; Statutory Checkpoints</div></div>
+
+  <div class="toc-part">Part D — Marketing &amp; Sales</div>
+  <div class="toc-row"><div class="toc-n">15</div><div class="toc-t">Positioning — What You Are Actually Selling</div></div>
+  <div class="toc-row"><div class="toc-n">16</div><div class="toc-t">Pricing Strategy &amp; Escalation Ladder</div></div>
+  <div class="toc-row"><div class="toc-n">17</div><div class="toc-t">Phase 1 — Pre-Launch (Before RERA)</div></div>
+  <div class="toc-row"><div class="toc-n">18</div><div class="toc-t">Phase 2 — Launch (After RERA Number)</div></div>
+  <div class="toc-row"><div class="toc-n">19</div><div class="toc-t">Channel Partners — The 40% of Your Sales</div></div>
+  <div class="toc-row"><div class="toc-n">20</div><div class="toc-t">Digital Marketing — Exact Setup &amp; Ad Copy</div></div>
+  <div class="toc-row"><div class="toc-n">21</div><div class="toc-t">Site Visit to Booking — The Conversion Script</div></div>
+  <div class="toc-row"><div class="toc-n">22</div><div class="toc-t">Booking Documentation, Collections &amp; Home Loans</div></div>
+
+  <div class="toc-part">Part E — Delivery &amp; Handover</div>
+  <div class="toc-row"><div class="toc-n">23</div><div class="toc-t">Occupancy Certificate &amp; Possession</div></div>
+  <div class="toc-row"><div class="toc-n">24</div><div class="toc-t">Society Formation, Conveyance &amp; Defect Liability</div></div>
+
+  <div class="toc-part">Part F — Survival</div>
+  <div class="toc-row"><div class="toc-n">25</div><div class="toc-t">12 Mistakes That Kill First Projects</div></div>
+  <div class="toc-row"><div class="toc-n">26</div><div class="toc-t">Master Timeline &amp; 90-Day Action Plan</div></div>
+</div>
+
+<!-- ═══════ PART A : NUMBERS ═══════ -->
+<div class="page">
+  <div class="ph"><span class="ph-l">Part A · 1 — Know Your Numbers</span><span class="ph-r">Indraprastha Heights</span></div>
+
+  <div class="sh"><div class="sh-n">1</div><div><div class="sh-t">Deal Structure, Break-Even &amp; Survival Maths</div><div class="sh-s">The single page that decides whether this project makes or loses money</div></div></div>
+
+  <p>Before design, marketing or approvals — settle the arithmetic. In development, the deal structure decides profit far more than execution quality does. A well-built project on a bad structure still loses money.</p>
+
+  <div class="ss">1.1 — Your project's base numbers</div>
+  <div class="grid2">
+    <div class="g-card"><div class="g-l">Plot Area</div><div class="g-v">~1,091</div><div class="g-u">sqm (37.15 × 29.38 m)</div></div>
+    <div class="g-card"><div class="g-l">Saleable Area</div><div class="g-v">29,100</div><div class="g-u">sq ft (per plan)</div></div>
+    <div class="g-card"><div class="g-l">Built-up (approx)</div><div class="g-v">~34,000</div><div class="g-u">sq ft incl. common areas</div></div>
+    <div class="g-card"><div class="g-l">Config</div><div class="g-v">G+6</div><div class="g-u">stilt parking + 6 floors</div></div>
+  </div>
+
+  <div class="ss">1.2 — The break-even calculation (fill in YOUR real numbers)</div>
+  <div class="formula">
+    <div class="label">Step 1 — Gross Development Value (GDV)</div>
+    <div class="expr">GDV = Saleable area × Achievable rate</div>
+    <div class="eg">Conservative: 29,100 × ₹3,800 = ₹11.06 Cr</div>
+    <div class="eg">Realistic:    29,100 × ₹4,200 = ₹12.22 Cr</div>
+    <div class="eg">Optimistic:   29,100 × ₹4,600 = ₹13.39 Cr</div>
+    <div class="label" style="margin-top:10px;">Step 2 — Total Project Cost</div>
+    <div class="expr">Cost = Construction + Approvals + Finance + Marketing + Contingency</div>
+    <div class="eg">Construction: 34,000 sqft × ₹2,200/sqft = ₹7.48 Cr</div>
+    <div class="eg">Govt fees, TDR/premium FSI, approvals   = ₹0.80–1.20 Cr</div>
+    <div class="eg">Marketing + brokerage (4–5% of GDV)     = ₹0.50–0.60 Cr</div>
+    <div class="eg">Finance cost + contingency (8%)         = ₹0.70 Cr</div>
+    <div class="result">TOTAL COST ≈ ₹9.5–10.0 Cr</div>
+  </div>
+
+  <div class="alert ac"><strong>The number that decides everything — your share of GDV.</strong> If you are the developer on an area-sharing deal with the landowner, you fund 100% of construction but keep only your share of the flats. Run this before anything else:</div>
+
+  <table>
+    <thead><tr><th>Your share of saleable area</th><th>Your revenue @ ₹4,200/sqft</th><th>Your cost</th><th>Result</th></tr></thead>
+    <tbody>
+      <tr><td>40% (11,640 sqft)</td><td>₹4.89 Cr</td><td>₹9.5 Cr</td><td><strong>LOSS ₹4.6 Cr</strong></td></tr>
+      <tr><td>60% (17,460 sqft)</td><td>₹7.33 Cr</td><td>₹9.5 Cr</td><td><strong>LOSS ₹2.2 Cr</strong></td></tr>
+      <tr><td>75% (21,825 sqft)</td><td>₹9.17 Cr</td><td>₹9.5 Cr</td><td>Break-even (approx)</td></tr>
+      <tr><td>85% (24,735 sqft)</td><td>₹10.39 Cr</td><td>₹9.5 Cr</td><td>Profit ₹0.9 Cr</td></tr>
+      <tr><td>100% (you own land)</td><td>₹12.22 Cr</td><td>₹9.5 Cr + land</td><td>Profit ₹2.7 Cr less land cost</td></tr>
+    </tbody>
+  </table>
+
+  <div class="ss">1.3 — The rule to remember forever</div>
+  <div class="dark">
+    <h4>The 2.5× Rule</h4>
+    <p>An area-sharing development deal only works when the <strong>achievable sale rate is at least 2.5–3× your construction cost per sqft</strong>. Below that ratio, whatever you give away to the landowner comes straight out of your profit and then out of your capital.</p>
+    <ul>
+      <li>Dasak: sale ₹4,200 ÷ construction ₹2,200 = <strong>1.9×</strong> → area-sharing is dangerous</li>
+      <li>Gangapur Rd: sale ₹6,500 ÷ ₹2,500 = <strong>2.6×</strong> → area-sharing works</li>
+    </ul>
+    <p style="margin-top:6px;">At a 1.9× ratio you need <strong>75%+ of the saleable area</strong> to break even. If your current deal gives you less, renegotiate before you start — the four levers are on the next line.</p>
+  </div>
+
+  <div class="ss">1.4 — Four renegotiation levers (use before signing/starting)</div>
+  <table>
+    <thead><tr><th>Lever</th><th>How it works</th></tr></thead>
+    <tbody>
+      <tr><td><strong>Fixed-area deal</strong></td><td>Landowner takes a fixed number of flats (e.g. 6 flats), not a %. Caps his share; all upside from better pricing is yours</td></tr>
+      <tr><td><strong>Revenue share after cost</strong></td><td>Split sale proceeds <em>after</em> project cost is recovered — construction burden shared proportionally, not dumped on you</td></tr>
+      <tr><td><strong>Part-cash, lower area</strong></td><td>Pay landowner some cash upfront in exchange for a much larger area share</td></tr>
+      <tr><td><strong>Outright purchase</strong></td><td>Buy the land if affordable — 100% of GDV is yours; simplest and most profitable structure</td></tr>
+    </tbody>
+  </table>
+
+  <div class="alert aw"><strong>Verify your sale rate before finalising anything.</strong> Do not use my figures or a broker's claim. Go to <em>igrmaharashtra.gov.in → e-Search</em> and pull the last 6 months of actual registered flat transactions in Dasak Shiwar / Nashik Road. Registered prices are the truth; asking prices are marketing.</div>
+</div>
+
+<!-- ═══════ PART A : CASH FLOW ═══════ -->
+<div class="page">
+  <div class="ph"><span class="ph-l">Part A · 2–3 — Cash Flow &amp; Team</span><span class="ph-r">Indraprastha Heights</span></div>
+
+  <div class="sh"><div class="sh-n">2</div><div><div class="sh-t">Cash Flow — How a First Project Gets Funded</div><div class="sh-s">Projects die of cash-flow timing, not of bad profit maths</div></div></div>
+
+  <p>You do not need ₹9.5 Cr in the bank. You need enough to reach the point where customer money starts arriving — and then the discipline to never spend ahead of it.</p>
+
+  <table>
+    <thead><tr><th>Stage</th><th>Cash needed from you</th><th>Money coming in</th></tr></thead>
+    <tbody>
+      <tr><td>Approvals, NOCs, fees, RERA, architect</td><td><strong>₹80L–1.2 Cr</strong> — all your money, zero income</td><td>Nil — you cannot legally book before RERA</td></tr>
+      <tr><td>Demolition + excavation + foundation</td><td><strong>₹60–90L</strong></td><td>Launch bookings begin: 10% booking amounts</td></tr>
+      <tr><td>Plinth to 2nd slab</td><td>₹1.2–1.8 Cr</td><td>Milestone demands (20–35% collected)</td></tr>
+      <tr><td>3rd slab to top slab</td><td>₹2.5–3 Cr</td><td>Bank disbursements start flowing (bulk of money)</td></tr>
+      <tr><td>Finishing, lifts, external</td><td>₹2–2.5 Cr</td><td>Milestone + possession-linked demands</td></tr>
+      <tr><td>OC + handover</td><td>₹30–50L</td><td>Final 5–10% on possession</td></tr>
+    </tbody>
+  </table>
+
+  <div class="alert ac"><strong>The critical gap:</strong> the first ₹1.5–2 Cr is entirely yours, spent over 8–14 months with no revenue. This is where most first-time developers run out. Arrange it before you start — not in month 9.</div>
+
+  <div class="ss">2.1 — Funding options, ranked for a first project</div>
+  <table>
+    <thead><tr><th>Source</th><th>Reality for a first-timer</th></tr></thead>
+    <tbody>
+      <tr><td><strong>Own capital</strong></td><td>Cleanest. Budget the full pre-revenue ₹2 Cr from here if possible</td></tr>
+      <tr><td><strong>Equity partner</strong></td><td>Best first-project option — share risk, share profit. Structure in an SPV with written roles, capital, and exit terms</td></tr>
+      <tr><td><strong>Construction finance (bank/NBFC)</strong></td><td>Hard without a track record. Needs sanctioned plan + RERA + clean title + 30–40% own contribution. Approach after RERA, not before</td></tr>
+      <tr><td><strong>Customer advances</strong></td><td>Your main engine — but 70% is legally locked in escrow (Section 9). Never plan on the full amount</td></tr>
+      <tr><td><strong>Private/hand loans</strong></td><td>Avoid. 2–3%/month interest destroys a 1.9× ratio project faster than any construction delay</td></tr>
+    </tbody>
+  </table>
+
+  <div class="sh" style="margin-top:18px;"><div class="sh-n">3</div><div><div class="sh-t">The Team — Assemble Before Anything Else</div><div class="sh-s">Nine people. Hire slowly, verify credentials, put everything in writing</div></div></div>
+
+  <table>
+    <thead><tr><th>Role</th><th>Why essential</th><th>Cost</th></tr></thead>
+    <tbody>
+      <tr><td><strong>Architect (CoA registered)</strong></td><td>Guru Buildcon — AutoDCR drawings, NOC coordination, completion certificate. Verify CoA number</td><td>1–2% of construction cost</td></tr>
+      <tr><td><strong>Structural engineer (NMC licensed)</strong></td><td>Design + stability certificates at every slab. Personally liable — cannot be skipped</td><td>₹1.5–3 L</td></tr>
+      <tr><td><strong>Site engineer (full time)</strong></td><td>Your eyes daily. A first-timer without one <em>will</em> be cheated on material and labour</td><td>₹30–45k/month</td></tr>
+      <tr><td><strong>Advocate (property)</strong></td><td>Title search, agreements, RERA, society formation, conveyance</td><td>₹1–2 L over project</td></tr>
+      <tr><td><strong>Chartered Accountant</strong></td><td>RERA CA certificates, escrow compliance, GST, TDS, quarterly filings</td><td>₹1–1.5 L/year</td></tr>
+      <tr><td><strong>RCC contractor</strong></td><td>Structure execution</td><td>See Section 11</td></tr>
+      <tr><td><strong>Sales person</strong></td><td>Site presence 7 days/week during launch. Do not staff the site with yourself alone</td><td>₹20–30k + 0.5% incentive</td></tr>
+      <tr><td><strong>Liaison/consultant</strong></td><td>Optional but valuable — walks files through NMC. Saves months</td><td>₹1.5–4 L</td></tr>
+      <tr><td><strong>Bank DSA relationship</strong></td><td>Converts buyers into loan approvals; a genuine sales channel</td><td>Free — they earn from the bank</td></tr>
+    </tbody>
+  </table>
+
+  <div class="alert at"><strong>Beginner tip:</strong> pay the architect and structural engineer properly and on time. They are the two people whose signatures the entire project legally rests on, and they will save you far more than they cost when NMC raises objections.</div>
+</div>
+
+<!-- ═══════ PART B : LAND & TITLE ═══════ -->
+<div class="page">
+  <div class="ph"><span class="ph-l">Part B · 4 — Land, Title &amp; Ownership</span><span class="ph-r">Indraprastha Heights</span></div>
+
+  <div class="sh"><div class="sh-n">4</div><div><div class="sh-t">Land, Title &amp; Ownership Verification</div><div class="sh-s">Everything below must be clean before you spend on drawings</div></div></div>
+
+  <div class="ss">4.1 — Documents to collect (in this order)</div>
+  <table>
+    <thead><tr><th>#</th><th>Document</th><th>Where</th><th>What to check</th></tr></thead>
+    <tbody>
+      <tr><td>1</td><td><strong>7/12 Extract (certified)</strong></td><td>Talathi office / bhulekh.mahabhumi.gov.in</td><td>Owner name, area, <em>land class — NA or agricultural</em>, "Itar Hakk" (other rights) must be NIL, no mortgage/attachment</td></tr>
+      <tr><td>2</td><td><strong>Property Card</strong></td><td>City Survey Office, Nashik</td><td>Urban record — plot dimensions must match your plan (37.15 × 29.38 m)</td></tr>
+      <tr><td>3</td><td><strong>NA Order</strong></td><td>SDO, Nashik (if land is agricultural)</td><td>Without this, no building permission. 2–5 months. Check FIRST</td></tr>
+      <tr><td>4</td><td><strong>30-year title search</strong></td><td>Advocate at Sub-Registrar records</td><td>Every sale deed, mortgage, court case, acquisition notice, POA in the chain</td></tr>
+      <tr><td>5</td><td><strong>Index II (30 yrs)</strong></td><td>Sub-Registrar, Nashik Road</td><td>Cross-check against title report — any unexplained entry is a defect</td></tr>
+      <tr><td>6</td><td><strong>DP Remark / Zone Certificate</strong></td><td>NMC Town Planning</td><td>Zone (Residential R1/R2), any road widening or reservation on your plot</td></tr>
+      <tr><td>7</td><td><strong>Development Agreement + POA</strong></td><td>Registered at Sub-Registrar</td><td>Your area share, timelines, penalty clauses, who pays what — see Section 1.4</td></tr>
+      <tr><td>8</td><td><strong>Search report from a bank's panel advocate</strong></td><td>Via any bank</td><td>Free second opinion — if a bank's lawyer clears it, buyer home loans will clear too</td></tr>
+    </tbody>
+  </table>
+
+  <div class="ss">4.2 — Site-specific issues on YOUR plot (from site inspection)</div>
+  <div class="box">
+    <div class="box-id">Issue 1 — Existing structure</div>
+    <h4>Old bungalow standing on the plot</h4>
+    <p>Must be demolished. Budget ₹2–5 L. <strong>Do not demolish before receiving the Commencement Certificate</strong> — premature demolition invites notices and complicates the NMC site inspection. Salvage value (steel, timber, doors, bricks) offsets part of the cost; agree salvage rights in the demolition contract.</p>
+  </div>
+  <div class="box">
+    <div class="box-id">Issue 2 — Trees on site</div>
+    <h4>Mature trees are visibly present — Tree Authority NOC is mandatory</h4>
+    <p>Do a tree survey now: count, species, girth, photographs. Trees above 100mm girth need formal permission. Expect a condition to plant 3 replacement trees per tree removed. <strong>Apply in month 1 — this NOC takes 30–60 days and NMC will not sanction plans without it.</strong> Cutting a tree without permission attracts heavy penalty and can stall the project.</p>
+  </div>
+  <div class="box">
+    <div class="box-id">Issue 3 — Corner plot at road junction</div>
+    <h4>Roads on both east and west sides — advantage and obligation</h4>
+    <p>Advantage: two-side visibility, better marketing, corner-unit premium. Obligation: corner plots require a <em>splay/cut-off at the corner</em> as per UDCPR, and both facades must be finished — you cannot leave a "back side". Confirm the splay dimension with your architect before the plan is finalised.</p>
+  </div>
+
+  <div class="alert ai"><strong>Before you proceed:</strong> confirm the 9m west road and the east road are actually notified in the Development Plan and their widening lines are known. A proposed road that never gets built changes your setbacks, your FSI eligibility, and your marketing story.</div>
+</div>
+
+<!-- ═══════ PART B : UDCPR RULES ═══════ -->
+<div class="page">
+  <div class="ph"><span class="ph-l">Part B · 5 — UDCPR 2020 Rules for Your Building</span><span class="ph-r">Indraprastha Heights</span></div>
+
+  <div class="sh"><div class="sh-n">5</div><div><div class="sh-t">Every Rule That Applies to a G+6 in Nashik</div><div class="sh-s">Unified Development Control &amp; Promotion Regulations 2020 — the binding law</div></div></div>
+
+  <p>UDCPR 2020 (notified 5 Dec 2020) replaced all older DCRs for Maharashtra municipal corporations except Mumbai. Your architect must work from UDCPR 2020 — not the old Nashik DCR. Ask him to confirm this in writing.</p>
+
+  <table>
+    <thead><tr><th>Parameter</th><th>Rule</th><th>Applied to your plot</th></tr></thead>
+    <tbody>
+      <tr><td><strong>Basic FSI</strong></td><td>1.10–1.50 depending on road width; 9m+ road qualifies for the higher slab</td><td>~1,636 sqm basic on 1,091 sqm plot</td></tr>
+      <tr><td><strong>Additional FSI</strong></td><td>TDR (up to +0.50) and Premium FSI on payment (up to +0.50)</td><td><em>Essential</em> — your 29,100 sqft target needs ~2.4–2.5 FSI. Confirm the loading with Guru Buildcon</td></tr>
+      <tr><td><strong>Ancillary/fungible FSI</strong></td><td>Additional area on premium payment for balconies, service areas</td><td>Verify what is included in the 29,100 sqft figure</td></tr>
+      <tr><td><strong>Ground coverage</strong></td><td>Max ~40–45% of plot for residential</td><td>Max ~440–490 sqm footprint</td></tr>
+      <tr><td><strong>Front setback</strong></td><td>Min 3.0m; increases with building height</td><td>3.0–4.5m from the 9m road</td></tr>
+      <tr><td><strong>Side/rear setbacks</strong></td><td>Height-linked. For ~21m height, typically 4.5–6.0m unless relaxations apply</td><td><em>Critical</em> — G+6 setbacks are much larger than G+4. Verify with architect</td></tr>
+      <tr><td><strong>Marginal open space</strong></td><td>Must be clear and accessible — cannot be built upon or fully covered</td><td>Fire tender access path required</td></tr>
+      <tr><td><strong>Parking</strong></td><td>1 ECS per flat minimum for units above 40 sqm carpet; visitor parking additional. 1 ECS ≈ 23 sqm incl. circulation</td><td>~20–24 flats → 20–24 ECS + visitor. Stilt alone may not suffice — check</td></tr>
+      <tr><td><strong>Lift</strong></td><td>Mandatory above G+3</td><td>Mandatory. For G+6 plan for <em>2 lifts</em> (or 1 lift + adequate stair) — 1 lift for 24 flats causes serious buyer objection</td></tr>
+      <tr><td><strong>Staircase</strong></td><td>Min 1.2m clear width residential; second staircase / fire escape as per height and fire NOC</td><td>Fire dept will likely require a second means of escape at this height</td></tr>
+      <tr><td><strong>Corridor</strong></td><td>Min 1.2m clear</td><td>Your plan shows 8'0" (2.4m) passage — compliant</td></tr>
+      <tr><td><strong>Habitable room ventilation</strong></td><td>Window area ≥ 1/10th of floor area; min room size norms apply</td><td>Check every bedroom in the plan</td></tr>
+      <tr><td><strong>Rainwater harvesting</strong></td><td>Mandatory for all new buildings in NMC</td><td>Show pit + roof drainage in drawings</td></tr>
+      <tr><td><strong>Solar water heating</strong></td><td>Mandatory for residential buildings above a stipulated number of flats</td><td>Show terrace solar provision</td></tr>
+      <tr><td><strong>Waste management</strong></td><td>Segregated waste storage; composting for larger projects</td><td>Provide a dry/wet waste room at stilt level</td></tr>
+      <tr><td><strong>Water storage</strong></td><td>Underground tank + overhead tank sized for occupancy; separate fire tank</td><td>Structural design must account for OHT load at G+6</td></tr>
+    </tbody>
+  </table>
+
+  <div class="alert aw"><strong>Ask your architect for a written FSI statement</strong> — a single sheet showing: plot area, basic FSI, TDR loaded, premium FSI purchased, ancillary FSI, total permissible, total proposed, ground coverage %, parking count, setbacks on all four sides. If he cannot produce this in one page, the plan is not ready for submission.</div>
+</div>
+
+<!-- ═══════ PART B : 24M RULE ═══════ -->
+<div class="page">
+  <div class="ph"><span class="ph-l">Part B · 6 — The 24-Metre Rule</span><span class="ph-r">Indraprastha Heights</span></div>
+
+  <div class="sh"><div class="sh-n">6</div><div><div class="sh-t">The 24-Metre Rule — Your Costliest Design Decision</div><div class="sh-s">Read this before the plan is finalised. It can swing ₹40–80 lakh</div></div></div>
+
+  <div class="alert ac"><strong>The rule:</strong> Under Maharashtra fire regulations and the National Building Code, a residential building crossing <strong>24 metres in height</strong> is classified as a <em>high-rise</em>. High-rise classification triggers a dramatically more expensive compliance package.</div>
+
+  <div class="ss">6.1 — Do the height maths NOW</div>
+  <div class="formula">
+    <div class="label">Height calculation — ground level to terrace slab</div>
+    <div class="expr">Height = Stilt height + (Number of floors × Floor-to-floor height)</div>
+    <div class="eg">Conservative design: 3.0m stilt + (6 × 3.0m) = 21.0m  → NOT high-rise ✓</div>
+    <div class="eg">Generous design:    3.3m stilt + (6 × 3.15m) = 22.2m → NOT high-rise ✓</div>
+    <div class="eg">Careless design:    3.6m stilt + (6 × 3.4m) = 24.0m → HIGH-RISE ✗</div>
+    <div class="result">TARGET: keep total height at or below 22.5m — leave a safety margin</div>
+  </div>
+
+  <div class="ss">6.2 — What changes if you cross 24m</div>
+  <table>
+    <thead><tr><th>Requirement</th><th>Below 24m</th><th>Above 24m (high-rise)</th><th>Extra cost</th></tr></thead>
+    <tbody>
+      <tr><td>Fire lift</td><td>Not required</td><td><strong>Mandatory</strong> — dedicated fireman's lift with power backup</td><td>₹12–20 L</td></tr>
+      <tr><td>Pressurised staircase</td><td>Not required</td><td><strong>Mandatory</strong> — mechanical pressurisation system</td><td>₹8–15 L</td></tr>
+      <tr><td>Refuge area</td><td>Not required</td><td><strong>Mandatory</strong> at prescribed levels — <em>consumes saleable area</em></td><td>Area loss + ₹5 L</td></tr>
+      <tr><td>Sprinkler system</td><td>Generally not required</td><td>May be required throughout</td><td>₹15–25 L</td></tr>
+      <tr><td>Fire tank capacity</td><td>Lower</td><td>Substantially higher; larger pumps</td><td>₹5–10 L</td></tr>
+      <tr><td>Setbacks &amp; fire tender path</td><td>Standard</td><td>Wider marginal spaces required — <em>may reduce your footprint</em></td><td>Area loss</td></tr>
+      <tr><td>Approval complexity</td><td>Ward-level</td><td>Higher scrutiny, longer timelines</td><td>2–4 months delay</td></tr>
+    </tbody>
+  </table>
+
+  <div class="dark">
+    <h4>Action this week</h4>
+    <p>Send one line to Guru Buildcon: <em>"Please confirm in writing the total building height from ground level to terrace slab, and confirm the building is classified as non-high-rise (below 24m) under the Maharashtra Fire Act."</em> Get the reply in writing before plan submission. If it comes back above 24m, reduce floor-to-floor heights to 2.95–3.0m — this single change protects ₹40–80 lakh and months of approval time, and buyers in this segment will never notice 5cm of ceiling height.</p>
+  </div>
+
+  <div class="ss">6.3 — Fire requirements you WILL have at G+6 (even below 24m)</div>
+  <ul class="cl">
+    <li><strong>Wet riser</strong> — 100mm GI pipe vertical through all floors, landing valve each floor, Siamese connection at ground for fire brigade</li>
+    <li><strong>Fire pumps</strong> — electric main + diesel standby, typically 900+ LPM at 3.5 kg/cm², in a ground-level pump room with 24-hour access</li>
+    <li><strong>Dedicated fire water tank</strong> — separate from domestic supply, clearly marked (underground + terrace)</li>
+    <li><strong>Hose reel cabinet</strong> on every floor landing, 20m hose + nozzle, break-glass enclosure</li>
+    <li><strong>Fire extinguishers</strong> — ABC dry powder 5kg per 150 sqm floor area; CO₂ in electrical rooms</li>
+    <li><strong>Smoke detection + alarm</strong> in lobbies, common passages, electrical rooms — interconnected</li>
+    <li><strong>Illuminated EXIT signage</strong> with battery backup on all escape routes</li>
+    <li><strong>Fire-rated doors (FD-60)</strong> at lift lobby / staircase interface on each floor</li>
+    <li><strong>Fire tender access</strong> — a clear path and turning space per fire officer's requirement; this drives your setback design</li>
+    <li><strong>Second means of escape</strong> — confirm with the fire officer at drawing stage, not after construction</li>
+  </ul>
+  <div class="alert at"><strong>Budget:</strong> ₹18–30 L for the complete fire package at G+6 (non-high-rise). Include it in your project cost from day one — first-timers routinely forget this and find it in month 20.</div>
+</div>
+
+<!-- ═══════ PART B : NOCs ═══════ -->
+<div class="page">
+  <div class="ph"><span class="ph-l">Part B · 7 — All NOCs</span><span class="ph-r">Indraprastha Heights</span></div>
+
+  <div class="sh"><div class="sh-n">7</div><div><div class="sh-t">NOC Collection — Apply for ALL Simultaneously</div><div class="sh-s">The single biggest cause of first-project delay is applying one at a time</div></div></div>
+
+  <table>
+    <thead><tr><th>NOC</th><th>Office</th><th>Key documents</th><th>Time</th><th>Cost</th></tr></thead>
+    <tbody>
+      <tr><td><strong>Fire NOC</strong><br>(mandatory G+6)</td><td>Chief Fire Officer, NMC</td><td>Fire protection plan, escape route drawings, system specifications, staircase widths</td><td>30–60 days</td><td>Fee + ₹18–30L system</td></tr>
+      <tr><td><strong>AAI height clearance</strong></td><td>Online: nocas.aai.aero</td><td>Plot GPS coordinates, proposed height in metres, site plan</td><td>15–45 days</td><td>₹500–2,000</td></tr>
+      <tr><td><strong>Tree Authority</strong><br>(confirmed needed)</td><td>NMC Tree Authority</td><td>Tree survey: count, species, girth, photos; replanting undertaking</td><td>30–60 days</td><td>Nominal + replanting</td></tr>
+      <tr><td><strong>MSEDCL</strong></td><td>MSEDCL Nashik Road sub-division</td><td>Load calculation (~4kW × flats + common), site plan, transformer requirement</td><td>15–30 days</td><td>Deposit at connection</td></tr>
+      <tr><td><strong>Water &amp; Drainage</strong></td><td>NMC Water Dept, Nashik Road ward</td><td>Drainage layout, connection point, sewer availability confirmation</td><td>15–30 days</td><td>Betterment charges</td></tr>
+      <tr><td><strong>MPCB / Environment</strong></td><td>environs.maharashtra.gov.in</td><td>Construction waste plan, dust mitigation, project details</td><td>30–60 days</td><td>Fee based on area</td></tr>
+      <tr><td><strong>Cantonment</strong> (verify)</td><td>Nashik Road / Deolali Cantonment Board</td><td>Only if plot falls in cantonment zone or buffer — <em>have your advocate confirm this in month 1</em></td><td>30–90 days</td><td>Varies</td></tr>
+      <tr><td><strong>Lift shaft approval</strong></td><td>Lift Inspector, DISH Maharashtra</td><td>Shaft drawings — needed <em>before</em> constructing the shaft, not after</td><td>30–45 days</td><td>Nominal</td></tr>
+    </tbody>
+  </table>
+
+  <div class="ss">7.1 — How to run NOCs without losing months</div>
+  <ol style="padding-left:18px; font-size:10.5px; line-height:1.75;">
+    <li>Make a one-page <strong>NOC tracker</strong>: NOC name · applied date · reference/inward number · officer name · expected date · status. Update weekly.</li>
+    <li>Submit <strong>all applications in the same week</strong>. They run in parallel; there is no dependency between them.</li>
+    <li>Visit each office <strong>in person every 10 days</strong>. In Nashik, physical follow-up moves files; email does not.</li>
+    <li>Always collect a <strong>stamped inward receipt</strong> for every submission. Without it, files "go missing".</li>
+    <li>When an objection is raised, get it <strong>in writing</strong> and respond in writing. Verbal objections have a way of changing.</li>
+  </ol>
+
+  <div class="alert ai"><strong>Consider a liaison consultant.</strong> For ₹1.5–4 L, an experienced NMC liaison consultant will walk your files, know which desk is stuck, and typically save 3–6 months. On a project of this size, 4 months saved is worth far more than the fee. Ask Guru Buildcon to recommend one they have worked with.</div>
+</div>
+
+<!-- ═══════ PART B : SANCTION + RERA ═══════ -->
+<div class="page">
+  <div class="ph"><span class="ph-l">Part B · 8–9 — Plan Sanction &amp; MahaRERA</span><span class="ph-r">Indraprastha Heights</span></div>
+
+  <div class="sh"><div class="sh-n">8</div><div><div class="sh-t">Building Plan Sanction (NMC AutoDCR)</div><div class="sh-s">Your architect submits; you control the fees and the follow-up</div></div></div>
+
+  <p>NMC processes building permissions through <strong>AutoDCR</strong>, which auto-checks drawings against UDCPR 2020. Drawings go in DXF/DWG with prescribed layer naming; wrong layers cause instant rejection.</p>
+
+  <div class="ss">8.1 — Drawing set required</div>
+  <p>Key plan (1:1000) · Site plan (1:200 or 1:500) · Stilt/parking plan · All floor plans (1:100) · Terrace plan · All 4 elevations · Minimum 2 sections · Parking layout with ECS marked · Drainage &amp; plumbing layout · Rainwater harvesting plan · Solar provision · Fire protection plan · Structural drawings + soil report.</p>
+
+  <div class="ss">8.2 — Government fees to budget</div>
+  <table>
+    <thead><tr><th>Fee</th><th>Basis</th><th>Indicative</th></tr></thead>
+    <tbody>
+      <tr><td>Development charges</td><td>Per sqm of built-up area</td><td>₹350–700/sqm</td></tr>
+      <tr><td>Infrastructure charges</td><td>Per sqm</td><td>₹200–400/sqm</td></tr>
+      <tr><td>Premium FSI charges</td><td>% of Ready Reckoner rate × additional area</td><td>Large — get exact figure</td></tr>
+      <tr><td>TDR purchase</td><td>Market rate</td><td>₹800–1,500/sqm of plot</td></tr>
+      <tr><td>Scrutiny fee</td><td>Built-up area based</td><td>₹20,000–80,000</td></tr>
+      <tr><td>Water/drainage betterment</td><td>Per flat</td><td>₹5,000–20,000/flat</td></tr>
+      <tr><td>Labour welfare cess</td><td>1% of construction cost</td><td>~₹7.5 L (paid during construction)</td></tr>
+      <tr><td colspan="2"><strong>Total government outgo (estimate)</strong></td><td><strong>₹60L–1.2 Cr</strong></td></tr>
+    </tbody>
+  </table>
+
+  <div class="alert aw"><strong>Get the exact fee calculation from NMC in writing before you commit.</strong> Premium FSI and TDR are the two biggest and most variable items — a wrong assumption here can move your project cost by ₹30–50 lakh.</div>
+
+  <div class="sh" style="margin-top:16px;"><div class="sh-n">9</div><div><div class="sh-t">MahaRERA — Non-Negotiable</div><div class="sh-s">No marketing, no booking, no rupee before your RERA number exists</div></div></div>
+
+  <div class="alert ac"><strong>Section 3, RERA Act 2016:</strong> advertising, marketing, booking or selling without registration is an offence — fine up to 10% of project cost, imprisonment up to 3 years for continued violation. This includes WhatsApp broadcasts, hoardings, Instagram posts, and accepting a ₹51,000 "token".</div>
+
+  <table>
+    <thead><tr><th>Requirement</th><th>What you must do</th></tr></thead>
+    <tbody>
+      <tr><td><strong>Registration</strong></td><td>maharera.mahaonline.gov.in — needs sanctioned plan, title documents, architect certificate, CA certificate, promoter KYC. Issued in ~30 days</td></tr>
+      <tr><td><strong>Escrow account</strong></td><td>Separate designated bank account. <em>70% of every rupee collected</em> goes here and can only be withdrawn against certificates from your engineer + architect + CA confirming % completion</td></tr>
+      <tr><td><strong>Carpet area only</strong></td><td>Sell and advertise on carpet area (excludes external walls, shafts, balconies). Super built-up pricing is illegal</td></tr>
+      <tr><td><strong>Completion date</strong></td><td>Declare conservatively. Delay = interest to buyers at SBI MCLR + 2% per month, plus refund rights</td></tr>
+      <tr><td><strong>Agreement for Sale</strong></td><td>Use the MahaRERA model format. Registered. Stamp duty 0.1% at booking stage</td></tr>
+      <tr><td><strong>Quarterly updates</strong></td><td>Construction photos + financials uploaded every quarter, throughout the project</td></tr>
+      <tr><td><strong>Display RERA number</strong></td><td>On every advertisement, hoarding, brochure, WhatsApp message, and website — legally required</td></tr>
+    </tbody>
+  </table>
+
+  <div class="alert at"><strong>Turn compliance into marketing.</strong> Many small builders in the Nashik Road belt operate without RERA. "RERA registered — MahaRERA No. P52xxxxxxxx" on your hoarding is a genuine trust differentiator with buyers who have heard delivery horror stories. Use it prominently.</div>
+</div>
+
+<!-- ═══════ PART B/C : CC + CONTRACTOR ═══════ -->
+<div class="page">
+  <div class="ph"><span class="ph-l">Part B · 10 &nbsp;|&nbsp; Part C · 11 — CC &amp; Contractors</span><span class="ph-r">Indraprastha Heights</span></div>
+
+  <div class="sh"><div class="sh-n">10</div><div><div class="sh-t">Commencement Certificate &amp; Demolition</div><div class="sh-s">The legal green light to break ground</div></div></div>
+
+  <div class="box">
+    <div class="box-id">Sequence — do not reorder</div>
+    <h4>Plan sanction → RERA → CC → demolition → excavation</h4>
+    <ol>
+      <li>Apply for CC to NMC Building Department with sanctioned plan + RERA certificate</li>
+      <li>NMC engineer inspects: plot boundaries match plan, setbacks physically marked with pegs/lime, no unauthorised work started</li>
+      <li>CC issued in 2–4 weeks</li>
+      <li><strong>Display the CC and approved plan on site</strong> in a weatherproof frame — NMC requirement, and it reassures every visiting buyer</li>
+      <li>Now demolish the existing bungalow. Contract should specify: debris removal, salvage rights, safety barricading, and completion within 15 days</li>
+      <li>Site setup: boundary barricade with project branding, site office, water and power connection, storage shed, watchman quarters</li>
+    </ol>
+  </div>
+
+  <div class="sh" style="margin-top:16px;"><div class="sh-n">11</div><div><div class="sh-t">Contractor Selection &amp; Contract Structure</div><div class="sh-s">The decision that determines your cost, quality and sanity</div></div></div>
+
+  <div class="ss">11.1 — Three contract models</div>
+  <table>
+    <thead><tr><th>Model</th><th>How it works</th><th>Best for</th></tr></thead>
+    <tbody>
+      <tr><td><strong>Turnkey / lumpsum</strong></td><td>Contractor supplies everything at a fixed ₹/sqft</td><td>Simplest, costliest (₹2,400–2,800/sqft). Quality risk if you don't supervise. Suits an absent developer</td></tr>
+      <tr><td><strong>Labour rate</strong></td><td>You buy all material; contractor supplies labour only</td><td>Cheapest and most control — but needs a full-time site engineer and daily procurement. High wastage risk if unmanaged</td></tr>
+      <tr><td><strong>Hybrid (recommended)</strong></td><td>You procure cement, steel, tiles, sanitaryware, lifts directly. Contractor does labour + minor materials, item-rate</td><td><em>Best for a first project</em> — you control the 60% of cost that matters, contractor handles execution complexity</td></tr>
+    </tbody>
+  </table>
+
+  <div class="ss">11.2 — Selecting the contractor</div>
+  <ul class="cl">
+    <li>Visit 3 of his completed buildings — look at plaster lines, plumbing chases, terrace waterproofing, staircase finish</li>
+    <li>Talk to 2 past clients <em>without</em> the contractor present. Ask about delays, extra claims, labour disputes</li>
+    <li>Confirm he has executed at least one G+5 or taller — G+6 needs proper scaffolding, hoisting and slab-cycle discipline</li>
+    <li>Verify GST registration, PAN, and labour licence; ask for his ESIC/EPF registration numbers</li>
+    <li>Take 3 written quotations on an identical BOQ — never compare verbal rates</li>
+    <li>Check his current workload — a contractor running 4 sites will starve yours of labour</li>
+  </ul>
+
+  <div class="ss">11.3 — Clauses your contract must contain</div>
+  <table>
+    <thead><tr><th>Clause</th><th>What it protects</th></tr></thead>
+    <tbody>
+      <tr><td><strong>Detailed BOQ + rates</strong></td><td>Every item measured and priced. No "as per site" items</td></tr>
+      <tr><td><strong>Stage-linked payment</strong></td><td>Payment only against completed, measured, certified work. Never advance more than 5–10% mobilisation</td></tr>
+      <tr><td><strong>Retention 5%</strong></td><td>Held until 6 months after completion — your leverage on snags</td></tr>
+      <tr><td><strong>Timeline + penalty</strong></td><td>Per-slab cycle timeline (typically 21–28 days/slab), with a per-week delay penalty</td></tr>
+      <tr><td><strong>Quality standards</strong></td><td>Concrete grade, cube testing frequency, steel brand, curing period, tolerance limits</td></tr>
+      <tr><td><strong>Labour compliance</strong></td><td>Contractor responsible for ESIC, EPF, BOCW, safety, insurance — with certificates as a payment condition</td></tr>
+      <tr><td><strong>Safety</strong></td><td>Helmets, harnesses at height, scaffolding standards, net protection. A fatal accident at G+6 stops your project for months</td></tr>
+      <tr><td><strong>No sub-contracting</strong></td><td>Without your written consent</td></tr>
+      <tr><td><strong>Termination</strong></td><td>Your right to terminate and take over materials if he abandons or delays beyond a threshold</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- ═══════ PART C : COST + SPEC ═══════ -->
+<div class="page">
+  <div class="ph"><span class="ph-l">Part C · 12–13 — Cost Control &amp; Specifications</span><span class="ph-r">Indraprastha Heights</span></div>
+
+  <div class="sh"><div class="sh-n">12</div><div><div class="sh-t">Cost Control — Where First-Timers Lose 15%</div><div class="sh-s">Every leak below is preventable with a system</div></div></div>
+
+  <table>
+    <thead><tr><th>Leak</th><th>Typical loss</th><th>Control</th></tr></thead>
+    <tbody>
+      <tr><td><strong>Steel &amp; cement pilferage</strong></td><td>3–7%</td><td>Gate register for every delivery; weighbridge slips; daily consumption reconciliation against theoretical requirement; locked store with a single keyholder</td></tr>
+      <tr><td><strong>Concrete wastage / over-ordering</strong></td><td>2–4%</td><td>Pre-calculate volume per slab; use RMC with delivery challans; cube-test every pour</td></tr>
+      <tr><td><strong>Design changes mid-construction</strong></td><td>3–8%</td><td>Freeze drawings before starting. Every change after that costs 3× what it would have on paper</td></tr>
+      <tr><td><strong>Rate escalation</strong></td><td>4–10%</td><td>Lock cement and steel rates with dealers in bulk tranches; buy at dips; storage capacity pays for itself</td></tr>
+      <tr><td><strong>Idle labour</strong></td><td>2–5%</td><td>Material must be on site <em>before</em> the crew. Running out of sand on a plastering day costs a full day's wages</td></tr>
+      <tr><td><strong>Rework</strong></td><td>1–3%</td><td>Check level, line and plumb at every stage <em>before</em> the next trade starts</td></tr>
+      <tr><td><strong>Finance cost from delays</strong></td><td>Largest of all</td><td>Every month of delay is interest plus a month of overheads. Speed IS profit</td></tr>
+    </tbody>
+  </table>
+
+  <div class="dark">
+    <h4>The three registers that save a first project</h4>
+    <ul>
+      <li><strong>Material inward register</strong> — date, item, quantity, vehicle number, supplier challan number, receiver signature. No entry, no payment.</li>
+      <li><strong>Daily progress report</strong> — labour count by trade, work done, material consumed, issues. One WhatsApp message from your site engineer every evening.</li>
+      <li><strong>Payment register</strong> — every rupee paid, against which measured work, certified by whom. Reconciled monthly against the BOQ.</li>
+    </ul>
+  </div>
+
+  <div class="sh" style="margin-top:16px;"><div class="sh-n">13</div><div><div class="sh-t">Specification Sheet for This Market</div><div class="sh-s">Match spec to buyer expectations — over-spec kills margin, under-spec kills sales</div></div></div>
+
+  <table>
+    <thead><tr><th>Element</th><th>Recommended spec (Dasak, ₹32–60L segment)</th></tr></thead>
+    <tbody>
+      <tr><td>Structure</td><td>RCC framed, earthquake-resistant design per IS codes, M25 concrete for columns, Fe500D steel (branded — TATA/JSW/SAIL)</td></tr>
+      <tr><td>Walls</td><td>6" external / 4" internal AAC blocks or brickwork; gypsum or sand-faced plaster internally</td></tr>
+      <tr><td>Flooring</td><td>2×2 vitrified tiles (₹45–70/sqft) living/bedrooms; anti-skid ceramic in bathrooms/balcony</td></tr>
+      <tr><td>Kitchen</td><td>Granite platform, SS sink, glazed tile dado to 2ft above platform, provision for water purifier and chimney</td></tr>
+      <tr><td>Bathrooms</td><td>Tiles to door height, branded CP fittings (Jaquar/Cera entry range), concealed plumbing, EWC, provision for geyser</td></tr>
+      <tr><td>Doors</td><td>Main: decorative flush with safety lock and eye-piece. Internal: flush doors. Bath: WPC/PVC</td></tr>
+      <tr><td>Windows</td><td>Powder-coated aluminium or uPVC sliding with mosquito-net provision and MS safety grill</td></tr>
+      <tr><td>Electrical</td><td>Concealed copper (Polycab/Finolex), modular switches (Legrand/Anchor Roma), MCB box, AC points in all bedrooms + living, TV/internet points</td></tr>
+      <tr><td>Painting</td><td>Internal: putty + primer + emulsion. External: weather-shield exterior emulsion (Asian/Berger)</td></tr>
+      <tr><td>Lifts</td><td><em>2 lifts strongly advised at G+6</em> — 6/8-passenger, branded (Johnson/Kone/Schindler), with ARD (auto rescue device) and power backup</td></tr>
+      <tr><td>Common areas</td><td>Granite/vitrified lobby, decorative entrance, staircase railing, common area lighting on a separate meter</td></tr>
+      <tr><td>Amenities (right-sized)</td><td>Stilt parking, security cabin, CCTV at entry + lobbies, intercom, children's play corner, terrace sit-out, borewell + tanker provision, DG backup for lift + common lights, solar water heating</td></tr>
+      <tr><td>External</td><td>Two-tone weatherproof texture finish, compound wall with gate, paved driveway, landscaping at entrance, project name signage</td></tr>
+    </tbody>
+  </table>
+
+  <div class="alert at"><strong>Where to spend extra (buyers notice):</strong> entrance lobby, lift quality and count, bathroom fittings, external elevation, and parking layout. <strong>Where not to (buyers don't):</strong> imported tiles, false ceilings, elaborate landscaping, a ₹8L sample flat. A clean, safe, well-signposted site with visible progress sells better than a show flat in this segment.</div>
+</div>
+
+<!-- ═══════ PART C : QUALITY CHECKPOINTS ═══════ -->
+<div class="page">
+  <div class="ph"><span class="ph-l">Part C · 14 — Stage-Wise Checkpoints</span><span class="ph-r">Indraprastha Heights</span></div>
+
+  <div class="sh"><div class="sh-n">14</div><div><div class="sh-t">Quality &amp; Statutory Checkpoints, Stage by Stage</div><div class="sh-s">Miss the statutory ones and your OC is blocked at the end</div></div></div>
+
+  <table>
+    <thead><tr><th>Stage</th><th>Quality checks</th><th>Statutory action</th></tr></thead>
+    <tbody>
+      <tr><td><strong>Excavation &amp; foundation</strong></td><td>Depth and soil match the soil report; footing dimensions per structural drawing; PCC level; anti-termite treatment; steel cover blocks</td><td>Structural engineer certificate</td></tr>
+      <tr><td><strong>Plinth</strong></td><td>Plinth level vs road level (flood safety); filling compaction in layers; plinth beam reinforcement</td><td><strong>Call NMC for plinth inspection BEFORE columns rise above plinth.</strong> Get plinth completion certificate</td></tr>
+      <tr><td><strong>Columns &amp; slabs (each floor)</strong></td><td>Column verticality (plumb); reinforcement as per drawing (count bars yourself); concrete cover; cube test per pour; curing for 7–14 days; shuttering quality</td><td>Structural engineer certificate for <em>each</em> slab; RERA quarterly photo upload</td></tr>
+      <tr><td><strong>Lift shaft</strong></td><td>Shaft plumb and dimensions exact — a 20mm error means a rejected lift</td><td><strong>Lift Inspector (DISH) shaft drawing approval BEFORE construction</strong></td></tr>
+      <tr><td><strong>Blockwork</strong></td><td>Line, level, plumb; proper curing; lintels over openings; no gaps at slab junction</td><td>—</td></tr>
+      <tr><td><strong>Plumbing &amp; electrical (concealed)</strong></td><td>Pressure-test all plumbing BEFORE plastering; photograph every wall's conduit layout before covering</td><td>Licensed electrical contractor execution</td></tr>
+      <tr><td><strong>Plastering</strong></td><td>Thickness uniformity, curing, no hollowness (tap-test), corner beading</td><td>—</td></tr>
+      <tr><td><strong>Waterproofing</strong></td><td>Terrace, bathrooms, water tanks, external walls — <strong>flood-test bathrooms for 48 hours before tiling</strong></td><td>—</td></tr>
+      <tr><td><strong>Terrace &amp; parapet</strong></td><td>Slope towards drains, parapet ≥1.05m, tank foundations</td><td>Final structural stability certificate</td></tr>
+      <tr><td><strong>Fire systems</strong></td><td>Riser pressure test, pump performance, alarm testing</td><td>Fire department final inspection</td></tr>
+      <tr><td><strong>Lift installation</strong></td><td>Levelling accuracy, door operation, ARD test</td><td>Lift Inspector final certificate</td></tr>
+      <tr><td><strong>Finishing</strong></td><td>Tile levels and joints, door/window operation, paint finish, fitting alignment</td><td>—</td></tr>
+      <tr><td><strong>Pre-handover</strong></td><td>Snag list per flat, deep clean, all fittings tested</td><td>Architect completion certificate → OC application</td></tr>
+      <tr><td><strong>Every quarter</strong></td><td>—</td><td><strong>MahaRERA upload: photos + financials</strong>. Missing these attracts penalty</td></tr>
+    </tbody>
+  </table>
+
+  <div class="alert ac"><strong>Three things that cause OC rejection at the end:</strong> (1) any deviation from the sanctioned plan — build exactly as approved; (2) missing stage certificates from the structural engineer; (3) rainwater harvesting or solar not actually installed. All three are avoidable if you follow this table.</div>
+</div>
+
+<!-- ═══════ PART D : POSITIONING + PRICING ═══════ -->
+<div class="page">
+  <div class="ph"><span class="ph-l">Part D · 15–16 — Positioning &amp; Pricing</span><span class="ph-r">Indraprastha Heights</span></div>
+
+  <div class="sh"><div class="sh-n">15</div><div><div class="sh-t">Positioning — What You Are Actually Selling</div><div class="sh-s">Get this right and everything else in marketing becomes easy</div></div></div>
+
+  <div class="dark">
+    <h4>Your three genuine advantages</h4>
+    <ul>
+      <li><strong>Proximity to Nashik Road railway station</strong> — a real, permanent, verifiable advantage. Mumbai/Pune commuters, railway employees, and daily travellers pay for this. Lead every communication with it.</li>
+      <li><strong>The tallest, most modern building in the neighbourhood</strong> — surroundings are G+1 bungalows. Your G+6 with stilt parking, two lifts and CCTV is a genuinely different product class in Dasak. You are not competing with the flats around you; there aren't any.</li>
+      <li><strong>Corner plot with roads on two sides</strong> — better light, better ventilation, better resale. The proposed 9m road is a future value story you can document with the DP map on your site board.</li>
+    </ul>
+  </div>
+
+  <div class="alert aw"><strong>What NOT to claim.</strong> Do not use "luxury", "premium", "world-class", or "elite". Buyers in this segment dismiss it instantly and it damages credibility. Your words are: <em>safe, spacious, well-built, RERA registered, near station, ready on time.</em></div>
+
+  <div class="ss">15.1 — Positioning statement (use this everywhere)</div>
+  <div class="script">Indraprastha Heights — Dasak, Nashik Road.
+Spacious 2BHK &amp; 3BHK homes, minutes from Nashik Road Railway Station.
+Stilt parking · 2 lifts · CCTV security · RERA registered.
+Built by people who live here, for families who want to.</div>
+
+  <div class="sh" style="margin-top:16px;"><div class="sh-n">16</div><div><div class="sh-t">Pricing Strategy &amp; Escalation Ladder</div><div class="sh-s">Price low at launch to create momentum, then climb</div></div></div>
+
+  <div class="alert ac"><strong>Before setting price:</strong> pull the last 6 months of <em>registered</em> transactions for Dasak Shiwar / Nashik Road from igrmaharashtra.gov.in, and visit 5 competing projects as a buyer to note their quoted rate, what's included, and how many flats they've sold. Price against reality, not hope.</div>
+
+  <div class="ss">16.1 — Indicative pricing (validate with the above)</div>
+  <table>
+    <thead><tr><th>Unit</th><th>Carpet area</th><th>Launch price</th><th>Rate/sqft carpet</th></tr></thead>
+    <tbody>
+      <tr><td><strong>2BHK</strong></td><td>620–700 sqft</td><td>₹31–38 L</td><td>₹4,800–5,400</td></tr>
+      <tr><td><strong>2BHK (corner/large)</strong></td><td>700–760 sqft</td><td>₹37–43 L</td><td>₹5,100–5,600</td></tr>
+      <tr><td><strong>3BHK</strong></td><td>900–1,000 sqft</td><td>₹48–58 L</td><td>₹5,200–5,800</td></tr>
+    </tbody>
+  </table>
+  <p>Plus: stamp duty and registration (buyer), GST (1% if affordable-housing criteria met, else 5%), one-time maintenance deposit, and parking/floor-rise as per your price list.</p>
+
+  <div class="ss">16.2 — The escalation ladder (this is how developers make money)</div>
+  <table>
+    <thead><tr><th>Stage</th><th>Inventory released</th><th>Price</th><th>Why buyers accept it</th></tr></thead>
+    <tbody>
+      <tr><td>Soft launch (post-RERA)</td><td>25–30%</td><td>Base price</td><td>"Founder rate" — earliest buyers get the best price and best units</td></tr>
+      <tr><td>Plinth complete</td><td>+20%</td><td>+4–6%</td><td>Visible progress, risk reduced</td></tr>
+      <tr><td>3rd slab</td><td>+20%</td><td>+8–12%</td><td>Building is visible from the road; credibility established</td></tr>
+      <tr><td>Top slab / brickwork</td><td>+20%</td><td>+15–18%</td><td>Near-ready product</td></tr>
+      <tr><td>OC / ready possession</td><td>Remaining</td><td>+20–25%</td><td>Zero risk, zero GST, immediate move-in</td></tr>
+    </tbody>
+  </table>
+
+  <div class="ss">16.3 — Price-list add-ons (standard practice, budget them in)</div>
+  <ul class="cl">
+    <li><strong>Floor rise:</strong> ₹25–50/sqft per floor above 2nd — top floors have terrace access appeal here</li>
+    <li><strong>Corner/east-facing premium:</strong> ₹50,000–1,50,000 per unit</li>
+    <li><strong>Covered parking:</strong> price into the flat rather than selling separately (RERA-safer)</li>
+    <li><strong>Maintenance deposit:</strong> 12–24 months advance, transferred to the society at formation</li>
+    <li><strong>Never discount the headline price</strong> — give a free modular kitchen, waived floor-rise, or paid stamp duty instead. A discounted rate resets the value for every future buyer</li>
+  </ul>
+</div>
+
+<!-- ═══════ PART D : PRE-LAUNCH + LAUNCH ═══════ -->
+<div class="page">
+  <div class="ph"><span class="ph-l">Part D · 17–18 — Pre-Launch &amp; Launch</span><span class="ph-r">Indraprastha Heights</span></div>
+
+  <div class="sh"><div class="sh-n">17</div><div><div class="sh-t">Phase 1 — Pre-Launch (Before RERA Number)</div><div class="sh-s">What you can legally do while approvals are running</div></div></div>
+
+  <div class="alert ac"><strong>Hard legal line.</strong> Before your RERA number: no prices, no unit sizes, no bookings, no tokens, no "block your flat". You may only build brand awareness. Breaking this is a criminal offence and gives a competitor an easy complaint to file against you.</div>
+
+  <div class="ss">17.1 — Permitted pre-launch activities</div>
+  <table>
+    <thead><tr><th>Activity</th><th>Detail</th><th>Cost</th></tr></thead>
+    <tbody>
+      <tr><td><strong>Site board</strong></td><td>"Coming Soon — Indraprastha Heights — 2 &amp; 3 BHK — Dasak" + phone. At a two-road junction this works 24×7. Your single best spend</td><td>₹8–15k</td></tr>
+      <tr><td><strong>Brand assets</strong></td><td>Logo, name registration, elevation render, project identity</td><td>₹25–50k</td></tr>
+      <tr><td><strong>Google Business Profile</strong></td><td>Create "Indraprastha Heights", category: Real Estate Developer, add photos, address, phone</td><td>Free</td></tr>
+      <tr><td><strong>Social pages</strong></td><td>Instagram + Facebook. Post construction-prep, site clearing, plan approval milestones. Build a following before you need it</td><td>Free</td></tr>
+      <tr><td><strong>Broker relationships</strong></td><td>Meet 10–15 brokers in Nashik Road/Dasak. Explain the project, take their numbers. No prices discussed — just relationship building</td><td>Chai money</td></tr>
+      <tr><td><strong>Interest list</strong></td><td>Collect names and numbers of interested people, with a written note that no booking is being accepted until RERA registration</td><td>Free</td></tr>
+      <tr><td><strong>Bank tie-ups</strong></td><td>Start conversations with SBI, BoB, HDFC, Saraswat for project approval. Takes months — start early</td><td>Free</td></tr>
+    </tbody>
+  </table>
+
+  <div class="sh" style="margin-top:16px;"><div class="sh-n">18</div><div><div class="sh-t">Phase 2 — Launch (RERA Number in Hand)</div><div class="sh-s">Now everything switches on at once</div></div></div>
+
+  <div class="ss">18.1 — Launch checklist</div>
+  <ul class="cl">
+    <li>RERA number printed on <strong>every</strong> piece of material — hoarding, flyer, WhatsApp, social post, brochure</li>
+    <li>Price list finalised: unit-wise carpet area, price, floor rise, payment schedule</li>
+    <li>Payment schedule prepared (booking 10% → agreement 20% → plinth → each slab → finishing → possession)</li>
+    <li>Brochure/flyer printed — 1 page, Marathi + English, floor plan, EMI figure, location map, RERA number</li>
+    <li>Site office ready — table, chairs, drinking water, plan display, elevation render, price list</li>
+    <li>Sales person appointed and trained on the script (Section 21)</li>
+    <li>Hoarding at Nashik Road station exit booked</li>
+    <li>Model Agreement for Sale drafted by advocate (MahaRERA format)</li>
+    <li>Escrow account opened and mapped in RERA</li>
+    <li>2–3 bank DSAs briefed and ready to process loans</li>
+  </ul>
+
+  <div class="ss">18.2 — Launch offer (creates urgency without discounting)</div>
+  <div class="script">LAUNCH OFFER — First 8 bookings only
+• Stamp duty waived (worth ₹2,00,000+)  OR  Free modular kitchen
+• No floor-rise charges
+• Preferred unit selection
+• Booking amount only ₹51,000
+Offer valid till [date, 21 days out] or first 8 bookings, whichever is earlier.</div>
+  <p><em>Why this works:</em> a fixed number and a fixed date create genuine scarcity; you protect your headline rate; and the early buyers become your referral engine.</p>
+
+  <div class="ss">18.3 — Launch event (Sunday, 10am–5pm)</div>
+  <p>Do a simple, credible site event: clean barricaded site, banner, plan display board, chai and poha, 2–3 chairs under a shamiana, your architect present for 2 hours to answer technical questions, and a small pooja at 10am. Invite the interest list, all brokers, and boost a Facebook/Instagram event post in a 10km radius. Target: 40–60 visitors, 3–6 bookings.</p>
+</div>
+
+<!-- ═══════ PART D : CHANNEL + DIGITAL ═══════ -->
+<div class="page">
+  <div class="ph"><span class="ph-l">Part D · 19–20 — Channel Partners &amp; Digital</span><span class="ph-r">Indraprastha Heights</span></div>
+
+  <div class="sh"><div class="sh-n">19</div><div><div class="sh-t">Channel Partners — 40% of Your Sales</div><div class="sh-s">Brokers are not a cost; they are your distribution network</div></div></div>
+
+  <p>In the Nashik Road market, local brokers control a large share of buyer flow. A first-time developer without a broker network sells slowly. Build this network deliberately.</p>
+
+  <div class="ss">19.1 — The channel partner programme</div>
+  <table>
+    <thead><tr><th>Element</th><th>Standard</th></tr></thead>
+    <tbody>
+      <tr><td>Brokerage</td><td><strong>2%</strong> of agreement value (competitive in this belt). Pay 50% on agreement registration, 50% on 30% collection</td></tr>
+      <tr><td>Launch bonus</td><td>Extra ₹15,000 per booking for the first 10 bookings — creates a rush at launch</td></tr>
+      <tr><td>Payment discipline</td><td><strong>Pay within 7 days, every time.</strong> Brokers sell what pays fastest. Late payment is why builders lose channel loyalty</td></tr>
+      <tr><td>Registration</td><td>Simple form: name, firm, phone, PAN, bank details. Give a signed appointment letter</td></tr>
+      <tr><td>Lead protection</td><td>Broker registers the client's name/number by WhatsApp before the site visit; valid 30 days. Written policy prevents disputes</td></tr>
+      <tr><td>Support</td><td>WhatsApp group with all partners: price list, availability, construction photos, offers. Update weekly</td></tr>
+    </tbody>
+  </table>
+
+  <div class="ss">19.2 — Broker outreach message</div>
+  <div class="script">Namaskar [Name] ji,
+
+Indraprastha Heights — Dasak, Nashik Road. Now RERA registered.
+MahaRERA No: [number]
+
+• 2BHK &amp; 3BHK · Stilt parking · 2 lifts · CCTV
+• Walking distance from Nashik Road station
+• 2BHK from ₹__ L | 3BHK from ₹__ L
+• Brokerage 2% + ₹15,000 bonus on first 10 bookings
+• Payment within 7 days of agreement — guaranteed
+
+Site visit any day, 10am–6pm. Shall I share the floor plan and price list?
+
+— [Your name], [phone]</div>
+
+  <div class="sh" style="margin-top:14px;"><div class="sh-n">20</div><div><div class="sh-t">Digital Marketing — Exact Setup</div><div class="sh-s">₹15–25k/month generates more enquiries than ₹1L of print in this market</div></div></div>
+
+  <table>
+    <thead><tr><th>Channel</th><th>Setup</th><th>Monthly budget</th></tr></thead>
+    <tbody>
+      <tr><td><strong>WhatsApp Business</strong></td><td>Catalogue with floor plans, price list, photos. Auto-greeting. Broadcast list segmented: enquiries / brokers / booked customers</td><td>Free</td></tr>
+      <tr><td><strong>Meta ads (FB+Insta)</strong></td><td>Lead-form ads. Radius: 10km from Nashik Road station. Age 27–50. Interests: home loan, real estate. Creative: elevation render + "2BHK from ₹__L near Nashik Road station"</td><td>₹8–15k</td></tr>
+      <tr><td><strong>Google Business Profile</strong></td><td>Weekly photo posts of construction progress. Ask every booked customer for a review</td><td>Free</td></tr>
+      <tr><td><strong>YouTube</strong></td><td>Monthly 60-second progress video shot on a phone. Walk the site, narrate in Marathi. Share to WhatsApp — this single habit builds enormous trust</td><td>Free</td></tr>
+      <tr><td><strong>Property portals</strong></td><td>99acres / MagicBricks / Housing listing once RERA is live</td><td>₹5–10k</td></tr>
+      <tr><td><strong>Google Search ads</strong></td><td>Optional later. Keywords: "flats in nashik road", "2bhk nashik road", "flats near nashik road station"</td><td>₹5–8k</td></tr>
+    </tbody>
+  </table>
+
+  <div class="ss">20.1 — Ad copy that works in this market</div>
+  <div class="script">🏠 2BHK near Nashik Road Station — ₹__ Lakhs onwards
+
+✅ MahaRERA Registered
+✅ Stilt parking + 2 lifts + CCTV
+✅ Home loan assistance available
+✅ EMI starting ₹__,___ per month
+
+📍 Dasak, Nashik Road
+📞 Site visit: [number]
+
+Marathi version: नाशिक रोड स्टेशनजवळ 2BHK — ₹__ लाखांपासून
+महारेरा नोंदणीकृत | स्टिल्ट पार्किंग | 2 लिफ्ट | सीसीटीव्ही
+साईट व्हिजिटसाठी संपर्क: [number]</div>
+
+  <div class="ss">20.2 — Offline that still works here</div>
+  <p><strong>Hoarding at Nashik Road station exit</strong> (highest-ROI offline spend — your target buyer walks past it twice daily) · <strong>Site barricade branding</strong> (free, permanent, 24×7) · <strong>Auto-rickshaw branding</strong> on 4–5 autos on the Dasak route (₹1,500–2,500/auto/month) · <strong>Pamphlet insert</strong> in local Marathi newspapers in a 5km radius · <strong>Society/samaj notice boards</strong> and railway employee associations.</p>
+</div>
+
+<!-- ═══════ PART D : SALES PROCESS ═══════ -->
+<div class="page">
+  <div class="ph"><span class="ph-l">Part D · 21–22 — Conversion, Documentation &amp; Collections</span><span class="ph-r">Indraprastha Heights</span></div>
+
+  <div class="sh"><div class="sh-n">21</div><div><div class="sh-t">Site Visit to Booking — The Conversion Process</div><div class="sh-s">Enquiries are worthless; conversion is everything</div></div></div>
+
+  <div class="ss">21.1 — The funnel and the targets to hold yourself to</div>
+  <table>
+    <thead><tr><th>Stage</th><th>Target conversion</th><th>What drives it</th></tr></thead>
+    <tbody>
+      <tr><td>Enquiry → Site visit</td><td>&gt;30%</td><td>Call within 10 minutes of the lead arriving. Speed is the entire game</td></tr>
+      <tr><td>Site visit → Second visit (with family)</td><td>&gt;50%</td><td>Nobody buys alone. Your goal on visit 1 is to get the spouse/parents to visit</td></tr>
+      <tr><td>Second visit → Booking</td><td>&gt;25%</td><td>Loan eligibility confirmed + offer deadline + a specific unit held</td></tr>
+      <tr><td>Booking → Registered agreement</td><td>&gt;90%</td><td>Follow-up discipline; loan file moved fast</td></tr>
+      <tr><td>Cost per booking</td><td>&lt;₹25,000</td><td>Track marketing spend ÷ bookings monthly</td></tr>
+    </tbody>
+  </table>
+
+  <div class="ss">21.2 — The site visit script (train your salesperson on this)</div>
+  <div class="script">1. WELCOME (2 min)
+   Water, sit down, ask where they're from and what they do.
+   "Aap kis area mein rehte ho abhi? Kaam kahaan hai?"
+
+2. QUALIFY BEFORE PITCHING (5 min)
+   • Budget range?
+   • 2BHK or 3BHK?
+   • Loan or self-funded? Which bank?
+   • First home or upgrade?
+   • Who else will decide? (spouse/parents — CRITICAL)
+   • Timeline to buy?
+
+3. SHOW — location first, product second (15 min)
+   • Distance to station, school, market, hospital
+   • Both roads, the future 9m road on the DP map
+   • Plan display: walk them through THEIR unit type
+   • Stilt parking, 2 lifts, CCTV, security
+   • RERA certificate on the wall — point at it
+
+4. THE THREE TRUST PROOFS
+   • "MahaRERA registered — number is on every paper we give you"
+   • "Approved plan is displayed on site, you can see it any time"
+   • "70% of your money goes to a designated project account by law"
+
+5. NUMBERS (5 min)
+   • Total price → down payment → loan amount → EMI
+   • "Aapka EMI approx ₹__,___ aayega. Abhi rent kitna de rahe ho?"
+   • Payment schedule linked to construction stages
+
+6. CLOSE
+   • "Is unit ko main aapke naam pe 48 ghante hold kar sakta hoon."
+   • "Launch offer [date] tak hai — uske baad rate badhega."
+   • Ask for the second visit with family, fix day and time NOW
+
+7. AFTER THEY LEAVE — same day
+   • WhatsApp: floor plan + price sheet + 3 site photos + your name
+   • Save their number with a tag (2BHK-hot / 3BHK-warm)
+   • Follow up on day 2, day 5, day 10. Most bookings come on follow-up 3–5</div>
+
+  <div class="sh" style="margin-top:14px;"><div class="sh-n">22</div><div><div class="sh-t">Booking Documentation, Collections &amp; Home Loans</div><div class="sh-s">Getting the money in, legally and on time</div></div></div>
+
+  <div class="ss">22.1 — Booking to agreement sequence</div>
+  <ol style="padding-left:18px; font-size:10.5px; line-height:1.7;">
+    <li><strong>Booking form + amount</strong> (₹51,000 or 2%) → issue a numbered receipt. Collect PAN, Aadhaar, photos of all buyers</li>
+    <li><strong>Allotment letter</strong> within 7 days — unit number, carpet area, price, payment schedule, RERA number</li>
+    <li><strong>Agreement for Sale</strong> within 30–45 days, in the MahaRERA model format, drafted by your advocate</li>
+    <li><strong>Registration</strong> at the Sub-Registrar — buyer pays stamp duty (0.1% at this stage) + registration fee</li>
+    <li><strong>Loan file</strong> — hand over to your DSA the day the agreement is registered; a bank needs the registered agreement to disburse</li>
+    <li><strong>Escrow discipline</strong> — 70% of every receipt into the designated account, same day</li>
+  </ol>
+
+  <div class="ss">22.2 — Payment schedule (construction-linked, RERA compliant)</div>
+  <table>
+    <thead><tr><th>Milestone</th><th>%</th><th>Cumulative</th></tr></thead>
+    <tbody>
+      <tr><td>On booking</td><td>10%</td><td>10%</td></tr>
+      <tr><td>On agreement registration</td><td>20%</td><td>30%</td></tr>
+      <tr><td>On completion of plinth</td><td>15%</td><td>45%</td></tr>
+      <tr><td>On 2nd slab</td><td>10%</td><td>55%</td></tr>
+      <tr><td>On 4th slab</td><td>10%</td><td>65%</td></tr>
+      <tr><td>On 6th slab / top slab</td><td>10%</td><td>75%</td></tr>
+      <tr><td>On brickwork &amp; plaster</td><td>10%</td><td>85%</td></tr>
+      <tr><td>On flooring &amp; finishing</td><td>10%</td><td>95%</td></tr>
+      <tr><td>On possession (after OC)</td><td>5%</td><td>100%</td></tr>
+    </tbody>
+  </table>
+
+  <div class="ss">22.3 — Collections discipline (where first-timers bleed)</div>
+  <ul class="cl">
+    <li>Raise the demand letter the <strong>same day</strong> a milestone is certified — not a week later</li>
+    <li>WhatsApp the demand with a photo of the completed milestone. It converts far better than a bare letter</li>
+    <li>Follow up on day 7, day 15, day 21. Charge the interest clause on delays — waive it as a goodwill gesture only after it has been raised</li>
+    <li>For loan cases, chase the <em>bank</em>, not just the buyer — disbursement delay is usually a missing document at the branch</li>
+    <li>Never hand over keys or allow interior work before full payment and OC. Once a buyer is inside, your leverage is gone</li>
+  </ul>
+
+  <div class="alert at"><strong>PMAY:</strong> check current scheme eligibility for your 2BHK buyers with your bank DSA. Where applicable, subsidy meaningfully reduces the effective EMI and is a strong closing tool for first-time buyers in this segment.</div>
+</div>
+
+<!-- ═══════ PART E + F ═══════ -->
+<div class="page">
+  <div class="ph"><span class="ph-l">Part E · 23–24 &nbsp;|&nbsp; Part F · 25 — Handover &amp; Survival</span><span class="ph-r">Indraprastha Heights</span></div>
+
+  <div class="sh"><div class="sh-n">23</div><div><div class="sh-t">Occupancy Certificate &amp; Possession</div><div class="sh-s">Without OC, nothing you built is legally habitable</div></div></div>
+
+  <p><strong>Documents for OC:</strong> architect's completion certificate · structural engineer's stability certificate · fire department final NOC · lift inspector certificate · rainwater harvesting completion · solar installation certificate · electrical test certificate · NMC water/drainage confirmation. NMC then inspects every floor against the sanctioned plan. Minor deviations may be compounded on payment; major deviations require demolition.</p>
+
+  <p><strong>Possession sequence:</strong> OC received → snag rectification per flat → final payment collected → possession letter + keys handed over with a signed handover checklist → final sale deed registered (buyer pays full stamp duty) → individual MSEDCL meters → property tax registration per flat.</p>
+
+  <div class="sh" style="margin-top:14px;"><div class="sh-n">24</div><div><div class="sh-t">Society, Conveyance &amp; Defect Liability</div><div class="sh-s">Your obligations do not end at handover</div></div></div>
+  <table>
+    <thead><tr><th>Obligation</th><th>Requirement</th></tr></thead>
+    <tbody>
+      <tr><td><strong>Society formation</strong></td><td>Form the co-operative housing society once the majority of flats are sold/occupied. Register with the District Deputy Registrar. Hand over the corpus and maintenance deposits with accounts</td></tr>
+      <tr><td><strong>Conveyance</strong></td><td>Execute the conveyance deed transferring land and building to the society. Delay here is the single biggest source of builder–society litigation in Maharashtra. Do it promptly</td></tr>
+      <tr><td><strong>Defect liability</strong></td><td><em>RERA Section 14(3): 5 years from possession.</em> Any structural or workmanship defect reported must be rectified within 30 days at your cost. Budget a 1–1.5% retention for this — do not treat the project as closed at handover</td></tr>
+      <tr><td><strong>Documents to hand over</strong></td><td>OC, approved plans, completion certificates, lift &amp; fire certificates, equipment warranties, AMC contacts, society registration papers</td></tr>
+    </tbody>
+  </table>
+
+  <div class="sh" style="margin-top:14px;"><div class="sh-n">25</div><div><div class="sh-t">12 Mistakes That Kill First Projects</div><div class="sh-s">Every one of these has ended a first-time developer in Maharashtra</div></div></div>
+
+  <table>
+    <thead><tr><th>#</th><th>Mistake</th><th>Prevention</th></tr></thead>
+    <tbody>
+      <tr><td>1</td><td>Starting with a deal structure below the 2.5× rule</td><td>Section 1. Fix the structure before the foundation</td></tr>
+      <tr><td>2</td><td>Underestimating pre-revenue cash need</td><td>Arrange the full ₹1.5–2 Cr before month 1</td></tr>
+      <tr><td>3</td><td>Marketing or taking tokens before RERA</td><td>Criminal offence. Wait for the number</td></tr>
+      <tr><td>4</td><td>Crossing 24m height unknowingly</td><td>Section 6. Get it in writing from your architect this week</td></tr>
+      <tr><td>5</td><td>Applying NOCs one at a time</td><td>All applications in the same week</td></tr>
+      <tr><td>6</td><td>Building even slightly differently from the sanctioned plan</td><td>OC gets blocked. Build exactly as approved</td></tr>
+      <tr><td>7</td><td>No full-time site engineer</td><td>You will be cheated on material and quality. Non-negotiable hire</td></tr>
+      <tr><td>8</td><td>Large advances to the contractor</td><td>Pay only against measured, certified work. Max 10% mobilisation</td></tr>
+      <tr><td>9</td><td>Mixing project money with personal/other accounts</td><td>RERA violation and you will lose track of true cost. One project, one account</td></tr>
+      <tr><td>10</td><td>Discounting the headline rate under pressure</td><td>Give freebies instead. A cut rate resets value for every future buyer</td></tr>
+      <tr><td>11</td><td>Ignoring collections while focused on construction</td><td>Demand letters same day as milestone; chase weekly. Cash flow kills faster than costs</td></tr>
+      <tr><td>12</td><td>Selling all inventory early at launch price</td><td>Hold 25–30% for the escalation ladder. Late-stage sales carry your profit</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- ═══════ TIMELINE ═══════ -->
+<div class="page">
+  <div class="ph"><span class="ph-l">Part F · 26 — Master Timeline &amp; 90-Day Plan</span><span class="ph-r">Indraprastha Heights</span></div>
+
+  <div class="sh"><div class="sh-n">26</div><div><div class="sh-t">Master Timeline</div><div class="sh-s">Approvals 8–14 months · Construction 24–30 months · Total ~3.5 years to handover</div></div></div>
+
+  <div class="tl-row"><div class="tl-m">Month 0–1</div><div class="tl-b">Verify deal structure &amp; break-even. 7/12, property card, title search. Check NA status. Confirm height &lt;24m in writing. Tree survey. Appoint structural engineer, order soil test.</div></div>
+  <div class="tl-row"><div class="tl-m">Month 1–3</div><div class="tl-b">ALL NOC applications submitted same week (Fire, AAI, Tree, MSEDCL, Water, MPCB). AutoDCR drawings prepared. NA order if required. Arrange pre-revenue funding.</div></div>
+  <div class="tl-row"><div class="tl-m">Month 3–5</div><div class="tl-b">NOCs chased weekly. Plan submitted on AutoDCR. Government fees paid. Pre-launch branding: site board, Google profile, social pages, broker relationships.</div></div>
+  <div class="tl-row"><div class="tl-m">Month 5–8</div><div class="tl-b">NMC scrutiny, objections cleared, <strong>Building Plan Sanction received</strong>. Bank project approvals initiated. Contractor selection and BOQ tendering.</div></div>
+  <div class="tl-row"><div class="tl-m">Month 8–10</div><div class="tl-b"><strong>MahaRERA registration</strong>. Escrow opened. CC applied and received. Demolition. Site setup. <strong>LAUNCH</strong> — price list, brochure, hoarding, brokers activated, digital ads live.</div></div>
+  <div class="tl-row"><div class="tl-m">Month 10–13</div><div class="tl-b">Excavation and foundation. Plinth. <strong>NMC plinth inspection</strong>. Price escalation step 1. Target: 25–30% inventory booked.</div></div>
+  <div class="tl-row"><div class="tl-m">Month 13–26</div><div class="tl-b">Slab cycles (21–28 days each). Structural certificate per slab. Lift shaft approval. RERA quarterly uploads. Monthly progress videos. Price escalation at 3rd and top slab. Target: 60–70% booked.</div></div>
+  <div class="tl-row"><div class="tl-m">Month 26–34</div><div class="tl-b">Blockwork, plaster, waterproofing, flooring, fittings, lifts, fire systems, external painting, compound and landscaping. Collections chased hard.</div></div>
+  <div class="tl-row"><div class="tl-m">Month 34–38</div><div class="tl-b">Fire final inspection, lift certificate, <strong>OC application and inspection</strong>. Snag rectification. OC received.</div></div>
+  <div class="tl-row"><div class="tl-m">Month 38–42</div><div class="tl-b">Possession and final sale deeds. MSEDCL meters. Society formation. Conveyance. RERA project closure. Defect liability period begins (5 years).</div></div>
+
+  <div class="ss" style="margin-top:16px;">The 90-Day Action Plan — start here</div>
+  <ul class="cl">
+    <li><strong>Week 1:</strong> Run the break-even table in Section 1 with your actual area share. If below 75%, renegotiate before anything else.</li>
+    <li><strong>Week 1:</strong> Pull the 7/12 from bhulekh.mahabhumi.gov.in — confirm NA status. Appoint your advocate for the title search.</li>
+    <li><strong>Week 1:</strong> Email Guru Buildcon: written confirmation of total building height (&lt;24m), a one-page FSI statement, and the setback drawing for G+6.</li>
+    <li><strong>Week 2:</strong> Verify actual sale rates on igrmaharashtra.gov.in. Visit 5 competing projects as a buyer. Fix your price band.</li>
+    <li><strong>Week 2:</strong> Tree survey with photographs. File the Tree Authority application.</li>
+    <li><strong>Week 2–3:</strong> Appoint structural engineer. Order soil investigation (3–4 bore holes).</li>
+    <li><strong>Week 3–4:</strong> All NOC applications submitted in the same week. Start the NOC tracker.</li>
+    <li><strong>Week 4:</strong> Site board up at the junction. Google Business Profile created. Instagram and Facebook pages live.</li>
+    <li><strong>Week 5–8:</strong> AutoDCR drawings finalised and reviewed. Government fee estimate obtained from NMC in writing.</li>
+    <li><strong>Week 6–10:</strong> Meet 15 brokers. Approach 3 banks for project approval. Line up pre-revenue funding.</li>
+    <li><strong>Week 8–12:</strong> Plan submitted. NOCs chased in person every 10 days. Contractor shortlist and BOQ prepared.</li>
+  </ul>
+
+  <div class="dark" style="margin-top:12px;">
+    <h4>The five things that decide whether this project succeeds</h4>
+    <ul>
+      <li><strong>The deal structure</strong> — 75%+ of saleable area, or renegotiate</li>
+      <li><strong>Pre-revenue capital</strong> — ₹1.5–2 Cr arranged before month 1</li>
+      <li><strong>Speed of approvals</strong> — parallel NOCs and a liaison consultant save 6 months of interest</li>
+      <li><strong>Collections discipline</strong> — demand the day the milestone is certified, chase weekly</li>
+      <li><strong>Building exactly as sanctioned</strong> — the only guaranteed path to OC</li>
+    </ul>
+  </div>
+</div>
+
+</body>
+</html>
