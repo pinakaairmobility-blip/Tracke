@@ -5,6 +5,7 @@
   "description": "MeghQuasar brand film: realtime three.js showreel plus a frame-accurate MP4 renderer.",
   "scripts": {
     "landmask": "node tools/build-landmask.mjs",
+    "logo": "node tools/embed-logo.mjs",
     "artifact": "node tools/build-artifact.mjs",
     "render": "node tools/render.mjs",
     "preview": "node tools/serve.mjs",

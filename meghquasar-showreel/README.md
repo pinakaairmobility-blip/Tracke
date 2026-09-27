@@ -16,8 +16,8 @@ made visible.
 
 | # | Time | Shot | What's on screen |
 |---|------|------|------------------|
-| 01 | 0:00 | Signal | Starfield push-in to a quasar: GLSL accretion disk with Doppler colour shift, particle jets |
-| 02 | 0:08 | Megh + Quasar | Backlit procedural cloud bank, god rays, kinetic wordmark and the two definitions |
+| 01 | 0:00 | Signal | Starfield push-in to a quasar whose light is the logo's four-point star, pinging like a signal |
+| 02 | 0:08 | Megh + Quasar | The logo builds over a night cloud sea: the star ignites, the plane flies the crescent as its contrail, MEGH and QUASAR rise; each word gets its definition |
 | 03 | 0:18 | The fog | 110 noise-tangled flight paths, 3D-anchored data tags, glitch hits: the opaque charter market |
 | 04 | 0:30 | The cut | A light sweep morphs every path, per vertex, into clean lanes: "Broker-only" |
 | 05 | 0:38 | The corridor | 72k-point Fibonacci globe on a Natural Earth land mask, 18 great-circle routes across 15 hubs |
@@ -27,7 +27,18 @@ made visible.
 | 09 | 1:07 | Quotes | Stacked 3D bars re-rank from headline price to all-in (illustrative values) |
 | 10 | 1:12 | Mission | Comet along the VOHS → OMDB great circle with live telemetry |
 | 11 | 1:20 | Why it matters | Dawn over a cloud sea |
-| 12 | 1:26 | Resolve | Quasar mark and end card |
+| 12 | 1:26 | Resolve | The logo builds again as the end card |
+
+## The logo
+
+`assets/meghquasar-logo.jpg` is the MeghQuasar logo. It is embedded in the page and
+composited in the final post pass with a screen blend, so its black background drops out
+and its colours stay exact (it is added after tone mapping). The crescent, star and plane
+positions were measured from the artwork (`LOGO` in `index.html`): the crescent is a circle
+that passes through the star, and the plane sits on that circle with its nose along the
+tangent, so the animation flies the plane up the crescent, drawing it as a contrail, and
+lands it exactly on its pose. Letters and plane are separated by colour, not by rectangles,
+so the crescent's glow is never cut.
 
 ## Accuracy
 
@@ -67,6 +78,8 @@ score offline with `OfflineAudioContext`, and muxes both.
 - Hubs, routes and the illustrative range: `HUBS`, `ROUTES`, `ILLUSTRATIVE_RANGE_KM`.
 - Score: `renderScore()` (120 BPM, D minor; cuts land on bar lines).
 - Land mask: `npm run landmask` regenerates the embedded bitmask from `world-atlas`.
+- Logo: replace `assets/meghquasar-logo.jpg` and run `npm run logo` to re-embed it (if the
+  artwork's layout changes, re-measure `LOGO`).
 - `npm run artifact` writes the claude.ai Artifact variant (the host adds its own
   document wrapper).
 
