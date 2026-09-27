@@ -2,4 +2,6 @@
 node_modules/
 dist/*
 !dist/meghquasar-showreel.mp4
+!dist/meghquasar-showreel-vertical.mp4
 !dist/poster.png
+!dist/poster-vertical.png
