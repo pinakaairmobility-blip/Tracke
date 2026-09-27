@@ -1,0 +1,22 @@
+{
+  "name": "meghquasar-showreel",
+  "private": true,
+  "type": "module",
+  "description": "MeghQuasar brand film: realtime three.js showreel plus a frame-accurate MP4 renderer.",
+  "scripts": {
+    "landmask": "node tools/build-landmask.mjs",
+    "artifact": "node tools/build-artifact.mjs",
+    "render": "node tools/render.mjs",
+    "preview": "node tools/serve.mjs",
+    "score": "node tools/score.mjs"
+  },
+  "dependencies": {
+    "three": "0.186.1"
+  },
+  "devDependencies": {
+    "d3-geo": "^3.1.1",
+    "playwright": "1.56.1",
+    "topojson-client": "^3.1.0",
+    "world-atlas": "^2.0.2"
+  }
+}
