@@ -159,9 +159,11 @@
   .barlab { font: 700 40px/1 var(--display); color: #eef3ff; text-align: center; }
   .barlab small { display: block; margin-top: 8px; font: 500 13px/1.3 var(--mono); letter-spacing: 0.12em; color: #8fa4cc; white-space: normal; width: 150px; margin-inline: -55px; }
 
-  .shade { width: 1920px; height: 1080px; background: linear-gradient(90deg, rgba(3, 5, 12, 0.82) 0%, rgba(3, 5, 12, 0.55) 34%, rgba(3, 5, 12, 0) 58%); }
+  .shade { width: 100%; height: 100%; background: linear-gradient(90deg, rgba(3, 5, 12, 0.82) 0%, rgba(3, 5, 12, 0.55) 34%, rgba(3, 5, 12, 0) 58%); }
   .hud { position: absolute; inset: 0; z-index: 5; }
-  .scrim { width: 1920px; height: 1080px; }
+  .scrim { width: 100%; height: 100%; }
+  .scrim.t { background: linear-gradient(180deg, rgba(3, 5, 12, 0.82) 0%, rgba(3, 5, 12, 0.5) 22%, rgba(3, 5, 12, 0) 42%); }
+  .tc { text-align: center; }
   .scrim.l { background: linear-gradient(90deg, rgba(3, 5, 12, 0.8) 0%, rgba(3, 5, 12, 0.55) 36%, rgba(3, 5, 12, 0) 62%); }
   .scrim.b { background: linear-gradient(0deg, rgba(3, 5, 12, 0.82) 0%, rgba(3, 5, 12, 0.5) 24%, rgba(3, 5, 12, 0) 46%); }
   .scrim.c { background: radial-gradient(ellipse 44% 38% at 50% 50%, rgba(3, 5, 12, 0.85) 0%, rgba(3, 5, 12, 0.6) 55%, rgba(3, 5, 12, 0) 100%); }
@@ -183,8 +185,26 @@
   body.render { padding: 0; overflow: hidden; }
   body.render .page { display: block; max-width: none; padding: 0; }
   body.render .masthead, body.render .transport, body.render .about, body.render .shots, body.render .foot, body.render .bigplay { display: none !important; }
-  body.render .player { width: 1920px; }
-  body.render .stage { width: 1920px; height: 1080px; border-radius: 0; box-shadow: none; }
+  body.render .stage { border-radius: 0; box-shadow: none; aspect-ratio: auto; }
+  body.vertical .stage { aspect-ratio: 9 / 16; }
+  body.vertical:not(.render) .player { width: min(100%, calc((100dvh - 190px) * 9 / 16)); }
+
+  /* ---------- 9:16 cut: type sized for a phone-width frame, clear of the Reels UI ---------- */
+  .ov.vert .f-state { font-size: 66px; }
+  .ov.vert .f-state.sm { font-size: 58px; }
+  .ov.vert .f-slam { font-size: 70px; }
+  .ov.vert .f-thin { font-size: 46px; }
+  .ov.vert .f-sub { font-size: 32px; }
+  .ov.vert .f-region { font-size: 70px; }
+  .ov.vert .stamp { font-size: 110px; padding: 6px 26px 10px; border-width: 5px; }
+  .ov.vert .legend { flex-wrap: wrap; width: 920px; }
+  .ov.vert .wrap { white-space: normal; width: 920px; }
+  .ov.vert .check { font-size: 19px; }
+  .ov.vert .hud .h-tl { top: 172px; left: 64px; }
+  .ov.vert .hud .h-tr { display: none; }
+  .ov.vert .hud .h-bl { top: 196px; bottom: auto; left: 64px; }
+  .ov.vert .hud #hudTech { display: none; }
+  .ov.vert .hud .h-br { top: 172px; bottom: auto; right: 64px; }
 
   @media (max-width: 640px) {
     .transport .tc.dim { display: none; }
@@ -279,7 +299,13 @@ const RENDER = new URLSearchParams(location.search).has('render');
 const REDUCED = !RENDER && matchMedia('(prefers-reduced-motion: reduce)').matches;
 const DURATION = 94;
 const POSTER_T = 15.3;
-const FW = 1920, FH = 1080;
+// ?format=vertical renders the 9:16 cut (1080×1920) for Reels from the same timeline.
+const VERT = new URLSearchParams(location.search).get('format') === 'vertical';
+const FW = VERT ? 1080 : 1920, FH = VERT ? 1920 : 1080;
+// Vertical cameras keep roughly the landscape framing's width by widening the vertical FOV.
+const vfov = (f) => (VERT ? (2 * Math.atan(Math.tan((f * Math.PI) / 360) * 1.9) * 180) / Math.PI : f);
+// View offsets: [landscape x, y], [vertical x, y].
+const offsetView = (cam, h, v) => { const [x, y] = VERT ? v : h; cam.setViewOffset(FW, FH, x, y, FW, FH); };
 
 const SHOTS = [
   { id: 'signal', t0: 0, t1: 8, scene: 'A', title: 'Signal', tech: 'Starfield push-in · GLSL accretion disk with Doppler colour shift · the logo star, pinging' },
@@ -319,7 +345,10 @@ const LOGO = {
   meghCenter: 265, quasarLeft: 553, textBottom: 374,
 };
 // Where the logo appears: frame position of its top-left corner, scale, and timing.
-const LOGO_SHOTS = [
+const LOGO_SHOTS = VERT ? [
+  { t: 8.0, t1: 17.6, x: 56, y: 560, s: 0.82 },
+  { t: 86.0, t1: 94.5, x: 56, y: 600, s: 0.82 },
+] : [
   { t: 8.0, t1: 17.6, x: 429, y: 142, s: 0.9 },
   { t: 86.0, t1: 94.5, x: 370, y: 158, s: 1.0 },
 ];
@@ -419,6 +448,9 @@ const stageEl = document.getElementById('stage');
 const ov = document.getElementById('ov');
 const canvas = document.getElementById('gl');
 if (RENDER) document.body.classList.add('render');
+if (VERT) { document.body.classList.add('vertical'); ov.classList.add('vert'); }
+ov.style.width = `${FW}px`; ov.style.height = `${FH}px`;
+if (RENDER) { stageEl.style.width = `${FW}px`; stageEl.style.height = `${FH}px`; document.getElementById('player').style.width = `${FW}px`; }
 
 const renderer = new THREE.WebGLRenderer({ canvas, antialias: false, powerPreference: 'high-performance', preserveDrawingBuffer: RENDER });
 renderer.setClearColor(0x000000, 1);
@@ -528,7 +560,7 @@ const FinalShader = {
       vec2 q = uv - 0.5; q.x *= uRes.x / uRes.y;
       col *= mix(1.0, 1.0 - smoothstep(0.35, 1.1, length(q)), uVig);
       if (uLogoOn > 0.001) {
-        vec3 L = logoLayer(vec2(vUv.x * 1920.0, (1.0 - vUv.y) * 1080.0)) * uLogoOn;
+        vec3 L = logoLayer(vec2(vUv.x * ${FW.toFixed(1)}, (1.0 - vUv.y) * ${FH.toFixed(1)})) * uLogoOn;
         col = 1.0 - (1.0 - col) * (1.0 - L);
       }
       col += (hash(uv * uRes + fract(uTime * 7.31) * 113.0) - 0.5) * uGrain;
@@ -572,7 +604,7 @@ function resize() {
   composer.setPixelRatio(pr);
   composer.setSize(w, h);
   FU.uRes.value.set(w * pr, h * pr);
-  G.uScale.value = (h * pr) / FH;
+  G.uScale.value = (Math.min(w, h) * pr) / 1080;
   ov.style.transform = `scale(${w / FW})`;
 }
 
@@ -639,7 +671,7 @@ function makeFlare(color, w, h, mode, intensity = 1, depthTest = true) {
         if (c.w <= 0.0) { gl_Position = vec4(2.0, 2.0, 2.0, 1.0); return; }
         vec2 o = position.xy * uSize;
         o = vec2(cos(uRot) * o.x - sin(uRot) * o.y, sin(uRot) * o.x + cos(uRot) * o.y);
-        gl_Position = vec4(c.xy + o / vec2(960.0, 540.0) * c.w, c.z, c.w);
+        gl_Position = vec4(c.xy + o * ${VERT ? '0.8' : '1.0'} / vec2(${(FW / 2).toFixed(1)}, ${(FH / 2).toFixed(1)}) * c.w, c.z, c.w);
       }`,
     fragmentShader: `
       uniform vec3 uColor; uniform float uInt, uMode; varying vec2 vUv;
@@ -983,12 +1015,13 @@ function makeTangle() {
   });
   const lines = new THREE.LineSegments(g, mat);
   lines.frustumCulled = false;
+  if (VERT) lines.scale.y = 1.8;
   return { lines, mat };
 }
 
 function makeSceneA(cloudTex) {
   const scene = new THREE.Scene();
-  const camera = new THREE.PerspectiveCamera(40, FW / FH, 0.1, 2000);
+  const camera = new THREE.PerspectiveCamera(vfov(40), FW / FH, 0.1, 2000);
   const sky = new THREE.Mesh(new THREE.SphereGeometry(900, 32, 16), new THREE.ShaderMaterial({
     side: THREE.BackSide, depthWrite: false,
     uniforms: {
@@ -1098,7 +1131,7 @@ function updateA(A, t) {
     // 02 Megh + Quasar: the logo builds over a night cloud sea; its star lights the cloud tops.
     const u = prog(t, 8, 18);
     cam.position.set(Math.sin(t * 0.2) * 0.3, lerp(2.4, 2.8, E.ioS(u)), lerp(16, 6, E.ioS(u)));
-    cam.lookAt(0, cam.position.y + 15, cam.position.z - 60);
+    cam.lookAt(0, cam.position.y + (VERT ? 21 : 15), cam.position.z - 60);
     setQuasar(Q, { visible: false });
     const L1 = LOGO_SHOTS[0];
     pinToScreen(A.logo.group, cam, ...logoPx(L1, ...LOGO.star), 140);
@@ -1205,7 +1238,7 @@ function arcPoints(a, b, n) {
 
 function makeSceneB(land) {
   const scene = new THREE.Scene();
-  const camera = new THREE.PerspectiveCamera(40, FW / FH, 0.01, 2000);
+  const camera = new THREE.PerspectiveCamera(vfov(40), FW / FH, 0.01, 2000);
   scene.add(makeStars(3000, 60, 600, 9));
   const globe = new THREE.Group();
   scene.add(globe);
@@ -1358,7 +1391,7 @@ function updateB(B, t) {
     cam.position.copy(ll2v(lat, lon, dist));
     cam.up.set(0, 1, 0);
     cam.lookAt(0, 0, 0);
-    cam.setViewOffset(FW, FH, -440, 10, FW, FH);
+    offsetView(cam, [-440, 10], [0, -110]);
     B.dotMat.uniforms.uReveal.value = lerp(0, 3.4, E.outC(prog(t, 38.2, 41.5)));
     B.dotMat.uniforms.uDim.value = 1;
     B.hubMat.uniforms.uAll.value = 0;
@@ -1388,7 +1421,7 @@ function updateB(B, t) {
     cam.position.copy(ll2v(ll.lat - 11, ll.lon + 9, 2.05));
     cam.up.set(0, 1, 0);
     cam.lookAt(ll2v(lerp(ll.lat, lead.lat, 0.4), lerp(ll.lon, lead.lon, 0.4), 1.0));
-    cam.setViewOffset(FW, FH, -300, -170, FW, FH);
+    offsetView(cam, [-300, -170], [0, -40]);
     B.dotMat.uniforms.uReveal.value = 4;
     B.dotMat.uniforms.uDim.value = 0.75;
     B.hubMat.uniforms.uAll.value = 1;
@@ -1442,7 +1475,7 @@ function floorGrid(size, y, color, fade) {
 
 function makeSceneC() {
   const scene = new THREE.Scene();
-  const camera = new THREE.PerspectiveCamera(38, FW / FH, 0.1, 500);
+  const camera = new THREE.PerspectiveCamera(vfov(38), FW / FH, 0.1, 500);
   scene.add(makeStars(1500, 40, 300, 12));
   scene.add(floorGrid(80, -2.6, [0.1, 0.3, 0.6], 0.07));
   const N = 700, rnd = mulberry32(44);
@@ -1470,7 +1503,7 @@ function makeSceneC() {
   return { scene, camera, mesh, jets, wl, scan, scanLong, dummy: new THREE.Object3D(), col: new THREE.Color() };
 }
 
-function colPos(k) { return new THREE.Vector3(-0.9, 0.62 - k * 0.4, 1.2); }
+function colPos(k) { return VERT ? new THREE.Vector3(-0.8, 1.1 - k * 0.62, 1.2) : new THREE.Vector3(-0.9, 0.62 - k * 0.4, 1.2); }
 
 function updateC(C, t) {
   const cam = C.camera, u = prog(t, 52, 57);
@@ -1522,7 +1555,7 @@ const mapXY = (lat, lon, z = 0) => new THREE.Vector3((lon - MAP.lon0) * MAP.k, (
 
 function makeSceneD(land) {
   const scene = new THREE.Scene();
-  const camera = new THREE.PerspectiveCamera(36, FW / FH, 0.1, 500);
+  const camera = new THREE.PerspectiveCamera(vfov(36), FW / FH, 0.1, 500);
   scene.add(makeStars(1500, 40, 300, 13));
   const map = new THREE.Group();
   scene.add(map);
@@ -1606,10 +1639,11 @@ function makeSceneD(land) {
 
 function updateD(D, t) {
   const cam = D.camera, u = E.ioS(prog(t, 57, 62));
-  cam.position.set(lerp(0.5, 1.1, u), lerp(-5.6, -5.0, u), lerp(11.0, 10.0, u));
+  if (VERT) cam.position.set(lerp(0.8, 1.2, u), lerp(-6.6, -6.0, u), lerp(15.0, 14.0, u));
+  else cam.position.set(lerp(0.5, 1.1, u), lerp(-5.6, -5.0, u), lerp(11.0, 10.0, u));
   cam.up.set(0, 1, 0);
   cam.lookAt(lerp(1.0, 1.2, u), lerp(-1.1, -0.9, u), 0);
-  cam.setViewOffset(FW, FH, 250, -40, FW, FH);
+  offsetView(cam, [250, -40], [40, 250]);
   D.map.updateMatrixWorld();
   D.dotMat.uniforms.uReveal.value = lerp(0, 16000, E.outC(prog(t, 57.0, 58.0)));
   D.dotMat.uniforms.uRange.value = ILLUSTRATIVE_RANGE_KM * E.outC(prog(t, 58.3, 59.0)) * (1 - prog(t, 61.4, 62));
@@ -1658,7 +1692,7 @@ function docTexture(title, seed) {
 }
 function makeSceneE() {
   const scene = new THREE.Scene();
-  const camera = new THREE.PerspectiveCamera(36, FW / FH, 0.1, 500);
+  const camera = new THREE.PerspectiveCamera(vfov(36), FW / FH, 0.1, 500);
   scene.add(makeStars(1500, 40, 300, 14));
   scene.add(floorGrid(80, -2.4, [0.08, 0.22, 0.45], 0.09));
   const cards = DOCS.map((d, k) => {
@@ -1678,7 +1712,7 @@ function updateE(Ee, t) {
   const cam = Ee.camera, u = prog(t, 62, 67);
   cam.position.set(lerp(-2.6, -1.8, E.ioS(u)), lerp(1.7, 1.2, u), lerp(9.2, 8.2, E.ioS(u)));
   cam.lookAt(lerp(3.6, 3.9, u), 0.0, -2.6);
-  cam.setViewOffset(FW, FH, -400, 0, FW, FH);
+  offsetView(cam, [-400, 0], [-40, -40]);
   const rz = ringZ(t);
   Ee.cards.forEach((m, k) => {
     const cz = m.position.z;
@@ -1718,7 +1752,7 @@ QUOTES.forEach((q) => { q.total = q.base + q.extra.reduce((a, b) => a + b, 0); }
 const SORTED = [...QUOTES].sort((a, b) => a.total - b.total).map((q) => q.id);
 function makeSceneF() {
   const scene = new THREE.Scene();
-  const camera = new THREE.PerspectiveCamera(36, FW / FH, 0.1, 500);
+  const camera = new THREE.PerspectiveCamera(vfov(36), FW / FH, 0.1, 500);
   scene.add(makeStars(1500, 40, 300, 15));
   scene.add(floorGrid(80, 0, [0.08, 0.24, 0.5], 0.08));
   const box = new THREE.BoxGeometry(1, 1, 1); box.translate(0, 0.5, 0);
@@ -1742,7 +1776,7 @@ function updateF(F, t) {
   const cam = F.camera, u = prog(t, 67, 72);
   cam.position.set(lerp(6.2, 4.6, E.ioS(u)), lerp(4.6, 3.9, E.ioS(u)), lerp(12.8, 11.6, E.ioS(u)));
   cam.lookAt(0, 1.75, 0);
-  cam.setViewOffset(FW, FH, -330, -20, FW, FH);
+  offsetView(cam, [-330, -20], [-20, -60]);
   const rise = E.outX(prog(t, QUOTE_T.rise, QUOTE_T.rise + 0.9));
   const sort = E.ioC(prog(t, QUOTE_T.sort, QUOTE_T.sort + 0.7));
   F.cols.forEach((c, i) => {
@@ -1775,6 +1809,7 @@ const CROSS = '<svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true
 const ANCH = { t: 'translate(-50%,0)', c: 'translate(-50%,-50%)', l: 'translate(0,-50%)', r: 'translate(-100%,-50%)', tl: '', tr: 'translate(-100%,0)', b: 'translate(-50%,-100%)', bl: 'translate(0,-100%)' };
 
 function cue(o) {
+  if (VERT && o.v) o = { ...o, ...o.v };
   const c = { anchor: 'tl', fx: 'fade', inDur: 0.6, outDur: 0.35, stagger: 0.05, x: 0, y: 0, ...o };
   const el = document.createElement('div');
   el.className = 'cue ' + (c.cls || '');
@@ -1875,43 +1910,48 @@ function updateCues(t, cam, sceneKey) {
 
 function buildCues(S) {
   // 01 Signal
-  cue({ t0: 0.9, t1: 4.6, x: 160, y: 800, cls: 'f-mono', fx: 'type', text: 'Incoming signal', cps: 20 });
-  cue({ t0: 1.6, t1: 4.6, x: 160, y: 842, cls: 'f-mono sm c-dim', fx: 'type', text: '3C 273 · RA 12h 29m 06.7s · Dec +02° 03\' 09"', cps: 42 });
-  cue({ t0: 2.5, t1: 4.6, x: 160, y: 870, cls: 'f-mono sm c-dim', fx: 'type', text: 'The first quasar identified · 1963', cps: 42 });
+  cue({ v: { x: 80, y: 1250 }, t0: 0.9, t1: 4.6, x: 160, y: 800, cls: 'f-mono', fx: 'type', text: 'Incoming signal', cps: 20 });
+  cue({ v: { x: 80, y: 1292 }, t0: 1.6, t1: 4.6, x: 160, y: 842, cls: 'f-mono sm c-dim', fx: 'type', text: '3C 273 · RA 12h 29m 06.7s · Dec +02° 03\' 09"', cps: 42 });
+  cue({ v: { x: 80, y: 1320 }, t0: 2.5, t1: 4.6, x: 160, y: 870, cls: 'f-mono sm c-dim', fx: 'type', text: 'The first quasar identified · 1963', cps: 42 });
   cue({ t0: 4.7, t1: 7.95, cls: 'scrim b', fx: 'veil', inDur: 0.5, outDur: 0.3, html: '' });
-  cue({ t0: 4.95, t1: 7.8, x: 960, y: 900, anchor: 'c', cls: 'f-thin', fx: 'mask', lines: ['Some light cuts through everything.'], inDur: 0.9, outDur: 0.3 });
+  cue({ v: { x: 540, y: 1340, cls: 'f-thin tc', lines: ['Some light cuts', 'through everything.'] }, t0: 4.95, t1: 7.8, x: 960, y: 900, anchor: 'c', cls: 'f-thin', fx: 'mask', lines: ['Some light cuts through everything.'], inDur: 0.9, outDur: 0.3 });
 
   // 02 Megh + Quasar
   {
     const L1 = LOGO_SHOTS[0], [mx, ty] = logoPx(L1, LOGO.meghCenter, LOGO.textBottom), [qx] = logoPx(L1, LOGO.quasarLeft, 0);
-    cue({ t0: 11.2, t1: 17.5, x: mx, y: ty + 44, anchor: 't', fx: 'fade', inDur: 0.8, outDur: 0.45, html: '<div class="def c-center"><div><span class="hw">मेघ</span><span class="pr">megh · Sanskrit</span></div><div class="gl">n. cloud</div></div>' });
-    cue({ t0: 11.5, t1: 17.5, x: qx, y: ty + 44, anchor: 'tl', fx: 'fade', inDur: 0.8, outDur: 0.45, html: '<div class="def"><div><span class="hw">quasar</span><span class="pr">astronomy</span></div><div class="gl">n. among the most luminous objects in the universe</div></div>' });
+    cue({ v: { x: 540, y: 1150 }, t0: 11.2, t1: 17.5, x: mx, y: ty + 44, anchor: 't', fx: 'fade', inDur: 0.8, outDur: 0.45, html: '<div class="def c-center"><div><span class="hw">मेघ</span><span class="pr">megh · Sanskrit</span></div><div class="gl">n. cloud</div></div>' });
+    cue({ v: { x: 540, y: 1270, anchor: 't', html: '<div class="def c-center"><div><span class="hw">quasar</span><span class="pr">astronomy</span></div><div class="gl">n. among the most luminous objects in the universe</div></div>' }, t0: 11.5, t1: 17.5, x: qx, y: ty + 44, anchor: 'tl', fx: 'fade', inDur: 0.8, outDur: 0.45, html: '<div class="def"><div><span class="hw">quasar</span><span class="pr">astronomy</span></div><div class="gl">n. among the most luminous objects in the universe</div></div>' });
   }
 
   // 03 The fog
-  cue({ t0: 18.2, t1: 23.5, cls: 'scrim l', fx: 'veil', inDur: 0.6, outDur: 0.2, html: '' });
+  cue({ v: { cls: 'scrim t' }, t0: 18.2, t1: 23.5, cls: 'scrim l', fx: 'veil', inDur: 0.6, outDur: 0.2, html: '' });
   cue({ t0: 23.35, t1: 29.7, cls: 'scrim c', fx: 'veil', inDur: 0.2, outDur: 0.2, html: '' });
-  cue({ t0: 18.35, t1: 21.8, x: 150, y: 400, cls: 'f-state', fx: 'mask', lines: ['Cross-border business', 'moves on its own clock.'], stagger: 0.12, inDur: 0.8 });
-  cue({ t0: 21.95, t1: 23.4, x: 150, y: 450, cls: 'f-state', fx: 'mask', lines: ['Charter should keep up.'], inDur: 0.6, outDur: 0.18 });
+  cue({ v: { x: 80, y: 300, lines: ['Cross-border', 'business moves', 'on its own clock.'] }, t0: 18.35, t1: 21.8, x: 150, y: 400, cls: 'f-state', fx: 'mask', lines: ['Cross-border business', 'moves on its own clock.'], stagger: 0.12, inDur: 0.8 });
+  cue({ v: { x: 80, y: 300, lines: ['Charter should', 'keep up.'] }, t0: 21.95, t1: 23.4, x: 150, y: 450, cls: 'f-state', fx: 'mask', lines: ['Charter should keep up.'], inDur: 0.6, outDur: 0.18 });
   const slams = [['Quotes that', 'don’t compare.'], ['Positioning fees,', 'buried.'], ['Permits across', 'borders.'], ['Sanctions.', 'FEMA. GST.']];
-  GLITCH_HITS.forEach((h, i) => cue({ t0: h, t1: h + 1.45, x: 960, y: 540, anchor: 'c', cls: 'f-state f-slam', fx: 'slam', html: slams[i].join('<br>'), inDur: 0.3, outDur: 0.12 }));
+  const slamsV = [['Quotes that', 'don\u2019t compare.'], ['Positioning', 'fees, buried.'], ['Permits across', 'borders.'], ['Sanctions.', 'FEMA. GST.']];
+  GLITCH_HITS.forEach((h, i) => cue({ v: { x: 540, y: 960, html: slamsV[i].join('<br>') }, t0: h, t1: h + 1.45, x: 960, y: 540, anchor: 'c', cls: 'f-state f-slam', fx: 'slam', html: slams[i].join('<br>'), inDur: 0.3, outDur: 0.12 }));
   const frags = [
     ['Positioning · excl.', [-9.5, 3.4, 8]], ['Handling · TBC', [6.8, 3.9, 8]], ['Fuel surcharge · ?', [-11, -2.2, 8]], ['Overflight permit · pending', [5.6, -3.6, 8]],
     ['KYC · incomplete', [-5, -4.6, 8]], ['FX route · unmapped', [8.4, 0.9, 8]], ['Quote 3 of 7 · expires 24h', [-7.8, 0.6, 8]], ['Crew duty · unknown', [1.4, 4.9, 8]],
   ];
-  frags.forEach(([txt, p], i) => cue({ t0: 19.0 + i * 0.5, t1: 29.6, scene: 'A', pos: () => new THREE.Vector3(...p), anchor: 'l', cls: 'tag warn', fx: 'fade', html: `<span class="dot"></span>${esc(txt)}`, inDur: 0.35, outDur: 0.12 }));
+  // In 9:16 the frame is narrow, so the tags sit in a taller, narrower field.
+  const fragsV = [[-5.4, 3.8], [0.6, 3.1], [-5.6, -1.4], [-3.0, -5.2], [0.8, -3.6], [1.0, -1.6], [-5.3, 2.4], [-5.0, -3.2]];
+  frags.forEach(([txt, p], i) => cue({ t0: 19.0 + i * 0.5, t1: 29.6, scene: 'A', pos: () => (VERT ? new THREE.Vector3(fragsV[i][0], fragsV[i][1], 8) : new THREE.Vector3(...p)), anchor: 'l', cls: 'tag warn', fx: 'fade', html: `<span class="dot"></span>${esc(txt)}`, inDur: 0.35, outDur: 0.12 }));
 
   // 04 The cut
   cue({ t0: 30.1, t1: 33.75, cls: 'scrim b', fx: 'veil', inDur: 0.4, outDur: 0.3, html: '' });
-  cue({ t0: 33.6, t1: 37.95, cls: 'scrim l', fx: 'veil', inDur: 0.4, outDur: 0.2, html: '' });
-  cue({ t0: 30.3, t1: 33.65, x: 960, y: 900, anchor: 'c', cls: 'f-state', fx: 'rise', html: chars('MeghQuasar cuts through.'), stagger: 0.024, inDur: 0.75, outDur: 0.35 });
-  cue({ t0: 33.8, t1: 37.8, x: 150, y: 330, cls: 'f-mono c-saff', fx: 'type', text: 'Broker-only', cps: 24 });
-  cue({ t0: 34.1, t1: 37.8, x: 150, y: 382, cls: 'f-state', fx: 'mask', lines: ['We don’t fly', 'the aircraft.'], stagger: 0.1 });
-  cue({ t0: 35.35, t1: 37.8, x: 150, y: 580, cls: 'f-state c-cyan', fx: 'mask', lines: ['We find the', 'right one.'], stagger: 0.1 });
+  cue({ v: { cls: 'scrim t' }, t0: 33.6, t1: 37.95, cls: 'scrim l', fx: 'veil', inDur: 0.4, outDur: 0.2, html: '' });
+  cue({ v: { x: 540, y: 1330, cls: 'f-state tc', html: chars('MeghQuasar') + '<br>' + chars('cuts through.') }, t0: 30.3, t1: 33.65, x: 960, y: 900, anchor: 'c', cls: 'f-state', fx: 'rise', html: chars('MeghQuasar cuts through.'), stagger: 0.024, inDur: 0.75, outDur: 0.35 });
+  cue({ v: { x: 80, y: 280 }, t0: 33.8, t1: 37.8, x: 150, y: 330, cls: 'f-mono c-saff', fx: 'type', text: 'Broker-only', cps: 24 });
+  cue({ v: { x: 80, y: 330 }, t0: 34.1, t1: 37.8, x: 150, y: 382, cls: 'f-state', fx: 'mask', lines: ['We don’t fly', 'the aircraft.'], stagger: 0.1 });
+  cue({ v: { x: 80, y: 500 }, t0: 35.35, t1: 37.8, x: 150, y: 580, cls: 'f-state c-cyan', fx: 'mask', lines: ['We find the', 'right one.'], stagger: 0.1 });
 
   // 05 The corridor
-  cue({ t0: 38.6, t1: 51.7, x: 150, y: 232, cls: 'f-mono', fx: 'type', text: 'The corridor', cps: 22 });
+  cue({ v: { x: 80, y: 236 }, t0: 38.6, t1: 51.7, x: 150, y: 232, cls: 'f-mono', fx: 'type', text: 'The corridor', cps: 22 });
+  const regionV = [[80, 280], [560, 280], [80, 368], [560, 368]];
   [['Gulf', 'gulf'], ['India', 'india'], ['Africa', 'africa'], ['Europe', 'europe']].forEach(([w, key], i) => cue({
+    v: { x: regionV[i][0], y: regionV[i][1] },
     t0: 38.7 + i * 0.08, t1: 51.7, x: 150, y: 290 + i * 106, cls: 'f-region', fx: 'custom', outDur: 0.4,
     html: `<span class="rg-o">${w.toUpperCase()}</span><span class="rg-f">${w.toUpperCase()}</span>`,
     init: (c) => { c.fill = c.el.querySelector('.rg-f'); c.lit = REGION_T[key]; },
@@ -1922,8 +1962,8 @@ function buildCues(S) {
       c.fill.style.clipPath = `inset(-10% ${((1 - k) * 100).toFixed(2)}% -10% 0)`;
     },
   }));
-  cue({ t0: 45.2, t1: 51.7, x: 150, y: 736, cls: 'f-sub', fx: 'mask', lines: ['One corridor, four regions.', 'Every leg sourced, checked', 'and priced like-for-like.'], stagger: 0.14, inDur: 0.8 });
-  cue({ t0: 46.5, t1: 51.7, x: 150, y: 900, cls: 'f-mono', fx: 'custom', inDur: 0.3,
+  cue({ v: { x: 80, y: 478, lines: ['One corridor, four regions.'] }, t0: 45.2, t1: 51.7, x: 150, y: 736, cls: 'f-sub', fx: 'mask', lines: ['One corridor, four regions.', 'Every leg sourced, checked', 'and priced like-for-like.'], stagger: 0.14, inDur: 0.8 });
+  cue({ v: { x: 80, y: 530 }, t0: 46.5, t1: 51.7, x: 150, y: 900, cls: 'f-mono', fx: 'custom', inDur: 0.3,
     update: (c, t, pin, pout, base) => {
       const i = clamp(Math.floor((t - 46.5) / 1.27), 0, READOUT_LEGS.length - 1);
       const [a, b] = READOUT_LEGS[i];
@@ -1942,9 +1982,9 @@ function buildCues(S) {
   });
 
   // 06 Sourcing
-  cue({ t0: 52.2, t1: 56.95, x: 150, y: 150, cls: 'f-mono c-cyan', fx: 'type', text: 'Operator sourcing', cps: 30 });
-  cue({ t0: 52.35, t1: 56.95, x: 150, y: 196, cls: 'f-state sm', fx: 'mask', lines: ['The right aircraft,', 'not the nearest one.'], stagger: 0.1, outDur: 0.3 });
-  cue({ t0: 52.6, t1: 56.95, x: 150, y: 930, cls: 'f-mono', fx: 'custom', inDur: 0.3, outDur: 0.3,
+  cue({ v: { x: 80, y: 236 }, t0: 52.2, t1: 56.95, x: 150, y: 150, cls: 'f-mono c-cyan', fx: 'type', text: 'Operator sourcing', cps: 30 });
+  cue({ v: { x: 80, y: 280 }, t0: 52.35, t1: 56.95, x: 150, y: 196, cls: 'f-state sm', fx: 'mask', lines: ['The right aircraft,', 'not the nearest one.'], stagger: 0.1, outDur: 0.3 });
+  cue({ v: { x: 80, y: 1470 }, t0: 52.6, t1: 56.95, x: 150, y: 930, cls: 'f-mono', fx: 'custom', inDur: 0.3, outDur: 0.3,
     update: (c, t, pin, pout, base) => {
       const scanned = Math.round(700 * E.ioS(prog(t, 52.4, 54.9)));
       const kept = SOURCE_T.filter((x) => t >= x).length;
@@ -1957,8 +1997,8 @@ function buildCues(S) {
 
   // 07 Feasibility
   const direct = gcKm(HUB.VOHS, HUB.FAOR), l1 = gcKm(HUB.VOHS, HUB.FSIA), l2 = gcKm(HUB.FSIA, HUB.FAOR);
-  cue({ t0: 57.2, t1: 61.95, x: 150, y: 150, cls: 'f-mono c-cyan', fx: 'type', text: 'Mission feasibility', cps: 30 });
-  cue({ t0: 57.35, t1: 61.95, x: 150, y: 196, cls: 'f-state sm', fx: 'mask', lines: ['Can it fly? Answered', 'before you commit.'], stagger: 0.1, outDur: 0.3 });
+  cue({ v: { x: 80, y: 236 }, t0: 57.2, t1: 61.95, x: 150, y: 150, cls: 'f-mono c-cyan', fx: 'type', text: 'Mission feasibility', cps: 30 });
+  cue({ v: { x: 80, y: 280, lines: ['Can it fly?', 'Answered before', 'you commit.'] }, t0: 57.35, t1: 61.95, x: 150, y: 196, cls: 'f-state sm', fx: 'mask', lines: ['Can it fly? Answered', 'before you commit.'], stagger: 0.1, outDur: 0.3 });
   const feas = [
     ['', `Direct VOHS → FAOR <b>${km(direct)} km</b>`],
     ['warn', `Range ${km(ILLUSTRATIVE_RANGE_KM)} km <span class="note">(illustrative)</span> <b>exceeded</b>`],
@@ -1966,16 +2006,16 @@ function buildCues(S) {
     ['', 'Permits · slots · handling <b>mapped</b>'],
     ['', 'Crew duty <b>within limits</b>'],
   ];
-  feas.forEach(([cls, txt], i) => cue({ t0: FEAS_T[i], t1: 61.95, x: 1200, y: 400 + i * 64, cls: `check ${cls}`, fx: 'fade', inDur: 0.35, outDur: 0.3, html: `<span class="bx">${cls === 'warn' ? CROSS : TICK}</span><span>${txt}</span>` }));
-  cue({ t0: GO_T, t1: 61.95, x: 1200, y: 760, cls: 'stamp', fx: 'pop', inDur: 0.4, outDur: 0.25, html: 'GO' });
+  feas.forEach(([cls, txt], i) => cue({ v: { x: 80, y: 1090 + i * 60 }, t0: FEAS_T[i], t1: 61.95, x: 1200, y: 400 + i * 64, cls: `check ${cls}`, fx: 'fade', inDur: 0.35, outDur: 0.3, html: `<span class="bx">${cls === 'warn' ? CROSS : TICK}</span><span>${txt}</span>` }));
+  cue({ v: { x: 680, y: 1150 }, t0: GO_T, t1: 61.95, x: 1200, y: 760, cls: 'stamp', fx: 'pop', inDur: 0.4, outDur: 0.25, html: 'GO' });
   [['VOHS', 'Hyderabad', 57.4], ['FAOR', 'Johannesburg', 57.6], ['FSIA', 'Mahé', 59.0]].forEach(([code, name, t0]) => cue({
     t0: t0 + 0.2, t1: 61.95, scene: 'D', pos: () => { const h = HUB[code]; const p = mapXY(h.lat, h.lon, code === 'FSIA' ? 0.8 : 0.55); return p.applyMatrix4(S.D.map.matrixWorld); }, anchor: 'b', dy: -12, cls: 'f-mono sm', fx: 'fade', inDur: 0.3, outDur: 0.25,
     html: `<span class="c-white">${code}</span> <span class="c-dim">${name}</span>` }));
 
   // 08 Compliance
-  cue({ t0: 62.2, t1: 66.95, x: 150, y: 150, cls: 'f-mono c-cyan', fx: 'type', text: 'Compliance', cps: 30 });
-  cue({ t0: 62.35, t1: 66.95, x: 150, y: 196, cls: 'f-state sm', fx: 'mask', lines: ['Every party screened.', 'Every permit mapped.'], stagger: 0.1, outDur: 0.3 });
-  ['OFAC SDN', 'UN Consolidated', 'EU Consolidated', 'UK OFSI', 'India UAPA / MHA'].forEach((l, i) => cue({ t0: COMP_T[i] - 0.25, t1: 66.95, x: 150, y: 420 + i * 62, cls: 'check', fx: 'custom', inDur: 0.3, outDur: 0.3,
+  cue({ v: { x: 80, y: 236 }, t0: 62.2, t1: 66.95, x: 150, y: 150, cls: 'f-mono c-cyan', fx: 'type', text: 'Compliance', cps: 30 });
+  cue({ v: { x: 80, y: 280 }, t0: 62.35, t1: 66.95, x: 150, y: 196, cls: 'f-state sm', fx: 'mask', lines: ['Every party screened.', 'Every permit mapped.'], stagger: 0.1, outDur: 0.3 });
+  ['OFAC SDN', 'UN Consolidated', 'EU Consolidated', 'UK OFSI', 'India UAPA / MHA'].forEach((l, i) => cue({ v: { x: 80, y: 1060 + i * 60 }, t0: COMP_T[i] - 0.25, t1: 66.95, x: 150, y: 420 + i * 62, cls: 'check', fx: 'custom', inDur: 0.3, outDur: 0.3,
     html: `<span class="bx"></span><span>${l}</span> <span class="note">screened</span>`,
     init: (c) => { c.bx = c.el.querySelector('.bx'); c.note = c.el.querySelector('.note'); c.tk = COMP_T[i]; },
     update: (c, t, pin, pout, base) => {
@@ -1984,14 +2024,14 @@ function buildCues(S) {
       const done = t >= c.tk;
       if (done !== c.done) { c.bx.innerHTML = done ? TICK : ''; c.note.style.opacity = done ? '1' : '0'; c.done = done; }
     } }));
-  cue({ t0: 65.7, t1: 66.95, x: 150, y: 760, cls: 'f-sub', fx: 'fade', inDur: 0.5, outDur: 0.3, html: 'FX and tax paths mapped: FEMA, LUT, FIRC/EEFC, GST.' });
+  cue({ v: { x: 80, y: 1380, cls: 'f-sub wrap' }, t0: 65.7, t1: 66.95, x: 150, y: 760, cls: 'f-sub', fx: 'fade', inDur: 0.5, outDur: 0.3, html: 'FX and tax paths mapped: FEMA, LUT, FIRC/EEFC, GST.' });
 
   // 09 Quotes
-  cue({ t0: 67.2, t1: 71.95, x: 150, y: 150, cls: 'f-mono c-cyan', fx: 'type', text: 'Quote normalization', cps: 30 });
-  cue({ t0: 67.35, t1: 71.95, x: 150, y: 196, cls: 'f-state sm', fx: 'mask', lines: ['Like-for-like.', 'All-in.'], stagger: 0.1, outDur: 0.3 });
-  cue({ t0: 68.9, t1: 71.95, x: 150, y: 370, cls: 'f-sub', fx: 'mask', lines: ['The lowest headline isn’t', 'always the lowest total.'], stagger: 0.1, outDur: 0.3 });
-  cue({ t0: 67.4, t1: 71.95, x: 1770, y: 150, anchor: 'tr', cls: 'tag', fx: 'fade', inDur: 0.4, outDur: 0.3, html: '<span class="dot"></span>Illustrative figures' });
-  cue({ t0: 67.6, t1: 71.95, x: 150, y: 960, anchor: 'bl', fx: 'fade', inDur: 0.4, outDur: 0.3, html: `<div class="legend">${SEGS.map((s) => `<span class="sw"><i style="background:rgb(${s.col.map((x) => Math.round(Math.min(1, x / 2.2) * 255)).join(',')})"></i>${s.name}</span>`).join('')}</div>` });
+  cue({ v: { x: 80, y: 236 }, t0: 67.2, t1: 71.95, x: 150, y: 150, cls: 'f-mono c-cyan', fx: 'type', text: 'Quote normalization', cps: 30 });
+  cue({ v: { x: 80, y: 280 }, t0: 67.35, t1: 71.95, x: 150, y: 196, cls: 'f-state sm', fx: 'mask', lines: ['Like-for-like.', 'All-in.'], stagger: 0.1, outDur: 0.3 });
+  cue({ v: { x: 80, y: 440 }, t0: 68.9, t1: 71.95, x: 150, y: 370, cls: 'f-sub', fx: 'mask', lines: ['The lowest headline isn’t', 'always the lowest total.'], stagger: 0.1, outDur: 0.3 });
+  cue({ v: { x: 1000, y: 236 }, t0: 67.4, t1: 71.95, x: 1770, y: 150, anchor: 'tr', cls: 'tag', fx: 'fade', inDur: 0.4, outDur: 0.3, html: '<span class="dot"></span>Illustrative figures' });
+  cue({ v: { x: 80, y: 1480 }, t0: 67.6, t1: 71.95, x: 150, y: 960, anchor: 'bl', fx: 'fade', inDur: 0.4, outDur: 0.3, html: `<div class="legend">${SEGS.map((s) => `<span class="sw"><i style="background:rgb(${s.col.map((x) => Math.round(Math.min(1, x / 2.2) * 255)).join(',')})"></i>${s.name}</span>`).join('')}</div>` });
   cue({ t0: 67.5, t1: 71.95, scene: 'F', pos: () => new THREE.Vector3(colX(1.5), 4.35, 0), anchor: 'c', cls: 'f-mono', fx: 'custom', inDur: 0.3, outDur: 0.3,
     update: (c, t, pin, pout, base) => {
       const html = t < QUOTE_T.extras ? 'Quotes A–D · headline price' : 'Quotes A–D · <span class="c-saff">all-in price</span>';
@@ -2012,11 +2052,11 @@ function buildCues(S) {
 
   // 10 Mission
   const legKm = gcKm(HUB.VOHS, HUB.OMDB);
-  cue({ t0: 72.0, t1: 80, x: 0, y: 0, cls: 'shade', fx: 'fade', inDur: 0.6, outDur: 0.3, html: '' });
-  cue({ t0: 72.8, t1: 79.8, x: 150, y: 400, cls: 'f-state sm', fx: 'mask', lines: ['One brief in.'], outDur: 0.3 });
-  cue({ t0: 74.4, t1: 79.8, x: 150, y: 478, cls: 'f-state sm', fx: 'mask', lines: ['One accountable desk.'], outDur: 0.3 });
-  cue({ t0: 76.3, t1: 79.8, x: 150, y: 556, cls: 'f-state sm c-cyan', fx: 'mask', lines: ['Wheels up.'], outDur: 0.3 });
-  cue({ t0: 72.6, t1: 79.8, x: 1780, y: 120, anchor: 'tr', fx: 'custom', inDur: 0.5, outDur: 0.35,
+  cue({ v: { cls: 'scrim b' }, t0: 72.0, t1: 80, x: 0, y: 0, cls: 'shade', fx: 'fade', inDur: 0.6, outDur: 0.3, html: '' });
+  cue({ v: { x: 80, y: 1180 }, t0: 72.8, t1: 79.8, x: 150, y: 400, cls: 'f-state sm', fx: 'mask', lines: ['One brief in.'], outDur: 0.3 });
+  cue({ v: { x: 80, y: 1252 }, t0: 74.4, t1: 79.8, x: 150, y: 478, cls: 'f-state sm', fx: 'mask', lines: ['One accountable desk.'], outDur: 0.3 });
+  cue({ v: { x: 80, y: 1324 }, t0: 76.3, t1: 79.8, x: 150, y: 556, cls: 'f-state sm c-cyan', fx: 'mask', lines: ['Wheels up.'], outDur: 0.3 });
+  cue({ v: { x: 80, y: 236, anchor: 'tl' }, t0: 72.6, t1: 79.8, x: 1780, y: 120, anchor: 'tr', fx: 'custom', inDur: 0.5, outDur: 0.35,
     html: `<div class="panel"><div class="f-mono sm c-saff">Illustrative mission</div><div class="big">VOHS → OMDB</div><div class="city">Hyderabad → Dubai</div><div class="kv">Great circle <b>${km(legKm)} km</b></div><div class="kv">Flown <b class="flown">0 km</b></div><div class="bar"><i></i></div><div class="kv">Desk <b>Broker-only</b></div></div>`,
     init: (c) => { c.flown = c.el.querySelector('.flown'); c.bar = c.el.querySelector('.bar i'); },
     update: (c, t, pin, pout, base) => {
@@ -2030,13 +2070,13 @@ function buildCues(S) {
   cue({ t0: 72.6, t1: 75.5, scene: 'B', pos: () => ll2v(HUB.VOHS.lat, HUB.VOHS.lon, 1.01), anchor: 'l', dx: 16, cls: 'f-mono sm', fx: 'fade', html: '<span class="c-white">VOHS</span> <span class="c-dim">Hyderabad</span>' });
 
   // 11 Why it matters
-  cue({ t0: 80.4, t1: 85.8, x: 960, y: 300, anchor: 'c', cls: 'f-state c-saff', fx: 'mask', lines: ['When the deal crosses borders,'], inDur: 0.9, outDur: 0.4 });
-  cue({ t0: 82.3, t1: 85.8, x: 960, y: 402, anchor: 'c', cls: 'f-state c-white', fx: 'mask', lines: ['the flight is part of the deal.'], inDur: 0.9, outDur: 0.4 });
+  cue({ v: { x: 540, y: 520, cls: 'f-state c-saff tc', lines: ['When the deal', 'crosses borders,'] }, t0: 80.4, t1: 85.8, x: 960, y: 300, anchor: 'c', cls: 'f-state c-saff', fx: 'mask', lines: ['When the deal crosses borders,'], inDur: 0.9, outDur: 0.4 });
+  cue({ v: { x: 540, y: 700, cls: 'f-state c-white tc', lines: ['the flight is part', 'of the deal.'] }, t0: 82.3, t1: 85.8, x: 960, y: 402, anchor: 'c', cls: 'f-state c-white', fx: 'mask', lines: ['the flight is part of the deal.'], inDur: 0.9, outDur: 0.4 });
 
   // 12 Resolve
-  cue({ t0: 88.4, t1: 94, x: 960, y: 872, anchor: 'c', cls: 'f-mono', fx: 'fade', inDur: 0.7, outDur: 0.9, html: 'Broker-only air charter · Gulf · India · Africa · Europe' });
-  cue({ t0: 89.1, t1: 94, x: 960, y: 928, anchor: 'c', cls: 'f-sub c-white', fx: 'fade', inDur: 0.7, outDur: 0.9, html: 'meghquasar.com' });
-  cue({ t0: 90.2, t1: 94, x: 960, y: 1010, anchor: 'c', cls: 'f-mono sm c-dim', fx: 'fade', inDur: 0.8, outDur: 0.9, html: 'Motion design &amp; realtime 3D · three.js · WebGL · Web Audio' });
+  cue({ v: { x: 540, y: 1210, cls: 'f-mono tc', html: 'Broker-only air charter<br>Gulf · India · Africa · Europe' }, t0: 88.4, t1: 94, x: 960, y: 872, anchor: 'c', cls: 'f-mono', fx: 'fade', inDur: 0.7, outDur: 0.9, html: 'Broker-only air charter · Gulf · India · Africa · Europe' });
+  cue({ v: { x: 540, y: 1300 }, t0: 89.1, t1: 94, x: 960, y: 928, anchor: 'c', cls: 'f-sub c-white', fx: 'fade', inDur: 0.7, outDur: 0.9, html: 'meghquasar.com' });
+  cue({ v: { x: 540, y: 1380, cls: 'f-mono sm c-dim tc', html: 'Motion design &amp; realtime 3D<br>three.js · WebGL · Web Audio' }, t0: 90.2, t1: 94, x: 960, y: 1010, anchor: 'c', cls: 'f-mono sm c-dim', fx: 'fade', inDur: 0.8, outDur: 0.9, html: 'Motion design &amp; realtime 3D · three.js · WebGL · Web Audio' });
 }
 
 // HUD

@@ -5,6 +5,7 @@
 //   node tools/render.mjs --fps 60 --workers 4    smoother, in parallel
 //   node tools/render.mjs --stills 1,9.5,15.3     PNG stills → dist/stills/
 //   node tools/render.mjs --from 38 --to 52       render a range (no audio)
+//   node tools/render.mjs --format vertical       9:16 cut for Reels → dist/meghquasar-showreel-vertical.mp4
 //
 // ffmpeg: set FFMPEG=/path/to/ffmpeg, or have one with libx264 on PATH.
 import { chromium } from 'playwright';
@@ -22,8 +23,10 @@ const args = Object.fromEntries(process.argv.slice(2).reduce((acc, a, i, all) =>
   return acc;
 }, []));
 const FPS = Number(args.fps || 30);
+const VERTICAL = args.format === 'vertical';
+const VW = VERTICAL ? 1080 : 1920, VH = VERTICAL ? 1920 : 1080;
 const WORKERS = Number(args.workers || 3);
-const OUT = resolve(args.out || join(DIST, 'meghquasar-showreel.mp4'));
+const OUT = resolve(args.out || join(DIST, VERTICAL ? 'meghquasar-showreel-vertical.mp4' : 'meghquasar-showreel.mp4'));
 const CRF = String(args.crf || 19);
 const FFMPEG = process.env.FFMPEG || findFfmpeg();
 
@@ -63,7 +66,7 @@ async function openPage(port) {
   const browser = await chromium.launch({
     args: ['--use-angle=swiftshader', '--enable-unsafe-swiftshader', '--ignore-gpu-blocklist', '--disable-gpu-vsync', '--font-render-hinting=none'],
   });
-  const page = await browser.newPage({ viewport: { width: 1920, height: 1080 }, deviceScaleFactor: 1 });
+  const page = await browser.newPage({ viewport: { width: VW, height: VH }, deviceScaleFactor: 1 });
   page.on('pageerror', (e) => console.error('[page error]', e.message));
   page.on('console', (m) => { if (m.type() === 'error' || m.type() === 'warning') console.error(`[console.${m.type()}]`, m.text()); });
   await page.route(THREE_CDN, (route) => {
@@ -79,7 +82,7 @@ async function openPage(port) {
       route.fulfill({ status: 200, body, headers: { 'content-type': type, 'access-control-allow-origin': '*' } });
     } catch (e) { console.error('font fetch failed', req.url()); route.abort(); }
   });
-  await page.goto(`http://127.0.0.1:${port}/index.html?render`);
+  await page.goto(`http://127.0.0.1:${port}/index.html?render${VERTICAL ? '&format=vertical' : ''}`);
   await page.waitForFunction(() => window.MQ, null, { timeout: 60000 });
   await page.evaluate(() => window.MQ.ready);
   const cdp = await page.context().newCDPSession(page);
@@ -99,7 +102,7 @@ async function stills(port, times) {
   const { browser, page } = await openPage(port);
   for (const t of times) {
     await renderFrameTo(page, t);
-    const f = join(dir, `still-${t.toFixed(2).padStart(6, '0')}.png`);
+    const f = join(dir, `${VERTICAL ? 'v' : ''}still-${t.toFixed(2).padStart(6, '0')}.png`);
     await page.screenshot({ path: f });
     console.log('wrote', f);
   }

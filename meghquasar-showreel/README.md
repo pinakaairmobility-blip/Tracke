@@ -49,6 +49,19 @@ so the crescent's glow is never cut.
   illustrative, and each is marked as such on screen.
 - 3C 273 is the first quasar identified (1963); its coordinates are shown in the opening.
 
+## Vertical cut (Instagram Reels)
+
+`index.html?format=vertical` is the same film at 1080×1920 (9:16): same timeline, score
+and logo build, reframed rather than cropped. Cameras widen their vertical field of view,
+view offsets and the logo placement have 9:16 values, and every title has a vertical
+position (`v:` on each cue) with lines re-broken for a phone-width frame. Type stays inside
+the Reels safe area: below the top header (~240 px), above the caption area (~1500 px)
+and clear of the right-hand buttons.
+
+```sh
+node tools/render.mjs --format vertical     # → dist/meghquasar-showreel-vertical.mp4
+```
+
 ## Preview
 
 ```sh
